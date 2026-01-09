@@ -11,9 +11,9 @@
     <version>1.0.0</version>
     <packaging>war</packaging>
 
-    <!-- ===== Java Version ===== -->
+    <!-- ===== Java Version (HEROKU SAFE) ===== -->
     <properties>
-        <maven.compiler.release>21</maven.compiler.release>
+        <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -28,7 +28,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- JSP Engine (Required for JSP) -->
+        <!-- JSP Engine -->
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-jasper</artifactId>
@@ -55,7 +55,7 @@
     <build>
         <plugins>
 
-            <!-- Java Compiler -->
+            <!-- Compiler -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
@@ -64,7 +64,7 @@
                 </configuration>
             </plugin>
 
-            <!-- WAR Builder -->
+            <!-- WAR Plugin -->
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.4.0</version>
@@ -73,7 +73,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Webapp Runner (Tomcat 10 for Heroku) -->
+            <!-- Webapp Runner for Heroku -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
