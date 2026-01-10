@@ -1,272 +1,87 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create New Bank - Fixed Deposit Tracking System</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>Create Bank - Fixed Deposit Tracking System</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f5f5f5;
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header {
-            background: white;
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .header h1 {
-            font-size: 2rem;
-            color: #2c3e50;
-            font-weight: 600;
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-info {
-            text-align: right;
-        }
-
-        .user-name {
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 16px;
-        }
-
-        .user-role {
-            font-size: 13px;
-            color: #7f8c8d;
-        }
-
-        .user-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #d0d0d0;
-        }
-
-        .user-avatar img {
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f5f5f5; display: flex; }
+        .main-content { margin-left: 250px; flex: 1; padding: 40px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .form-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 500px; }
+        .form-card h2 { color: #2c3e50; margin-bottom: 30px; font-size: 1.5rem; text-align: center; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; color: #34495e; margin-bottom: 8px; }
+        .form-group input, .form-group textarea {
             width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .page-content {
-            padding: 40px;
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .form-container {
-            background: white;
-            border-radius: 20px;
-            padding: 50px 60px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            width: 100%;
-        }
-
-        .form-title {
-            font-size: 28px;
-            font-weight: 600;
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .form-group {
-            margin-bottom: 30px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 15px;
-            font-weight: 500;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 15px 18px;
-            border: 2px solid #d0d0d0;
+            padding: 12px;
+            border: 1px solid #ddd;
             border-radius: 8px;
-            font-size: 15px;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 14px;
         }
-
-        .form-group input:focus {
-            outline: none;
+        .form-group input:focus, .form-group textarea:focus {
             border-color: #003f5c;
+            outline: none;
         }
-
-        .form-group input::placeholder {
-            color: #a0a0a0;
-        }
-
-        .btn-container {
-            display: flex;
-            justify-content: center;
-            margin-top: 40px;
-        }
-
-        .btn-submit {
-            padding: 15px 80px;
+        .submit-btn {
             background: #003f5c;
             color: white;
             border: none;
+            padding: 15px;
+            width: 100%;
             border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            margin-top: 10px;
         }
-
-        .btn-submit:hover {
-            background: #002d42;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 63, 92, 0.3);
-        }
-
-        .error-message {
-            color: #e74c3c;
-            font-size: 13px;
-            margin-top: 8px;
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                margin-left: 200px;
-            }
-
-            .form-container {
-                padding: 40px 30px;
-            }
-
-            .page-content {
-                padding: 20px;
-            }
+        .submit-btn:hover { background: #002d42; }
+        .cancel-btn {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            text-decoration: none;
+            color: #7f8c8d;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
+
     <%@ include file="includes/sidebar.jsp" %>
 
     <div class="main-content">
-        <div class="header">
-            <h1>Create New Bank</h1>
-            <div class="user-profile">
-                <div class="user-info">
-                    <div class="user-name">Nor Azlina</div>
-                    <div class="user-role">Administrator</div>
+        <div class="form-card">
+            <h2>Create New Bank</h2>
+
+            <!-- ✅ CONNECTED TO BankController -->
+            <form action="BankController" method="post">
+                <input type="hidden" name="action" value="add">
+
+                <div class="form-group">
+                    <label for="bankName">Bank Name</label>
+                    <input type="text" id="bankName" name="bankName"
+                           placeholder="Enter bank name" required>
                 </div>
-                <div class="user-avatar">
-                    <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
+                <div class="form-group">
+                    <label for="bankPhoneNo">Bank Phone Number</label>
+                    <input type="text" id="bankPhoneNo" name="bankPhoneNo"
+                           placeholder="Enter head office contact number" required>
                 </div>
-            </div>
-        </div>
+                <div class="form-group">
+                    <label for="bankAddress">Bank Address</label>
+                    <textarea id="bankAddress" name="bankAddress" rows="4"
+                              placeholder="Enter office branch address" required></textarea>
+                </div>
 
-        <div class="page-content">
-            <div class="form-container">
-                <h2 class="form-title">Create Bank</h2>
-
-                <form id="createBankForm" onsubmit="submitBank(event)">
-                    <div class="form-group">
-                        <label for="bankName">Bank Name</label>
-                        <input 
-                            type="text" 
-                            id="bankName" 
-                            name="bankName" 
-                            placeholder="Enter bank name"
-                            required
-                        >
-                        <div class="error-message" id="errorMessage">Bank name is required</div>
-                    </div>
-
-                    <div class="btn-container">
-                        <button type="submit" class="btn-submit">Submit</button>
-                    </div>
-                </form>
-            </div>
+                <button type="submit" class="submit-btn">Register Bank</button>
+                <a href="BankController" class="cancel-btn">Back to List</a>
+            </form>
         </div>
     </div>
 
-    <script>
-        // Auto-expand Bank dropdown in sidebar
-        document.addEventListener('DOMContentLoaded', function() {
-            const bankDropdown = document.getElementById('bankDropdown');
-            const bankNavItem = document.getElementById('bankNavItem');
-            
-            if (bankDropdown && bankNavItem) {
-                bankDropdown.classList.add('show');
-                bankNavItem.classList.add('open');
-            }
-        });
-
-        function submitBank(event) {
-            event.preventDefault();
-
-            const bankName = document.getElementById('bankName').value.trim();
-            const errorMessage = document.getElementById('errorMessage');
-
-            // Validation
-            if (!bankName) {
-                errorMessage.style.display = 'block';
-                return;
-            } else {
-                errorMessage.style.display = 'none';
-            }
-
-            // In real implementation, this would submit to servlet/API
-            console.log('Creating bank:', bankName);
-
-            // Clear form
-            document.getElementById('createBankForm').reset();
-
-            // Redirect immediately to Bank Lists page with success parameter
-            window.location.href = 'BankList.jsp?success=created';
-        }
-
-        // Real-time validation
-        document.getElementById('bankName').addEventListener('input', function() {
-            const errorMessage = document.getElementById('errorMessage');
-            if (this.value.trim()) {
-                errorMessage.style.display = 'none';
-            }
-        });
-    </script>
 </body>
 </html>
