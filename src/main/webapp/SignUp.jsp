@@ -492,6 +492,20 @@
                             </div>
                             <div class="error-message" id="emailError">Please enter a valid email address</div>
                         </div>
+                        <div class="form-row">
+                        <div class="form-group">
+                            <div class="input-wrapper">
+                                <label for="staffRole" class="staff-role-label">Staff Role</label>
+                                <select id="staffRole" name="staffRole" required>
+                                    <option value="" disabled selected>Choose Role</option>
+                                    <option value="Adminstration">Administration</option>
+                                    <option value="FinanceExecutive">Finance Executive</option>
+                                    <option value="FinanceStaff">Finance Staff</option>
+                                </select>
+                            </div>
+                            <div class="error-message" id="staffRoleError">Please select a staff role</div>
+                        </div>
+                    </div>
                         <div class="form-group">
                             <div class="input-wrapper">
                                 <img src="images/icons/password.png" alt="Password" class="password-icon">
