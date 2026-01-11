@@ -11,7 +11,11 @@
     <link rel="stylesheet" href="css/Login.css">
 </head>
 
+<<<<<<< HEAD
 <body>		
+=======
+<body>
+>>>>>>> 3d08e50 (initial commit)
     <!-- Success Message -->
     <div class="success-message" id="successMessage">
         User Account Created Successfully!
@@ -37,17 +41,31 @@
                     <hr class="divider">
                 </div>
 
-                <form id="loginForm" action="#" method="POST">
+                <!-- SERVER ERROR MESSAGE -->
+                <%
+                    String error = (String) request.getAttribute("error");
+                    if (error != null && !error.trim().isEmpty()) {
+                %>
+                    <div class="server-error" style="margin-bottom: 12px; padding: 10px; border-radius: 8px;">
+                        <%= error %>
+                    </div>
+                <%
+                    }
+                %>
+
+                <form id="loginForm" action="<%= request.getContextPath() %>/LoginServlet" method="POST">
                     <div class="form-group">
                         <div class="input-wrapper">
                             <img src="images/icons/user.jpg" alt="Email" class="input-icon">
-                            <input type="email" id="email" name="email" placeholder="Your Email" required>
+                            <input type="email" id="email" name="email" placeholder="Your Email" required
+                                   value="<%= request.getAttribute("emailValue") != null ? request.getAttribute("emailValue") : "" %>">
                         </div>
                         <div class="error-message" id="emailError">Please enter a valid email address</div>
                     </div>
 
 
                     <div class="form-group">
+<<<<<<< HEAD
 					    <div class="input-wrapper">
 					        <img src="images/icons/password.png" alt="Password" class="password-icon">
 					        <input type="password" id="password" name="password" placeholder="Your Password" required>
@@ -63,37 +81,87 @@
 					    </div>
 					</div>
                     
+=======
+                        <div class="input-wrapper" style="position: relative;">
+                            <img src="images/icons/password.png" alt="Password" class="password-icon">
+                            <input type="password" id="password" name="password" placeholder="Your Password" required>
+                            <button type="button" id="togglePassword"
+                                    style="position: absolute; right: 25px; background: none; border: none; cursor: pointer; z-index: 2;">
+                                <img id="passwordIcon" src="images/icons/showpass.png" alt="Show Password" style="width: 25px; height: 25px;">
+                            </button>
+                        </div>
+
+                        <div class="error-message" id="passwordError">Please enter your password</div>
+
+                        <div class="forgot-password-link">
+                            <a href="ForgotPassword.jsp">Forgot Password ?</a>
+                        </div>
+                    </div>
+>>>>>>> 3d08e50 (initial commit)
 
                     <button type="submit" class="submit-btn">Login</button>
 
                     <div class="signup-link">
+<<<<<<< HEAD
                         Don't have an account? Click here to <a href="SignUp.jsp">Sign Up </a>
+=======
+                        Don't have an account? Click here to <a href="SignUp.jsp">Sign Up</a>
+>>>>>>> 3d08e50 (initial commit)
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <script>
-        // Check for success message from URL parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('signup') === 'success') {
-            const successMessage = document.getElementById('successMessage');
-            successMessage.classList.add('show');
-            
-            // Hide message after 5 seconds with animation
+<script>
+    // success message (signup)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('signup') === 'success') {
+        const successMessage = document.getElementById('successMessage');
+        successMessage.classList.add('show');
+
+        setTimeout(() => {
+            successMessage.classList.add('hide');
             setTimeout(() => {
-                successMessage.classList.add('hide');
-                
-                // Remove from DOM after animation completes
-                setTimeout(() => {
-                    successMessage.classList.remove('show', 'hide');
-                    // Clean URL by removing the parameter
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                }, 500); // Wait for fadeOut animation (0.5s)
-            }, 5000);
+                successMessage.classList.remove('show', 'hide');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }, 500);
+        }, 5000);
+    }
+
+    // Elements
+    const form = document.getElementById('loginForm');
+    const email = document.getElementById('email');
+    const passwordField = document.getElementById('password');
+
+    const togglePasswordButton = document.getElementById("togglePassword");
+    const passwordIcon = document.getElementById("passwordIcon");
+
+    // Toggle password visibility
+    togglePasswordButton.addEventListener("click", () => {
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            passwordIcon.src = "images/icons/hidepass.png";
+        } else {
+            passwordField.type = "password";
+            passwordIcon.src = "images/icons/showpass.png";
+        }
+    });
+
+    // Form validation - prevent submit ONLY if invalid
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+
+        document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+        document.querySelectorAll('input').forEach(el => el.classList.remove('error'));
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email.value)) {
+            showError('email', 'emailError', 'Please enter a valid email address');
+            isValid = false;
         }
 
+<<<<<<< HEAD
         // Form validation
         const form = document.getElementById('loginForm');
         const email = document.getElementById('email');
@@ -149,7 +217,23 @@
             const errorEl = document.getElementById(errorId);
             errorEl.textContent = message;
             errorEl.classList.add('show');
+=======
+        if (passwordField.value.trim() === '') {
+            showError('password', 'passwordError', 'Please enter your password');
+            isValid = false;
+>>>>>>> 3d08e50 (initial commit)
         }
-    </script>
+
+        if (!isValid) e.preventDefault();
+        // if valid -> POST to servlet
+    });
+
+    function showError(inputId, errorId, message) {
+        document.getElementById(inputId).classList.add('error');
+        const errorEl = document.getElementById(errorId);
+        errorEl.textContent = message;
+        errorEl.classList.add('show');
+    }
+</script>
 </body>
 </html>
