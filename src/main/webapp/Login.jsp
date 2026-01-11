@@ -8,339 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: 
-                linear-gradient(rgba(12, 55, 63, 0.7), rgba(12, 55, 63, 0.8)),
-                url('images/signupBG.png');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            max-height: 100vh;
-            display: flex;
-        }
-
-        .container {
-            display: flex;
-            width: 100%;
-            min-height: 100vh;
-            align-items: center;
-            padding: 40px;
-        }
-
-        .left-panel {
-            flex: 0 0 50%;
-            background: transparent;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 60px 80px;
-            color: white;
-            position: relative;
-        }
-
-        .logo {
-            width: 240px;
-            height: 240px;
-            position: relative;
-            margin-top: -150px;
-            margin-bottom: -30px;
-        }
-
-        .logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .system-title {
-            text-align: left;
-            margin-bottom: -20px;
-        }
-
-        .system-title h1 {
-            font-size: 4.5rem;
-            font-weight: 700;
-            color: #ff914d;
-            line-height: 1.1;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.2);
-            font-family: 'Libre Baskerville', serif;
-        }
-
-        .system-description {
-            max-width: 600px;
-            margin-top: 35px;
-        }
-
-        .system-description p {
-            font-size: 1.4rem;
-            line-height: 1.6;
-            color: #e0e0e0;
-            font-weight: medium;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .right-panel {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 60px;
-            background: transparent;
-            position: relative;
-            overflow: hidden;
-            min-height: 100vh;
-        }
-
-        .right-panel::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 130%;
-            height: 100%;
-            background-image: url('images/lineP.png');
-            background-size: cover;
-            background-position: 100% center;
-            background-repeat: no-repeat;
-            opacity: 0.4;
-            pointer-events: none;
-        }
-
-        .login-form {
-            width: 100%;
-            max-width: 500px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .form-header {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        .form-header h2 {
-            font-size: 3rem;
-            color: #ffffff;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-
-        .form-header .divider {
-            width: 100%;
-            height: 4px;
-            background: #1a4d5e;
-            border: none;
-            border-top: 3px dashed #ffffff;
-            background: transparent;
-        }
-
-        .form-group {
-            margin-bottom: 30px;
-        }
-
-        .input-wrapper {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 25px;
-            width: 40px;
-            height: 40px;
-            margin-left: -10px;
-            z-index: 1;
-            object-fit: contain;
-        }
-
-        .password-icon {
-            position: absolute;
-            left: 25px;
-            width: 35px;
-            height: 35px;
-            margin-left: -5px;
-            z-index: 1;
-            object-fit: contain;
-        }
-
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 20px 25px 20px 65px;
-            border: 2px solid #d0d0d0;
-            border-radius: 50px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: #fafafa;
-            color: #333;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #1a4d5e;
-            background: white;
-        }
-
-        input::placeholder {
-            color: #a8a8a8;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 20px;
-            background: linear-gradient(135deg, #ff9a5a, #ff8547);
-            border: none;
-            border-radius: 50px;
-            color: white;
-            font-size: 20px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 40px;
-            box-shadow: 0 6px 20px rgba(255, 154, 90, 0.3);
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 154, 90, 0.4);
-        }
-
-        .signup-link {
-            text-align: center;
-            margin-top: 25px;
-            color: #ffffff;
-            font-size: 16px;
-        }
-
-        .signup-link a {
-            color: #ffffff;
-            font-weight: 700;
-            text-decoration: underline;
-        }
-
-        .error-message {
-            color: #e74c3c;
-            font-size: 13px;
-            margin-top: 5px;
-            margin-left: 25px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        input.error {
-            border-color: #e74c3c;
-        }
-
-        /* Success Message */
-        .success-message {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #7dd3c0;
-            color: #0c373f;
-            padding: 15px 40px;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            z-index: 9999;
-            display: none;
-            animation: slideDown 0.5s ease;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .success-message.show {
-            display: block;
-        }
-
-        .success-message.hide {
-            animation: fadeOut 0.5s ease forwards;
-        }
-
-        @keyframes slideDown {
-            from {
-                top: -100px;
-                opacity: 0;
-            }
-            to {
-                top: 20px;
-                opacity: 1;
-            }
-        }
-
-        @keyframes fadeOut {
-            from {
-                opacity: 1;
-                top: 20px;
-            }
-            to {
-                opacity: 0;
-                top: -100px;
-            }
-        }
-
-        @media (max-width: 1200px) {
-            .left-panel {
-                padding: 40px 50px;
-            }
-
-            .system-title h1 {
-                font-size: 3.5rem;
-            }
-            
-            .form-header h2 {
-                font-size: 2.5rem;
-            }
-        }
-
-        @media (max-width: 968px) {
-            .container {
-                flex-direction: column;
-            }
-
-            .left-panel {
-                flex: 0 0 auto;
-                padding: 40px 20px;
-            }
-
-            .logo {
-                width: 120px;
-                height: 120px;
-            }
-
-            .system-title h1 {
-                font-size: 2.5rem;
-            }
-
-            .system-description p {
-                font-size: 1rem;
-            }
-
-            .right-panel {
-                padding: 40px 20px;
-            }
-
-            .submit-btn {
-                width: 100%;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="css/Login.css">
 </head>
-<body>
+
+<body>		
     <!-- Success Message -->
     <div class="success-message" id="successMessage">
         User Account Created Successfully!
@@ -375,18 +46,28 @@
                         <div class="error-message" id="emailError">Please enter a valid email address</div>
                     </div>
 
+
                     <div class="form-group">
-                        <div class="input-wrapper">
-                            <img src="images/icons/password.png" alt="Password" class="password-icon">
-                            <input type="password" id="password" name="password" placeholder="Your Password" required>
-                        </div>
-                        <div class="error-message" id="passwordError">Please enter your password</div>
-                    </div>
+					    <div class="input-wrapper">
+					        <img src="images/icons/password.png" alt="Password" class="password-icon">
+					        <input type="password" id="password" name="password" placeholder="Your Password" required>
+					        <button type="button" id="togglePassword" style="position: absolute; right: 25px; background: none; border: none; cursor: pointer; z-index: 2;">
+					            <img id="passwordIcon" src="images/icons/showpass.png" alt="Show Password" style="width: 25px; height: 25px;">
+					        </button>
+					    </div>
+					    <div class="error-message" id="passwordError">Please enter your password</div>
+					    
+					    <!-- Forgot Password Link -->
+					    <div class="forgot-password-link">
+					        <a href="ForgotPassword.jsp">Forgot Password ?</a>
+					    </div>
+					</div>
+                    
 
                     <button type="submit" class="submit-btn">Login</button>
 
                     <div class="signup-link">
-                        Don't have an account? Click here to <a href="SignUp.jsp">Sign Up !</a>
+                        Don't have an account? Click here to <a href="SignUp.jsp">Sign Up </a>
                     </div>
                 </form>
             </div>
@@ -417,6 +98,23 @@
         const form = document.getElementById('loginForm');
         const email = document.getElementById('email');
         const password = document.getElementById('password');
+        const showPasswordButton = document.getElementById('showPassword');
+
+        // Get elements
+        const togglePasswordButton = document.getElementById("togglePassword");
+        const passwordField = document.getElementById("password");
+        const passwordIcon = document.getElementById("passwordIcon");
+	
+        // Toggle password visibility
+        togglePasswordButton.addEventListener("click", () => {
+            if (passwordField.type === "password") {
+                passwordField.type = "text";
+                passwordIcon.src = "images/icons/hidepass.png"; // Switch to "hide" icon
+            } else {
+                passwordField.type = "password";
+                passwordIcon.src = "images/icons/showpass.png"; // Switch back to "show" icon
+            }
+        });
 
         // Form submission validation
         form.addEventListener('submit', function(e) {
