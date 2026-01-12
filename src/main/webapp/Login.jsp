@@ -11,11 +11,7 @@
     <link rel="stylesheet" href="css/Login.css">
 </head>
 
-<<<<<<< HEAD
-<body>		
-=======
 <body>
->>>>>>> 3d08e50 (initial commit)
     <!-- Success Message -->
     <div class="success-message" id="successMessage">
         User Account Created Successfully!
@@ -63,25 +59,7 @@
                         <div class="error-message" id="emailError">Please enter a valid email address</div>
                     </div>
 
-
                     <div class="form-group">
-<<<<<<< HEAD
-					    <div class="input-wrapper">
-					        <img src="images/icons/password.png" alt="Password" class="password-icon">
-					        <input type="password" id="password" name="password" placeholder="Your Password" required>
-					        <button type="button" id="togglePassword" style="position: absolute; right: 25px; background: none; border: none; cursor: pointer; z-index: 2;">
-					            <img id="passwordIcon" src="images/icons/showpass.png" alt="Show Password" style="width: 25px; height: 25px;">
-					        </button>
-					    </div>
-					    <div class="error-message" id="passwordError">Please enter your password</div>
-					    
-					    <!-- Forgot Password Link -->
-					    <div class="forgot-password-link">
-					        <a href="ForgotPassword.jsp">Forgot Password ?</a>
-					    </div>
-					</div>
-                    
-=======
                         <div class="input-wrapper" style="position: relative;">
                             <img src="images/icons/password.png" alt="Password" class="password-icon">
                             <input type="password" id="password" name="password" placeholder="Your Password" required>
@@ -97,16 +75,11 @@
                             <a href="ForgotPassword.jsp">Forgot Password ?</a>
                         </div>
                     </div>
->>>>>>> 3d08e50 (initial commit)
 
                     <button type="submit" class="submit-btn">Login</button>
 
                     <div class="signup-link">
-<<<<<<< HEAD
-                        Don't have an account? Click here to <a href="SignUp.jsp">Sign Up </a>
-=======
                         Don't have an account? Click here to <a href="SignUp.jsp">Sign Up</a>
->>>>>>> 3d08e50 (initial commit)
                     </div>
                 </form>
             </div>
@@ -161,71 +134,12 @@
             isValid = false;
         }
 
-<<<<<<< HEAD
-        // Form validation
-        const form = document.getElementById('loginForm');
-        const email = document.getElementById('email');
-        const password = document.getElementById('password');
-        const showPasswordButton = document.getElementById('showPassword');
-
-        // Get elements
-        const togglePasswordButton = document.getElementById("togglePassword");
-        const passwordField = document.getElementById("password");
-        const passwordIcon = document.getElementById("passwordIcon");
-	
-        // Toggle password visibility
-        togglePasswordButton.addEventListener("click", () => {
-            if (passwordField.type === "password") {
-                passwordField.type = "text";
-                passwordIcon.src = "images/icons/hidepass.png"; // Switch to "hide" icon
-            } else {
-                passwordField.type = "password";
-                passwordIcon.src = "images/icons/showpass.png"; // Switch back to "show" icon
-            }
-        });
-
-        // Form submission validation
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            let isValid = true;
-
-            // Reset all errors
-            document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
-            document.querySelectorAll('input').forEach(el => el.classList.remove('error'));
-
-            // Email validation
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailPattern.test(email.value)) {
-                showError('email', 'emailError', 'Please enter a valid email address');
-                isValid = false;
-            }
-
-            // Password validation
-            if (password.value.trim() === '') {
-                showError('password', 'passwordError', 'Please enter your password');
-                isValid = false;
-            }
-
-            if (isValid) {
-                // Redirect to dashboard
-                window.location.href = 'Dashboard.jsp';
-            }
-        });
-
-        function showError(inputId, errorId, message) {
-            document.getElementById(inputId).classList.add('error');
-            const errorEl = document.getElementById(errorId);
-            errorEl.textContent = message;
-            errorEl.classList.add('show');
-=======
         if (passwordField.value.trim() === '') {
             showError('password', 'passwordError', 'Please enter your password');
             isValid = false;
->>>>>>> 3d08e50 (initial commit)
         }
 
-        if (!isValid) e.preventDefault();
-        // if valid -> POST to servlet
+        if (!isValid) e.preventDefault(); // valid -> POST to servlet
     });
 
     function showError(inputId, errorId, message) {
