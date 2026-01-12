@@ -11,7 +11,7 @@
     <version>1.0.0</version>
     <packaging>war</packaging>
 
-    <!-- ===== Java Version (HEROKU SAFE) ===== -->
+    <!-- ===== Java Version (Heroku-24 supports Java 21) ===== -->
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -28,7 +28,7 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- JSP Engine -->
+        <!-- JSP Engine (Tomcat Jasper) -->
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-jasper</artifactId>
@@ -47,6 +47,19 @@
             <groupId>org.glassfish.web</groupId>
             <artifactId>jakarta.servlet.jsp.jstl</artifactId>
             <version>3.0.1</version>
+        </dependency>
+
+        <!-- ===== Jakarta Mail (EmailUtil.java) ===== -->
+        <dependency>
+            <groupId>jakarta.mail</groupId>
+            <artifactId>jakarta.mail-api</artifactId>
+            <version>2.1.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>2.0.1</version>
         </dependency>
 
     </dependencies>
@@ -73,7 +86,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Webapp Runner for Heroku -->
+            <!-- Webapp Runner (Heroku) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
