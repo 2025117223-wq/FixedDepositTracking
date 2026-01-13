@@ -12,8 +12,18 @@
 </head>
 
 <body>
-    <!-- Success Message -->
-    <div class="success-message" id="successMessage">
+<%
+    // Read server error only if this page is loaded via POST (prevents error showing on first GET)
+    String error = (String) request.getAttribute("error");
+    boolean isPost = "POST".equalsIgnoreCase(request.getMethod());
+
+    // Preserve email value if servlet sets it; fallback to empty
+    Object emailObj = request.getAttribute("emailValue");
+    String emailValue = emailObj != null ? emailObj.toString() : "";
+%>
+
+    <!-- Success Message (hidden by default; show only when ?signup=success) -->
+    <div class="success-message" id="successMessage" style="display:none;">
         User Account Created Successfully!
     </div>
 
@@ -37,10 +47,9 @@
                     <hr class="divider">
                 </div>
 
-                <!-- SERVER ERROR MESSAGE -->
+                <!-- SERVER ERROR MESSAGE (POST only) -->
                 <%
-                    String error = (String) request.getAttribute("error");
-                    if (error != null && !error.trim().isEmpty()) {
+                    if (isPost && error != null && !error.trim().isEmpty()) {
                 %>
                     <div class="server-error" style="margin-bottom: 12px; padding: 10px; border-radius: 8px;">
                         <%= error %>
@@ -54,7 +63,7 @@
                         <div class="input-wrapper">
                             <img src="images/icons/user.jpg" alt="Email" class="input-icon">
                             <input type="email" id="email" name="email" placeholder="Your Email" required
-                                   value="<%= request.getAttribute("emailValue") != null ? request.getAttribute("emailValue") : "" %>">
+                                   value="<%= emailValue %>">
                         </div>
                         <div class="error-message" id="emailError">Please enter a valid email address</div>
                     </div>
@@ -91,13 +100,16 @@
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('signup') === 'success') {
         const successMessage = document.getElementById('successMessage');
+
+        // show (because default is hidden)
+        successMessage.style.display = 'block';
         successMessage.classList.add('show');
 
         setTimeout(() => {
             successMessage.classList.add('hide');
             setTimeout(() => {
                 successMessage.classList.remove('show', 'hide');
-                // Remove the signup parameter from the URL after success
+                successMessage.style.display = 'none'; // hide again
                 window.history.replaceState({}, document.title, window.location.pathname);
             }, 500);
         }, 5000);
