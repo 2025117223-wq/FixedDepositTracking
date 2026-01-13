@@ -30,18 +30,40 @@ public class StaffDAO {
         String sql = "INSERT INTO Staff (staffName, staffPhone, staffAddress, staffEmail, staffRole, password, staffPicture) "
                    + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = DBConn.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConn.getConnection()) {
+            // Disable auto-commit mode
+            conn.setAutoCommit(false);
 
-            ps.setString(1, s.getStaffName());
-            ps.setString(2, s.getStaffPhone());
-            ps.setString(3, s.getStaffAddress());
-            ps.setString(4, s.getStaffEmail().trim().toLowerCase());
-            ps.setString(5, s.getStaffRole());
-            ps.setString(6, s.getPassword());  // Use password as is, no hashing
-            ps.setBlob(7, s.getStaffPicture());
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, s.getStaffName());
+                ps.setString(2, s.getStaffPhone());
+                ps.setString(3, s.getStaffAddress());
+                ps.setString(4, s.getStaffEmail().trim().toLowerCase());
+                ps.setString(5, s.getStaffRole());
+                ps.setString(6, s.getPassword());
+                
+                Blob staffPic = s.getStaffPicture();
+                if (staffPic != null) {
+                    ps.setBlob(7, staffPic); // Set the image blob
+                } else {
+                    ps.setNull(7, java.sql.Types.BLOB); // Set null if no image is uploaded
+                }
 
-            return ps.executeUpdate() > 0;
+                // Execute the update
+                int affectedRows = ps.executeUpdate();
+
+                // Commit the transaction if successful
+                conn.commit();
+
+                return affectedRows > 0;
+            } catch (SQLException e) {
+                // Rollback the transaction if an error occurs
+                conn.rollback();
+                throw e;
+            } finally {
+                // Restore the auto-commit mode
+                conn.setAutoCommit(true);
+            }
         }
     }
 
