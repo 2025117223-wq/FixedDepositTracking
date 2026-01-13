@@ -11,6 +11,7 @@ import java.sql.Blob;
 
 public class StaffDAO {
 
+    // Check if email exists
     public boolean isEmailExists(String email) throws SQLException {
         String sql = "SELECT 1 FROM Staff WHERE staffEmail = ?";
 
@@ -24,6 +25,7 @@ public class StaffDAO {
         }
     }
 
+    // Insert a new staff member
     public boolean insertStaff(Staff s) throws SQLException {
         String sql = "INSERT INTO Staff (staffName, staffPhone, staffAddress, staffEmail, staffRole, password, staffPicture) "
                    + "VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -36,13 +38,14 @@ public class StaffDAO {
             ps.setString(3, s.getStaffAddress());
             ps.setString(4, s.getStaffEmail().trim().toLowerCase());
             ps.setString(5, s.getStaffRole());
-            ps.setString(6, s.getPassword());
+            ps.setString(6, s.getPassword());  // Use password as is, no hashing
             ps.setBlob(7, s.getStaffPicture());
 
             return ps.executeUpdate() > 0;
         }
     }
 
+    // Staff login - authenticate with email and password
     public Staff login(String email, String password) throws SQLException {
         String sql = "SELECT staffID, staffName, staffEmail, staffRole, staffStatus "
                    + "FROM Staff WHERE staffEmail = ? AND password = ?";
@@ -51,7 +54,7 @@ public class StaffDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email.trim().toLowerCase());
-            ps.setString(2, password);
+            ps.setString(2, password);  // Use password as is, no hashing
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -65,9 +68,10 @@ public class StaffDAO {
                 }
             }
         }
-        return null;
+        return null;  // Return null if no matching staff found
     }
 
+    // Get staff picture by ID
     public byte[] getStaffPictureById(int staffID) throws SQLException {
         String sql = "SELECT staffPicture FROM Staff WHERE staffID = ?";
 
@@ -85,6 +89,6 @@ public class StaffDAO {
                 }
             }
         }
-        return null;
+        return null;  // Return null if picture is not found
     }
 }
