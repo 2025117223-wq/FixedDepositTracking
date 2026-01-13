@@ -97,6 +97,7 @@
             successMessage.classList.add('hide');
             setTimeout(() => {
                 successMessage.classList.remove('show', 'hide');
+                // Remove the signup parameter from the URL after success
                 window.history.replaceState({}, document.title, window.location.pathname);
             }, 500);
         }, 5000);
