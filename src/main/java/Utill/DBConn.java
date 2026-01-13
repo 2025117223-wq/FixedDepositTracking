@@ -1,30 +1,6 @@
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
-public class DBConn {
-
-    public static Connection getConnection() {
-        // Set up database connection details
-        String url = "jdbc:cee3ebbhveeoab.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com"; // Replace with your Heroku host
-        String user = "u375elp7att1k5"; // Replace with your Heroku username
-        String password = "p7dd455ccb3b6240ac52d8059200db4a112c7942d8084f4753cbff9186626a833"; // Replace with your Heroku password
-        
-        try {
-            // Load PostgreSQL JDBC driver
-            Class.forName("org.postgresql.Driver");
-
-            // Establish and return connection
-            return DriverManager.getConnection(url, user, password);
-        } catch (ClassNotFoundException | SQLException e) {
-            System.out.println("Connection failed: " + e.getMessage());
-            return null;
-        }
-    }
-
-
 package Utill;
 
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -32,16 +8,25 @@ import java.sql.SQLException;
 public class DBConn {
 
     public static Connection getConnection() {
-
-        String url = "jdbc:postgresql://cee3ebbhveeoab.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/dbname";
-        String user = "u375elp7att1k5";
-        String password = "p7dd455ccb3b6240ac52d8059200db4a112c7942d8084f4753cbff9186626a833";
-
         try {
-            Class.forName("org.postgresql.Driver");
-            return DriverManager.getConnection(url, user, password);
+            // Heroku standard: DATABASE_URL = postgres://user:pass@host:port/dbname
+            String dbUrl = System.getenv("DATABASE_URL");
 
-        } catch (ClassNotFoundException | SQLException e) {
+            if (dbUrl == null || dbUrl.isBlank()) {
+                throw new RuntimeException("DATABASE_URL is not set in environment variables.");
+            }
+
+            URI uri = new URI(dbUrl);
+
+            String userInfo = uri.getUserInfo(); // user:pass
+            String username = userInfo.split(":")[0];
+            String password = userInfo.split(":")[1];
+
+            String jdbcUrl = "jdbc:postgresql://" + uri.getHost() + ":" + uri.getPort() + uri.getPath();
+
+            return DriverManager.getConnection(jdbcUrl, username, password);
+
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
