@@ -140,7 +140,8 @@
             isValid = false;
         }
 
-        if (!isValid) e.preventDefault(); // valid -> POST to servlet
+        if (!isValid) e.preventDefault();
+        // if valid -> POST to servlet
     });
 
     function showError(inputId, errorId, message) {
