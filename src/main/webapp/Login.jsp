@@ -10,7 +10,285 @@
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/Login.css">
 </head>
+<style>
+/* ================= RESET ================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+/* ================= BODY ================= */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-image:
+        linear-gradient(rgba(12, 55, 63, 0.7), rgba(12, 55, 63, 0.8)),
+        url('../images/signupBG.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+}
+
+/* ================= LAYOUT ================= */
+.container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    align-items: center;
+    padding: 40px;
+}
+
+/* ================= LEFT PANEL ================= */
+.left-panel {
+    flex: 0 0 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px 80px;
+    color: white;
+}
+
+.logo {
+    width: 240px;
+    height: 240px;
+    margin-top: -150px;
+    margin-bottom: -30px;
+}
+
+.logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.system-title h1 {
+    font-size: 4.5rem;
+    font-weight: 700;
+    color: #ff914d;
+    line-height: 1.1;
+    font-family: 'Libre Baskerville', serif;
+}
+
+/* ================= RIGHT PANEL ================= */
+.right-panel {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px;
+    position: relative;
+}
+
+.login-form {
+    width: 100%;
+    max-width: 500px;
+}
+
+/* ================= HEADER ================= */
+.form-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.form-header h2 {
+    font-size: 3rem;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.divider {
+    border-top: 3px dashed #ffffff;
+    margin-top: 15px;
+}
+
+/* ================= FORM ================= */
+.form-group {
+    margin-bottom: 30px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* ================= ICONS ================= */
+.input-icon,
+.password-icon {
+    position: absolute;
+    left: 25px;
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    z-index: 2;
+}
+
+/* ================= INPUTS ================= */
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+    width: 100%;
+    padding: 20px 25px 20px 70px;
+    border: 2px solid #d0d0d0;
+    border-radius: 50px;
+    font-size: 16px;
+    background: #fafafa;
+    color: #333;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: #1a4d5e;
+    background: #fff;
+}
+
+input::placeholder {
+    color: #a8a8a8;
+}
+
+/* ================= FORGOT PASSWORD ================= */
+.forgot-password-link {
+    text-align: right;
+    margin-top: 10px;
+}
+
+.forgot-password-link a {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: underline !important;
+    text-underline-offset: 3px;
+}
+
+.forgot-password-link a:hover {
+    text-decoration: none;
+}
+
+/* ================= BUTTON ================= */
+.submit-btn {
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(135deg, #ff9a5a, #ff8547);
+    border: none;
+    border-radius: 50px;
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+}
+
+/* ================= SIGN UP LINK ================= */
+.signup-link {
+    text-align: center;
+    margin-top: 25px;
+    color: #ffffff;
+    font-size: 16px;
+}
+
+.signup-link a {
+    color: #ffffff;
+    font-weight: 700;
+    text-decoration: underline !important;
+    text-underline-offset: 3px;
+}
+
+.signup-link a:hover {
+    text-decoration: none;
+}
+
+/* ================= ERROR ================= */
+.error-message {
+    color: #e74c3c;
+    font-size: 13px;
+    margin-top: 5px;
+    margin-left: 25px;
+    display: none;
+}
+
+.error-message.show {
+    display: block;
+}
+
+input.error {
+    border-color: #e74c3c;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 968px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .left-panel {
+        padding: 40px 20px;
+    }
+
+    .logo {
+        width: 120px;
+        height: 120px;
+    }
+
+    .system-title h1 {
+        font-size: 2.5rem;
+    }
+
+    .right-panel {
+        padding: 40px 20px;
+    }
+    
+    /* ================= SUCCESS MESSAGE ================= */
+.success-message{
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-weight: 700;
+    z-index: 9999;
+
+    background: rgba(46, 204, 113, 0.95);
+    color: #fff;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.success-message.show{
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.success-message.hide{
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(-10px);
+}
+
+/* ================= SERVER ERROR (from servlet) ================= */
+.server-error{
+    background: rgba(231, 76, 60, 0.18);
+    border: 1px solid rgba(231, 76, 60, 0.7);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+}
+
+
+</style>
 <body>
 <%
     // Read server error only if this page is loaded via POST (prevents error showing on first GET)
