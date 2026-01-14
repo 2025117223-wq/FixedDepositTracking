@@ -12,8 +12,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import Utill.DBConn;
-import Utill.EmailUtil;
+import Util.DBConn;
+import Util.EmailUtil;
 
 @WebServlet("/ForgotPasswordServlet")
 public class ForgotPasswordServlet extends HttpServlet {
