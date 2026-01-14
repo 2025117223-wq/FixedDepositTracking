@@ -1,7 +1,5 @@
 package Bean;
 
-import java.io.InputStream;
-
 public class Staff {
     private int staffID;
     private String staffName;
@@ -10,7 +8,7 @@ public class Staff {
     private String staffEmail;
     private String staffRole;
     private String password;
-    private InputStream staffPicture;
+    private byte[] staffPicture;   // ✅ byte[] for PostgreSQL
 
     private String staffStatus;
 
@@ -37,8 +35,9 @@ public class Staff {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
-    public InputStream getStaffPicture() { return staffPicture; }
-    public void setStaffPicture(InputStream staffPicture) { this.staffPicture = staffPicture; }
+    // ✅ picture getter/setter
+    public byte[] getStaffPicture() { return staffPicture; }
+    public void setStaffPicture(byte[] staffPicture) { this.staffPicture = staffPicture; }
 
     public String getStaffStatus() { return staffStatus; }
     public void setStaffStatus(String staffStatus) { this.staffStatus = staffStatus; }
