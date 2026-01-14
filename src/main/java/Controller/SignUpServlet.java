@@ -2,7 +2,7 @@ package Controller;
 
 import Bean.Staff;
 import DAO.StaffDAO;
-import Utill.PasswordUtil;
+import Util.PasswordUtil;  // ✅ tukar ikut folder sebenar: Util atau Utill
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -55,6 +55,18 @@ public class SignUpServlet extends HttpServlet {
             return;
         }
 
+        // ✅ Convert image to byte[] for PostgreSQL BYTEA
+        byte[] picBytes;
+        try (InputStream is = profilePart.getInputStream()) {
+            picBytes = is.readAllBytes(); // JDK 21 ok
+        }
+
+        if (picBytes == null || picBytes.length == 0) {
+            request.setAttribute("error", "Profile picture is required.");
+            request.getRequestDispatcher("SignUp.jsp").forward(request, response);
+            return;
+        }
+
         Staff staff = new Staff();
         staff.setStaffName(fullName.trim());
         staff.setStaffPhone(phoneNumber.trim());
@@ -62,12 +74,11 @@ public class SignUpServlet extends HttpServlet {
         staff.setStaffEmail(email.trim().toLowerCase());
         staff.setStaffRole(staffRole.trim());
         staff.setPassword(PasswordUtil.processPassword(password.trim()));
+        staff.setStaffPicture(picBytes); // ✅ byte[] setter
 
         StaffDAO dao = new StaffDAO();
 
-        try (InputStream pictureStream = profilePart.getInputStream()) {
-            staff.setStaffPicture(pictureStream);
-
+        try {
             if (dao.isEmailExists(staff.getStaffEmail())) {
                 request.setAttribute("error", "Email already registered.");
                 request.getRequestDispatcher("SignUp.jsp").forward(request, response);
