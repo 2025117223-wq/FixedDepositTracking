@@ -1,4 +1,4 @@
-package Utill;
+package Util;
 
 import java.util.Properties;
 
@@ -57,3 +57,4 @@ public class EmailUtil {
         }
     }
 }
+git
