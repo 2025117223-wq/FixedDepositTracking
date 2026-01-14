@@ -35,6 +35,20 @@
             <version>10.1.18</version>
         </dependency>
 
+        <!-- Tomcat Core (recommended) -->
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>10.1.18</version>
+        </dependency>
+
+        <!-- Tomcat EL (recommended for JSP/JSTL) -->
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-el</artifactId>
+            <version>10.1.18</version>
+        </dependency>
+
         <!-- JSTL API -->
         <dependency>
             <groupId>jakarta.servlet.jsp.jstl</groupId>
@@ -49,21 +63,14 @@
             <version>3.0.1</version>
         </dependency>
 
-        <!-- Jakarta Mail API -->
-        <dependency>
-            <groupId>jakarta.mail</groupId>
-            <artifactId>jakarta.mail-api</artifactId>
-            <version>2.1.3</version>
-        </dependency>
-
-        <!-- Jakarta Mail Implementation -->
+        <!-- Jakarta Mail Implementation (includes API) -->
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
             <version>2.0.1</version>
         </dependency>
 
-        <!-- PostgreSQL JDBC Driver (REQUIRED) -->
+        <!-- PostgreSQL JDBC Driver -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -116,9 +123,7 @@
                                     <destFileName>webapp-runner.jar</destFileName>
                                 </artifactItem>
                             </artifactItems>
-                            <outputDirectory>
-                                ${project.build.directory}/dependency
-                            </outputDirectory>
+                            <outputDirectory>${project.build.directory}/dependency</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>
