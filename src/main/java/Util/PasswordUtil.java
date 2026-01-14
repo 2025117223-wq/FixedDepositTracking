@@ -1,4 +1,4 @@
-package Utill;
+package Util;
 
 public class PasswordUtil {
     public static String processPassword(String plainPassword) {
