@@ -1,34 +1,24 @@
-package Utill;
-
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBConn {
 
-    public static Connection getConnection() {
-        try {
-            // Heroku standard: DATABASE_URL = postgres://user:pass@host:port/dbname
-            String dbUrl = System.getenv("DATABASE_URL");
+    private static final String URL  = "jdbc:postgresql://cee3ebbhveeoab.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/dbu39dr34ej0dq";
+    private static final String USER = "u375elp7att1k5";
+    private static final String PASS = "p7dd455ccb3b6240ac52d8059200db4a112c7942d8084f4753cbff9186626a833";
 
-            if (dbUrl == null || dbUrl.isBlank()) {
-                throw new RuntimeException("DATABASE_URL is not set in environment variables.");
-            }
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASS);
+    }
 
-            URI uri = new URI(dbUrl);
-
-            String userInfo = uri.getUserInfo(); // user:pass
-            String username = userInfo.split(":")[0];
-            String password = userInfo.split(":")[1];
-
-            String jdbcUrl = "jdbc:postgresql://" + uri.getHost() + ":" + uri.getPort() + uri.getPath();
-
-            return DriverManager.getConnection(jdbcUrl, username, password);
-
-        } catch (Exception e) {
+    // Test connection
+    public static void main(String[] args) {
+        try (Connection conn = getConnection()) {
+            System.out.println("✅ Connected to PostgreSQL RDS successfully!");
+        } catch (SQLException e) {
+            System.out.println("❌ Failed to connect: " + e.getMessage());
             e.printStackTrace();
-            return null;
         }
     }
 }
