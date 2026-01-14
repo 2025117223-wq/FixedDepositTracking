@@ -7,18 +7,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Blob;
 
 public class StaffDAO {
 
     // Check if email exists
     public boolean isEmailExists(String email) throws SQLException {
-        String sql = "SELECT 1 FROM Staff WHERE staffEmail = ?";
+        String sql = "SELECT 1 FROM staff WHERE staffemail = ?";
 
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email.trim().toLowerCase());
+
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
             }
@@ -27,75 +27,60 @@ public class StaffDAO {
 
     // Insert a new staff member
     public boolean insertStaff(Staff s) throws SQLException {
-        String sql = "INSERT INTO Staff (staffName, staffPhone, staffAddress, staffEmail, staffRole, password, staffPicture) "
+        String sql = "INSERT INTO staff (staffname, staffphone, staffaddress, staffemail, staffrole, password, staffpicture) "
                    + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = DBConn.getConnection()) {
-            // Disable auto-commit mode
-            conn.setAutoCommit(false);
+        try (Connection conn = DBConn.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setString(1, s.getStaffName());
-                ps.setString(2, s.getStaffPhone());
-                ps.setString(3, s.getStaffAddress());
-                ps.setString(4, s.getStaffEmail().trim().toLowerCase());
-                ps.setString(5, s.getStaffRole());
-                ps.setString(6, s.getPassword());
-                
-                Blob staffPic = s.getStaffPicture();
-                if (staffPic != null) {
-                    ps.setBlob(7, staffPic); // Set the image blob
-                } else {
-                    ps.setNull(7, java.sql.Types.BLOB); // Set null if no image is uploaded
-                }
+            ps.setString(1, s.getStaffName());
+            ps.setString(2, s.getStaffPhone());
+            ps.setString(3, s.getStaffAddress());
+            ps.setString(4, s.getStaffEmail().trim().toLowerCase());
+            ps.setString(5, s.getStaffRole());
+            ps.setString(6, s.getPassword());
 
-                // Execute the update
-                int affectedRows = ps.executeUpdate();
-
-                // Commit the transaction if successful
-                conn.commit();
-
-                return affectedRows > 0;
-            } catch (SQLException e) {
-                // Rollback the transaction if an error occurs
-                conn.rollback();
-                throw e;
-            } finally {
-                // Restore the auto-commit mode
-                conn.setAutoCommit(true);
+            // PostgreSQL BYTEA -> use byte[]
+            byte[] picBytes = s.getStaffPictureBytes(); // ✅ buat getter byte[] dalam Bean
+            if (picBytes != null && picBytes.length > 0) {
+                ps.setBytes(7, picBytes);
+            } else {
+                ps.setNull(7, java.sql.Types.BINARY);
             }
+
+            return ps.executeUpdate() > 0;
         }
     }
 
-    // Staff login - authenticate with email and password
+    // Staff login
     public Staff login(String email, String password) throws SQLException {
-        String sql = "SELECT staffID, staffName, staffEmail, staffRole, staffStatus "
-                   + "FROM Staff WHERE staffEmail = ? AND password = ?";
+        String sql = "SELECT staffid, staffname, staffemail, staffrole, staffstatus "
+                   + "FROM staff WHERE staffemail = ? AND password = ?";
 
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, email.trim().toLowerCase());
-            ps.setString(2, password);  // Use password as is, no hashing
+            ps.setString(2, password);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Staff s = new Staff();
-                    s.setStaffID(rs.getInt("staffID"));
-                    s.setStaffName(rs.getString("staffName"));
-                    s.setStaffEmail(rs.getString("staffEmail"));
-                    s.setStaffRole(rs.getString("staffRole"));
-                    s.setStaffStatus(rs.getString("staffStatus"));
+                    s.setStaffID(rs.getInt("staffid"));
+                    s.setStaffName(rs.getString("staffname"));
+                    s.setStaffEmail(rs.getString("staffemail"));
+                    s.setStaffRole(rs.getString("staffrole"));
+                    s.setStaffStatus(rs.getString("staffstatus"));
                     return s;
                 }
             }
         }
-        return null;  // Return null if no matching staff found
+        return null;
     }
 
     // Get staff picture by ID
     public byte[] getStaffPictureById(int staffID) throws SQLException {
-        String sql = "SELECT staffPicture FROM Staff WHERE staffID = ?";
+        String sql = "SELECT staffpicture FROM staff WHERE staffid = ?";
 
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -104,13 +89,10 @@ public class StaffDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    Blob blob = rs.getBlob("staffPicture");
-                    if (blob != null) {
-                        return blob.getBytes(1, (int) blob.length());
-                    }
+                    return rs.getBytes("staffpicture"); // ✅ bytea -> bytes
                 }
             }
         }
-        return null;  // Return null if picture is not found
+        return null;
     }
 }
