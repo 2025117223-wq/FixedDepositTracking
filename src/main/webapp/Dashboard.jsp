@@ -192,7 +192,7 @@
         if (hasChartData) break;
     }
 
-    // Start labels at first month with any value (so graph starts when data starts)
+    // Start labels at first month with any value (so graph start when data starts)
     int firstIndex = 0;
     if (hasChartData) {
         boolean found = false;
@@ -216,19 +216,16 @@
         if (i < 11) jsLabels.append(",");
     }
     jsLabels.append("]");
-
     String[] colors = new String[] {
-        "#7dd3c0", "#0c373f", "#ff9a5a", "#6c5ce7", "#0984e3", 
-        "#00b894", "#d63031", "#e67e22", "#f39c12", "#2ecc71", 
-        "#8e44ad", "#34495e"
-    };
-
+    	    "#7dd3c0", "#0c373f", "#ff9a5a", "#6c5ce7", "#0984e3", 
+    	    "#00b894", "#d63031", "#e67e22", "#f39c12", "#2ecc71", 
+    	    "#8e44ad", "#34495e"
+    	};
     StringBuilder jsDatasets = new StringBuilder("[");
 
     int colorIdx = 0;
     int appended = 0;
 
-    // Generate the chart data
     for (Map.Entry<String, Double[]> entry : bankMonthTotals.entrySet()) {
         String bankName = entry.getKey();
         Double[] arr = entry.getValue();
@@ -259,6 +256,7 @@
             if (i < 11) jsDatasets.append(",");
         }
 
+        // TAJAM + bersambung bila bulan tertentu null (spanGaps true)
         jsDatasets.append("],")
                   .append("showLine:true,")
                   .append("spanGaps:true,")
@@ -300,7 +298,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/Dashboard.css">
+    <link rel="stylesheet" href="css/Dashbord.css">
 </head>
 
 <body>
@@ -363,17 +361,6 @@
                         <% } else { %>
                             <div style="height:100%; display:flex; align-items:center; justify-content:center; color:#7f8c8d; font-size:14px;">
                                 No data available for selected year/bank.
-                            </div>
-                        <% } %>
-                    </div>
-
-                    <!-- Color Legend -->
-                    <div class="color-legend">
-                        <h3>Legend</h3>
-                        <% for (int i = 0; i < bankMonthTotals.size(); i++) { %>
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <div style="width:20px; height:20px; background-color:<%= colors[i % colors.length] %>;"></div>
-                                <span><%= bankList.get(i) %></span>
                             </div>
                         <% } %>
                     </div>
