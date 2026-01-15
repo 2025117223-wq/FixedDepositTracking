@@ -2,7 +2,6 @@
 <%@ page import="Bean.Staff" %>
 <%@ page import="java.sql.*" %>
 <%@ page import="java.util.*" %>
-<%@ page import="java.util.Arrays" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="Util.DBConn" %>
 
@@ -67,7 +66,7 @@
         "GROUP BY b.bankname, EXTRACT(MONTH FROM f.startdate) " +
         "ORDER BY b.bankname, mth";
 
-    // Stats cards (PostgreSQL: COALESCE instead of NVL)
+    // Stats cards
     double thisMonthTotal = 0.0, lastMonthTotal = 0.0, lastYearTotal = 0.0;
     int totalStaff = 0;
 
@@ -96,7 +95,7 @@
 
     try (Connection con = DBConn.getConnection()) {
 
-        // --- Bank dropdown list ---
+        // --- Bank dropdown list ---  
         try (PreparedStatement ps = con.prepareStatement(sqlBankList);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) bankList.add(rs.getString("bankname"));
@@ -110,7 +109,7 @@
                     while (rs.next()) {
                         String bankName = rs.getString("bankname");
                         int mth = rs.getInt("mth"); // 1..12
-                        double profit = rs.getDouble("total_profit");  // Use profit instead of deposit
+                        double profit = rs.getDouble("total_profit");
 
                         Double[] arr = bankMonthTotals.get(bankName);
                         if (arr == null) {
@@ -118,7 +117,7 @@
                             Arrays.fill(arr, null);
                             bankMonthTotals.put(bankName, arr);
                         }
-                        if (mth >= 1 && mth <= 12) arr[mth - 1] = profit;  // Store profit
+                        if (mth >= 1 && mth <= 12) arr[mth - 1] = profit;
                     }
                 }
             }
@@ -130,7 +129,7 @@
                     while (rs.next()) {
                         String bankName = rs.getString("bankname");
                         int mth = rs.getInt("mth");
-                        double profit = rs.getDouble("total_profit");  // Use profit instead of deposit
+                        double profit = rs.getDouble("total_profit");
 
                         Double[] arr = bankMonthTotals.get(bankName);
                         if (arr == null) {
@@ -138,7 +137,7 @@
                             Arrays.fill(arr, null);
                             bankMonthTotals.put(bankName, arr);
                         }
-                        if (mth >= 1 && mth <= 12) arr[mth - 1] = profit;  // Store profit
+                        if (mth >= 1 && mth <= 12) arr[mth - 1] = profit;
                     }
                 }
             }
@@ -211,16 +210,18 @@
     String[] monthLabels = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 
     StringBuilder jsLabels = new StringBuilder("[");
+
     for (int i = firstIndex; i < 12; i++) {
         jsLabels.append("\"").append(monthLabels[i]).append("\"");
         if (i < 11) jsLabels.append(",");
     }
     jsLabels.append("]");
+
     String[] colors = new String[] {
-    	    "#7dd3c0", "#0c373f", "#ff9a5a", "#6c5ce7", "#0984e3", 
-    	    "#00b894", "#d63031", "#e67e22", "#f39c12", "#2ecc71", 
-    	    "#8e44ad", "#34495e"
-    	};
+        "#7dd3c0", "#0c373f", "#ff9a5a", "#6c5ce7", "#0984e3",
+        "#00b894", "#d63031", "#e67e22", "#f39c12", "#2ecc71",
+        "#8e44ad", "#34495e"
+    };
     StringBuilder jsDatasets = new StringBuilder("[");
 
     int colorIdx = 0;
