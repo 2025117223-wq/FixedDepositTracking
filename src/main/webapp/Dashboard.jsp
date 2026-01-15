@@ -4,7 +4,7 @@
 <%@ page import="java.util.*" %>
 <%@ page import="java.util.Arrays" %>
 <%@ page import="java.text.DecimalFormat" %>
-<%@ page import="Utill.DBConn" %>
+<%@ page import="Util.DBConn" %>
 
 <%
     // =========================
@@ -426,3 +426,4 @@
                     y: {
                         beginAtZero: true,
                         grid
+
