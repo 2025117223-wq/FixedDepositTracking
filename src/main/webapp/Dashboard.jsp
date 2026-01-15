@@ -192,7 +192,7 @@
         if (hasChartData) break;
     }
 
-    // Start labels at first month with any value (so graph start when data starts)
+    // Start labels at first month with any value (so graph starts when data starts)
     int firstIndex = 0;
     if (hasChartData) {
         boolean found = false;
@@ -228,6 +228,7 @@
     int colorIdx = 0;
     int appended = 0;
 
+    // Generate the chart data
     for (Map.Entry<String, Double[]> entry : bankMonthTotals.entrySet()) {
         String bankName = entry.getKey();
         Double[] arr = entry.getValue();
@@ -258,7 +259,6 @@
             if (i < 11) jsDatasets.append(",");
         }
 
-        // TAJAM + bersambung bila bulan tertentu null (spanGaps true)
         jsDatasets.append("],")
                   .append("showLine:true,")
                   .append("spanGaps:true,")
@@ -300,7 +300,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/Dashbord.css">
+    <link rel="stylesheet" href="css/Dashboard.css">
 </head>
 
 <body>
@@ -366,6 +366,17 @@
                             </div>
                         <% } %>
                     </div>
+
+                    <!-- Color Legend -->
+                    <div class="color-legend">
+                        <h3>Legend</h3>
+                        <% for (int i = 0; i < bankMonthTotals.size(); i++) { %>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div style="width:20px; height:20px; background-color:<%= colors[i % colors.length] %>;"></div>
+                                <span><%= bankList.get(i) %></span>
+                            </div>
+                        <% } %>
+                    </div>
                 </div>
 
                 <div class="stats-section">
@@ -425,5 +436,15 @@
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid
+                        grid: { color: '#eeeeee' },
+                        ticks: { callback: (val) => 'RM ' + Number(val).toLocaleString() }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    </script>
+    <% } %>
 
+</body>
+</html>
