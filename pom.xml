@@ -103,7 +103,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Webapp Runner for Heroku -->
+            <!-- Webapp Runner for Heroku (Runs WAR files on Heroku) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
