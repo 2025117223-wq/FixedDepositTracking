@@ -2,13 +2,8 @@
 <%@ page import="Bean.Staff" %>
 <%@ page import="java.sql.*" %>
 <%@ page import="java.util.*" %>
-<<<<<<< HEAD
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="Util.DBConn" %>
-=======
-<%@ page import="java.util.Arrays" %>
-<%@ page import="java.text.DecimalFormat" %>
-<%@ page import="Utill.DBConn" %>
 
 <%!
     // Escape untuk JS string
@@ -150,18 +145,14 @@
 
     try (Connection con = DBConn.getConnection()) {
 
-<<<<<<< HEAD
         // --- Bank dropdown list ---  
-=======
-        // --- Bank dropdown list ---
->>>>>>> d50825d (initial commit)
         try (PreparedStatement ps = con.prepareStatement(sqlBankList);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) bankList.add(rs.getString("bankname"));
         }
 
         // --- Top 3 profit data ---
-        String sqlToUse = "ALL".equalsIgnoreCase(selectedBank) ? sqlTop3All : sqlTop3One;
+        String sqlToUse = "ALL".equalsIgnoreCase(selectedBank) ? sqlChartAll : sqlChartOne;
 
         try (PreparedStatement ps = con.prepareStatement(sqlToUse)) {
             ps.setInt(1, selectedYear);
@@ -170,18 +161,16 @@
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     String bankName = rs.getString("bankname");
-                    int rn = rs.getInt("rn"); // 1..3
-                    double profit = rs.getDouble("profit");
+                    int mth = rs.getInt("mth");
+                    double profit = rs.getDouble("total_profit");
 
-                        Double[] arr = bankMonthTotals.get(bankName);
-                        if (arr == null) {
-                            arr = new Double[12];
-                            Arrays.fill(arr, null);
-                            bankMonthTotals.put(bankName, arr);
-                        }
-                        if (mth >= 1 && mth <= 12) arr[mth - 1] = profit;
+                    Double[] arr = bankTop3.get(bankName);
+                    if (arr == null) {
+                        arr = new Double[12];
+                        Arrays.fill(arr, null);
+                        bankTop3.put(bankName, arr);
                     }
-                    if (rn >= 1 && rn <= 3) arr[rn - 1] = profit;
+                    if (mth >= 1 && mth <= 12) arr[mth - 1] = profit;
                 }
             }
         }
@@ -223,7 +212,7 @@
     }
 
     // =========================
-    // SORT BANKS ikut Top1 profit (desc)
+    // SORT BANKS by Top1 profit (desc)
     // =========================
     List<Map.Entry<String, Double[]>> sortedEntries = new ArrayList<>(bankTop3.entrySet());
     Collections.sort(sortedEntries, new Comparator<Map.Entry<String, Double[]>>() {
@@ -234,95 +223,10 @@
         }
     });
 
-    // rebuild map ikut susunan sorted
+    // rebuild map following sorted order
     Map<String, Double[]> bankTop3Sorted = new LinkedHashMap<>();
     for (Map.Entry<String, Double[]> e : sortedEntries) bankTop3Sorted.put(e.getKey(), e.getValue());
     bankTop3 = bankTop3Sorted;
-
-    // =========================
-    // Check chart data
-    // =========================
-    boolean hasChartData = false;
-    for (Double[] arr : bankMonthTotals.values()) {
-        if (arr == null) continue;
-        for (int i = 0; i < 3; i++) {
-            if (arr[i] != null && arr[i] != 0) { hasChartData = true; break; }
-        }
-        if (hasChartData) break;
-    }
-
-    // =========================
-    // Chart JS labels = Top 1..Top 3
-    // datasets = per BANK (warna ikut bank)
-    // =========================
-    StringBuilder jsLabels = new StringBuilder("[\"Top 1\",\"Top 2\",\"Top 3\"]");
-
-    List<String> bankNames = new ArrayList<>(bankTop3.keySet());
-    int bankCount = bankNames.size();
-
-    StringBuilder jsDatasets = new StringBuilder("[");
-    int colorIdx = 0;
-    int appended = 0;
-
-    for (Map.Entry<String, Double[]> entry : bankMonthTotals.entrySet()) {
-        String bankName = entry.getKey();
-        Double[] arr = entry.getValue();
-
-        boolean allNull = true;
-        if (arr != null) {
-            for (int i = 0; i < 12; i++) {
-                if (arr[i] != null && arr[i] > 0) { allNull = false; break; }
-            }
-        }
-        if (allNull) continue;
-
-        String safeName = (bankName == null ? "Unknown" : bankName)
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"");
-
-        String color = colors[colorIdx % colors.length];
-
-        if (appended > 0) jsDatasets.append(",");
-
-        jsDatasets.append("{")
-                  .append("label:\"").append(safeName).append("\",")
-                  .append("data:[");
-
-        for (int i = firstIndex; i < 12; i++) {
-            if (arr == null || arr[i] == null) jsDatasets.append("null");
-            else jsDatasets.append(arr[i]);
-            if (i < 11) jsDatasets.append(",");
-        }
-
-        // TAJAM + bersambung bila bulan tertentu null (spanGaps true)
-        jsDatasets.append("],")
-                  .append("showLine:true,")
-                  .append("spanGaps:true,")
-                  .append("borderColor:\"").append(color).append("\",")
-                  .append("backgroundColor:\"transparent\",")
-                  .append("borderWidth:3,")
-                  .append("fill:false,")
-                  .append("tension:0,")
-                  .append("pointRadius:4,")
-                  .append("pointHoverRadius:6,")
-                  .append("pointBorderWidth:2,")
-                  .append("pointBackgroundColor:\"").append(color).append("\",")
-                  .append("pointBorderColor:\"#ffffff\"")
-                  .append("}");
-
-        appended++;
-        colorIdx++;
-    }
-    jsDatasets.append("]");
-
-    hasChartData = hasChartData && (di > 0);
-
-    DecimalFormat df = new DecimalFormat("#,##0.00");
-
-    boolean showThisMonth = thisMonthTotal > 0;
-    boolean showLastMonth = lastMonthTotal > 0;
-    boolean showLastYear  = lastYearTotal > 0;
-    boolean showTotalStaff = totalStaff > 0;
 %>
 
 <!DOCTYPE html>
@@ -336,7 +240,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="css/Dashbord.css">
+    <link rel="stylesheet" href="css/Dashboard.css">
 </head>
 
 <body>
@@ -401,45 +305,6 @@
                                 No data available for selected year/bank.
                             </div>
                         <% } %>
-<<<<<<< HEAD
-                    </div>
-                </div>
-
-                <div class="stats-section">
-                    <!-- Display stats for this month, even if the value is null or zero -->
-                    <div class="stat-card">
-                        <h3>This Month Total Profit</h3>
-                        <div class="amount">
-                            <%= thisMonthTotal > 0 ? "RM" + df.format(thisMonthTotal) : "RM 0.00" %>
-                        </div>
-                    </div>
-
-                    <!-- Display stats for last month, even if the value is null or zero -->
-                    <div class="stat-card">
-                        <h3>Last Month Total Profit</h3>
-                        <div class="amount">
-                            <%= lastMonthTotal > 0 ? "RM" + df.format(lastMonthTotal) : "RM 0.00" %>
-                        </div>
-                    </div>
-
-                    <!-- Display stats for last year, even if the value is null or zero -->
-                    <div class="stat-card">
-                        <h3>Last Year Total Profit</h3>
-                        <div class="amount">
-                            <%= lastYearTotal > 0 ? "RM" + df.format(lastYearTotal) : "RM 0.00" %>
-                        </div>
-                    </div>
-
-                    <!-- Display stats for total staff -->
-                    <div class="stat-card">
-                        <h3>Total Staff</h3>
-                        <div class="amount">
-                            <%= totalStaff > 0 ? totalStaff : "0" %>
-                        </div>
-                    </div>
-                </div>
-
-=======
                     </div>
                 </div>
 
@@ -474,7 +339,6 @@
                     </div>
                 </div>
 
->>>>>>> d50825d (initial commit)
             </div>
         </div>
     </div>
