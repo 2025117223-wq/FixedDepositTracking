@@ -7,6 +7,7 @@ import java.sql.*;
 
 public class StaffDAO {
 
+    // Check if the email already exists
     public boolean isEmailExists(String email) throws SQLException {
         String sql = "SELECT 1 FROM staff WHERE LOWER(TRIM(staffemail)) = ? LIMIT 1";
 
@@ -21,6 +22,7 @@ public class StaffDAO {
         }
     }
 
+    // Insert a new staff record
     public boolean insertStaff(Staff s) throws SQLException {
         String sql =
                 "INSERT INTO staff " +
@@ -54,7 +56,7 @@ public class StaffDAO {
                 ps.setString(8, status);
 
                 // manager_id (nullable, now Long for BIGINT)
-                Long mid = s.getManagerID();
+                Long mid = s.getManagerID();  // Ensure Long type for managerID
                 if (mid != null && mid > 0) {
                     ps.setLong(9, mid);
                 } else {
@@ -74,6 +76,7 @@ public class StaffDAO {
         }
     }
 
+    // Login check
     public Staff login(String email, String password) throws SQLException {
         String sql =
                 "SELECT staffid, staffname, staffemail, staffrole, staffstatus, managerid " +
@@ -89,14 +92,14 @@ public class StaffDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Staff s = new Staff();
-                    s.setStaffID(rs.getLong("staffid"));  // staffid is BIGINT
+                    s.setStaffID(rs.getLong("staffid"));  // staffid is BIGINT, use Long
                     s.setStaffName(rs.getString("staffname"));
                     s.setStaffEmail(rs.getString("staffemail"));
                     s.setStaffRole(rs.getString("staffrole"));
                     s.setStaffStatus(rs.getString("staffstatus"));
 
-                    Long mid = rs.getLong("managerid");
-                    if (!rs.wasNull()) s.setManagerID(mid);  // managerid is BIGINT
+                    Long mid = rs.getLong("managerid");  // managerid is BIGINT, use Long
+                    if (!rs.wasNull()) s.setManagerID(mid);
 
                     return s;
                 }
@@ -105,13 +108,14 @@ public class StaffDAO {
         return null;
     }
 
+    // Get staff picture by ID
     public byte[] getStaffPictureById(long staffID) throws SQLException {
         String sql = "SELECT staffpicture FROM staff WHERE staffid = ?";
 
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setLong(1, staffID);
+            ps.setLong(1, staffID);  // staffID is BIGINT
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
