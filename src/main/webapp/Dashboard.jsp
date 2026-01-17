@@ -347,13 +347,16 @@
 
     <% if (hasChartData) { %>
     <script>
-        const labels = <%= jsLabels.toString() %>;
-        const datasets = <%= jsDatasets.toString() %>;
+        const labels = <%= jsLabels %>;
+        const datasets = <%= jsDatasets %>;
 
         const ctx = document.getElementById('reportChart').getContext('2d');
         new Chart(ctx, {
             type: 'bar',
-            data: { labels, datasets },
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
