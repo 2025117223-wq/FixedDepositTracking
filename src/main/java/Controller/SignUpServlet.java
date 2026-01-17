@@ -2,7 +2,7 @@ package Controller;
 
 import Bean.Staff;
 import DAO.StaffDAO;
-import Util.PasswordUtil;  
+import Utill.PasswordUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -28,17 +28,23 @@ public class SignUpServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // ===== Read params =====
         String fullName = request.getParameter("fullName");
         String phoneNumber = request.getParameter("phoneNumber");
         String email = request.getParameter("email");
         String password = request.getParameter("password");
+        String confirmPassword = request.getParameter("confirmPassword");
         String homeAddress = request.getParameter("homeAddress");
         String staffRole = request.getParameter("staffRole");
+        String managerIDStr = request.getParameter("managerID"); // NEW
 
         Part profilePart = request.getPart("profilePicture");
 
+        // ===== Basic required validation =====
         if (isBlank(fullName) || isBlank(phoneNumber) || isBlank(email)
-                || isBlank(password) || isBlank(homeAddress) || isBlank(staffRole)
+                || isBlank(password) || isBlank(confirmPassword)
+                || isBlank(homeAddress) || isBlank(staffRole)
+                || isBlank(managerIDStr)
                 || profilePart == null || profilePart.getSize() == 0) {
 
             request.setAttribute("error", "Please fill in all required fields.");
@@ -46,39 +52,59 @@ public class SignUpServlet extends HttpServlet {
             return;
         }
 
+        // ===== Password validation =====
+        if (password.trim().length() < 8) {
+            request.setAttribute("error", "Password must be at least 8 characters.");
+            request.getRequestDispatcher("SignUp.jsp").forward(request, response);
+            return;
+        }
+
+        if (!password.equals(confirmPassword)) {
+            request.setAttribute("error", "Passwords do not match.");
+            request.getRequestDispatcher("SignUp.jsp").forward(request, response);
+            return;
+        }
+
+        // ===== ManagerID parse =====
+        Integer managerID;
+        try {
+            managerID = Integer.valueOf(managerIDStr);
+            if (managerID <= 0) throw new NumberFormatException();
+        } catch (NumberFormatException ex) {
+            request.setAttribute("error", "Invalid manager selected.");
+            request.getRequestDispatcher("SignUp.jsp").forward(request, response);
+            return;
+        }
+
+        // ===== Profile picture validation =====
         String contentType = profilePart.getContentType();
-        if (contentType == null || !(contentType.equalsIgnoreCase("image/jpeg")
-                || contentType.equalsIgnoreCase("image/png"))) {
+        if (contentType == null ||
+                !(contentType.equalsIgnoreCase("image/jpeg")
+                        || contentType.equalsIgnoreCase("image/jpg")
+                        || contentType.equalsIgnoreCase("image/png"))) {
 
             request.setAttribute("error", "Profile picture must be JPEG or PNG.");
             request.getRequestDispatcher("SignUp.jsp").forward(request, response);
             return;
         }
 
-        // ✅ Convert image to byte[] for PostgreSQL BYTEA
-        byte[] picBytes;
-        try (InputStream is = profilePart.getInputStream()) {
-            picBytes = is.readAllBytes(); // JDK 21 ok
-        }
-
-        if (picBytes == null || picBytes.length == 0) {
-            request.setAttribute("error", "Profile picture is required.");
-            request.getRequestDispatcher("SignUp.jsp").forward(request, response);
-            return;
-        }
-
+        // ===== Build Staff bean =====
         Staff staff = new Staff();
         staff.setStaffName(fullName.trim());
         staff.setStaffPhone(phoneNumber.trim());
         staff.setStaffAddress(homeAddress.trim());
         staff.setStaffEmail(email.trim().toLowerCase());
         staff.setStaffRole(staffRole.trim());
+        staff.setManagerID(managerID);              // NEW
+        staff.setStaffStatus("ACTIVE");             // optional default
         staff.setPassword(PasswordUtil.processPassword(password.trim()));
-        staff.setStaffPicture(picBytes); // ✅ byte[] setter
 
         StaffDAO dao = new StaffDAO();
 
-        try {
+        try (InputStream pictureStream = profilePart.getInputStream()) {
+            staff.setStaffPicture(pictureStream);
+
+            // ===== Duplicate email check =====
             if (dao.isEmailExists(staff.getStaffEmail())) {
                 request.setAttribute("error", "Email already registered.");
                 request.getRequestDispatcher("SignUp.jsp").forward(request, response);

@@ -1,17 +1,63 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.sql.*" %>
+<%@ page import="java.util.*" %>
+
+<%
+    List<Map<String, String>> managers = new ArrayList<>();
+    Connection conn = null;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+
+    try {
+        conn = Utill.DBConn.getConnection();
+
+        String sqlManagers =
+            "SELECT staffID, staffName " +
+            "FROM Staff " +
+            "WHERE staffStatus = 'ACTIVE' " +
+            "AND staffRole = 'Administration' " +
+            "ORDER BY staffName";
+
+        // Option B: show all active staff as managers (uncomment if you want)
+        // String sqlManagers = "SELECT staffID, staffName FROM Staff WHERE staffStatus = 'ACTIVE' ORDER BY staffName";
+
+        ps = conn.prepareStatement(sqlManagers);
+        rs = ps.executeQuery();
+
+        while (rs.next()) {
+            Map<String, String> m = new HashMap<>();
+            m.put("id", rs.getString("staffID"));
+            m.put("name", rs.getString("staffName"));
+            managers.add(m);
+        }
+    } catch (Exception e) {
+        // Optional debug:
+        // out.println("Error loading managers: " + e.getMessage());
+    } finally {
+        try { if (rs != null) rs.close(); } catch (Exception ex) {}
+        try { if (ps != null) ps.close(); } catch (Exception ex) {}
+        try { if (conn != null) conn.close(); } catch (Exception ex) {}
+    }
+%>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Fixed Deposit Tracking System</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="css/SignUp.css">
 </head>
+
 <body>
 <div class="container">
+
+    <!-- LEFT PANEL -->
     <div class="left-panel">
         <div class="logo">
             <img src="images/Logo.png" alt="Infra Desa Johor Logo">
@@ -21,22 +67,26 @@
         </div>
     </div>
 
+    <!-- RIGHT PANEL -->
     <div class="right-panel">
         <div class="signup-form">
+
             <div class="form-header">
                 <h2>Sign Up Account</h2>
                 <hr class="divider">
             </div>
 
             <% if (request.getAttribute("error") != null) { %>
-                <div class="error-message show" style="margin-bottom: 12px;">
+                <div class="error-message show server-error" style="margin-bottom: 12px;">
                     <%= request.getAttribute("error") %>
                 </div>
             <% } %>
 
             <form id="signupForm" action="SignUpServlet" method="POST" enctype="multipart/form-data">
 
-                <!-- Row 1: Name | Phone -->
+                <!-- =========================
+                     Row 1: Name | Phone
+                ========================== -->
                 <div class="form-row">
                     <div class="form-group">
                         <div class="input-wrapper">
@@ -55,7 +105,9 @@
                     </div>
                 </div>
 
-                <!-- Row 2: Email | Address -->
+                <!-- =========================
+                     Row 2: Email | Profile Picture
+                ========================== -->
                 <div class="form-row">
                     <div class="form-group">
                         <div class="input-wrapper">
@@ -65,7 +117,23 @@
                         <div class="error-message" id="emailError">Please enter a valid email address</div>
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group profile-upload">
+                        <label for="profilePicture" class="profile-upload-wrapper">
+                            <img src="images/icons/file.png" alt="Upload" class="profile-icon">
+                            <div class="profile-upload-input" id="uploadLabel">Upload Profile Picture</div>
+                        </label>
+
+                        <div class="file-format">JPEG, PNG</div>
+                        <input type="file" id="profilePicture" name="profilePicture" accept=".jpg,.jpeg,.png" required>
+                        <div class="error-message" id="fileError">Please select a profile picture</div>
+                    </div>
+                </div>
+
+                <!-- =========================
+                     Row 3: Address (FULL WIDTH)
+                ========================== -->
+                <div class="form-row">
+                    <div class="form-group fullwidth">
                         <div class="input-wrapper">
                             <img src="images/icons/haddress.png" alt="Home" class="address-icon">
                             <input type="text" id="homeAddress" name="homeAddress" placeholder="Home Address" required>
@@ -74,18 +142,10 @@
                     </div>
                 </div>
 
-                <!-- Row 3: Profile picture | Role -->
+                <!-- =========================
+                     Row 4: Role | Manager
+                ========================== -->
                 <div class="form-row">
-                    <div class="form-group profile-upload">
-                        <label for="profilePicture" class="profile-upload-wrapper">
-                            <img src="images/icons/file.png" alt="Upload" class="profile-icon">
-                            <div class="profile-upload-input" id="uploadLabel">Upload Profile Picture</div>
-                        </label>
-                        <div class="file-format">JPEG, PNG</div>
-                        <input type="file" id="profilePicture" name="profilePicture" accept=".jpg,.jpeg,.png" required>
-                        <div class="error-message" id="fileError">Please select a profile picture</div>
-                    </div>
-
                     <div class="form-group">
                         <div class="input-wrapper select-wrapper">
                             <img src="images/icons/role.png" alt="Role" class="role-icon">
@@ -98,37 +158,50 @@
                         </div>
                         <div class="error-message" id="roleError">Please select a role</div>
                     </div>
+
+                    <div class="form-group">
+                        <div class="input-wrapper select-wrapper">
+                            <img src="images/icons/role.png" alt="Manager" class="role-icon">
+                            <select id="managerID" name="managerID" required>
+                                <option value="" disabled selected>Select Manager</option>
+                                <% if (managers != null && !managers.isEmpty()) { %>
+                                    <% for (Map<String, String> m : managers) { %>
+                                        <option value="<%= m.get("id") %>"><%= m.get("name") %></option>
+                                    <% } %>
+                                <% } else { %>
+                                    <option value="" disabled>No manager found</option>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="error-message" id="managerError">Please select a manager</div>
+                    </div>
                 </div>
 
-                <!-- Row 4: Password | Re-confirm password -->
+                <!-- =========================
+                     Row 5: Password | Re-confirm Password
+                ========================== -->
                 <div class="form-row">
-                    <!-- PASSWORD -->
                     <div class="form-group">
                         <div class="input-wrapper" style="position: relative;">
                             <img src="images/icons/password.png" alt="Password" class="password-icon">
                             <input type="password" id="password" name="password" placeholder="Password" required minlength="8">
 
-                            <!-- Toggle button -->
                             <button type="button" id="togglePassword"
-                                    style="position: absolute; right: 25px; background: none; border: none; cursor: pointer; z-index: 2;">
-                                <img id="passwordIcon" src="images/icons/showpass.png" alt="Show Password"
-                                     style="width: 25px; height: 25px;">
+                                    style="position:absolute; right:25px; background:none; border:none; cursor:pointer; z-index:2;">
+                                <img id="passwordIcon" src="images/icons/showpass.png" alt="Show Password" style="width:25px; height:25px;">
                             </button>
                         </div>
                         <div class="error-message" id="passwordError">Password must be at least 8 characters</div>
                     </div>
 
-                    <!-- CONFIRM PASSWORD -->
                     <div class="form-group">
                         <div class="input-wrapper" style="position: relative;">
                             <img src="images/icons/password.png" alt="Confirm Password" class="password-icon">
                             <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-confirm Password" required minlength="8">
 
-                            <!-- Toggle button -->
                             <button type="button" id="toggleConfirmPassword"
-                                    style="position: absolute; right: 25px; background: none; border: none; cursor: pointer; z-index: 2;">
-                                <img id="confirmPasswordIcon" src="images/icons/showpass.png" alt="Show Password"
-                                     style="width: 25px; height: 25px;">
+                                    style="position:absolute; right:25px; background:none; border:none; cursor:pointer; z-index:2;">
+                                <img id="confirmPasswordIcon" src="images/icons/showpass.png" alt="Show Password" style="width:25px; height:25px;">
                             </button>
                         </div>
                         <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
@@ -140,6 +213,7 @@
                 <div class="login-link">
                     Already have an account? <a href="Login.jsp">Login Now</a>
                 </div>
+
             </form>
         </div>
     </div>
@@ -157,21 +231,21 @@
 </div>
 
 <script>
-    // Form validation
+    // Form elements
     const form = document.getElementById('signupForm');
     const fullName = document.getElementById('fullName');
     const phoneNumber = document.getElementById('phoneNumber');
     const email = document.getElementById('email');
-    const password = document.getElementById('password');
-    const confirmPassword = document.getElementById('confirmPassword');
     const homeAddress = document.getElementById('homeAddress');
     const profilePicture = document.getElementById('profilePicture');
     const staffRole = document.getElementById('staffRole');
+    const managerID = document.getElementById('managerID');
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
 
     // Toggle password elements
     const togglePasswordButton = document.getElementById("togglePassword");
     const passwordIcon = document.getElementById("passwordIcon");
-
     const toggleConfirmPasswordButton = document.getElementById("toggleConfirmPassword");
     const confirmPasswordIcon = document.getElementById("confirmPasswordIcon");
 
@@ -235,13 +309,20 @@
         }
     });
 
-    // Form submit validation
+    function showError(inputId, errorId, message) {
+        document.getElementById(inputId).classList.add('error');
+        const errorEl = document.getElementById(errorId);
+        errorEl.textContent = message;
+        errorEl.classList.add('show');
+    }
+
+    // Form submit validation + modal
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         let isValid = true;
 
-        // Reset all errors
-        document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+        // Reset errors (except server error)
+        document.querySelectorAll('.error-message:not(.server-error)').forEach(el => el.classList.remove('show'));
         document.querySelectorAll('input, select').forEach(el => el.classList.remove('error'));
 
         // Full Name
@@ -281,6 +362,12 @@
             isValid = false;
         }
 
+        // Manager
+        if (managerID.value === '') {
+            showError('managerID', 'managerError', 'Please select a manager');
+            isValid = false;
+        }
+
         // Password
         if (password.value.length < 8) {
             showError('password', 'passwordError', 'Password must be at least 8 characters');
@@ -317,13 +404,7 @@
             this.classList.remove('show');
         }
     });
-
-    function showError(inputId, errorId, message) {
-        document.getElementById(inputId).classList.add('error');
-        const errorEl = document.getElementById(errorId);
-        errorEl.textContent = message;
-        errorEl.classList.add('show');
-    }
 </script>
+
 </body>
 </html>

@@ -85,4 +85,11 @@ public class Staff {
     public void setStaffStatus(String staffStatus) {
         this.staffStatus = staffStatus;
     }
+    public Integer getManagerID() {
+        return managerID;
+    }
+
+    public void setManagerID(Integer managerID) {
+        this.managerID = managerID;
+    }
 }
