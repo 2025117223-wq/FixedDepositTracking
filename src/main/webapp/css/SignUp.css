@@ -33,7 +33,7 @@ body{
 
   background-image:
     linear-gradient(rgba(12, 55, 63, 0.7), rgba(12, 55, 63, 0.8)),
-    url('../images/signupBG.png'); /* ✅ fixed path for css folder */
+    url('../images/signupBG.png');
   background-size: cover;
   background-position: center;
 }
@@ -83,7 +83,7 @@ body{
   right: 150px;
   width: 1000px;
   height: 2000px;
-  background-image: url('../images/line.png'); /* ✅ fixed path for css folder */
+  background-image: url('../images/line.png');
   background-size: contain;
   background-repeat: no-repeat;
   opacity: 1;
@@ -117,7 +117,7 @@ body{
   background: transparent;
 }
 
-/* rows */
+/* ================= ROWS ================= */
 .form-row{
   display: flex;
   gap: 30px;
@@ -128,11 +128,22 @@ body{
   flex: 1;
 }
 
-/* ✅ fix mismatch: JSP uses "fullwidth" not "full-width" */
-.form-row.fullwidth,
-.form-group.fullwidth{
+/* ✅ JSP uses "fullwidth" */
+.form-row.fullwidth{
   width: 100%;
+}
+
+.form-row.fullwidth .form-group{
   flex: 1 1 100%;
+}
+
+/* ✅ Fix: row Address + Upload -> ratio cantik (Address bigger) */
+.form-row .form-group.fullwidth{
+  flex: 2;
+}
+
+.form-row .profile-upload{
+  flex: 1;
 }
 
 /* input wrapper */
@@ -197,11 +208,11 @@ select{
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  color: #a8a8a8; /* default (placeholder) */
+  color: #a8a8a8;
 }
 
 select:valid{
-  color: #333; /* bila user dah pilih */
+  color: #333;
 }
 
 /* ================= PROFILE UPLOAD ================= */
@@ -212,6 +223,7 @@ select:valid{
   width: 100%;
 }
 
+/* ✅ Fix: make upload box same height/feel as inputs */
 .profile-upload-input{
   width: 100%;
   padding: 20px 25px 20px 90px;
@@ -221,6 +233,10 @@ select:valid{
   cursor: pointer;
   color: #a8a8a8;
   transition: border-color 0.3s ease, background 0.3s ease;
+
+  min-height: 62px;
+  display: flex;
+  align-items: center;
 }
 
 .profile-upload-input:hover{
@@ -239,7 +255,7 @@ input[type="file"]{
   margin-top: 4px;
 }
 
-/* ================= SERVER ERROR (from servlet) ================= */
+/* ================= SERVER ERROR ================= */
 .server-error{
   background: rgba(231, 76, 60, 0.12);
   border: 1px solid rgba(231, 76, 60, 0.65);

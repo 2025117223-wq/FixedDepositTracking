@@ -50,7 +50,6 @@
 
     <link rel="stylesheet" href="css/SignUp.css">
 </head>
-
 <body>
 <div class="container">
 
