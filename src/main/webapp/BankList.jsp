@@ -1,5 +1,18 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%
+    // =========================
+    // SESSION PROTECTION
+    // =========================
+    Staff loggedStaff = (Staff) session.getAttribute("loggedStaff");
+    if (loggedStaff == null) {
+        response.sendRedirect("Login.jsp");
+        return;
+    }
+
+    String staffName = loggedStaff.getStaffName();
+    String staffRole = loggedStaff.getStaffRole();
+%>
 <c:if test="${listBank == null}"><c:redirect url="BankController?action=list"/></c:if>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,7 +23,27 @@
     <link rel="stylesheet" href="css/BankList.css">
 </head>
 <body>
-    <%@ include file="includes/sidebar.jsp" %>
+     
+   <%@ include file="includes/sidebar.jsp" %>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>Bank Directory</h1>
+
+            <div class="user-profile">
+                <div class="user-info">
+                    <div class="user-name"><%= staffName %></div>
+                    <div class="user-role"><%= staffRole %></div>
+                </div>
+
+                <div class="user-avatar">
+                    <img src="ProfileImagesServlet" alt="User Avatar"
+                         onerror="this.src='images/icons/user.jpg'">
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="main-content">
         <div class="header"><h1>Bank Directory</h1></div>
         <div class="page-content">
