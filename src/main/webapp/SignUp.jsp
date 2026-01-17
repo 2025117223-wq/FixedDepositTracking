@@ -9,7 +9,7 @@
     ResultSet rs = null;
 
     try {
-        conn = Utill.DBConn.getConnection();
+        conn = Util.DBConn.getConnection();
 
         String sqlManagers =
             "SELECT staffID, staffName " +
