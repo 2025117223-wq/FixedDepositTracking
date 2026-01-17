@@ -81,7 +81,7 @@
 
             <form id="signupForm" action="SignUpServlet" method="POST" enctype="multipart/form-data">
 
-                <!-- Full Name -->
+                <!-- Full Name (Full Width) -->
                 <div class="form-row fullwidth">
                     <div class="form-group">
                         <div class="input-wrapper">
@@ -92,7 +92,7 @@
                     </div>
                 </div>
 
-                <!-- Phone | Email -->
+                <!-- Row 1: Phone | Email -->
                 <div class="form-row">
                     <div class="form-group">
                         <div class="input-wrapper">
@@ -111,7 +111,7 @@
                     </div>
                 </div>
 
-                <!-- Address | Picture -->
+                <!-- Row 2: Address | Profile Picture -->
                 <div class="form-row">
                     <div class="form-group fullwidth">
                         <div class="input-wrapper">
@@ -133,7 +133,7 @@
                     </div>
                 </div>
 
-                <!-- Role | Manager (Manager OPTIONAL) -->
+                <!-- Row 3: Role | Manager -->
                 <div class="form-row">
                     <div class="form-group">
                         <div class="input-wrapper select-wrapper">
@@ -151,11 +151,10 @@
                     <div class="form-group">
                         <div class="input-wrapper select-wrapper">
                             <img src="images/icons/role.png" alt="Manager" class="role-icon">
-                            <!-- ✅ removed "required" -->
-                            <select id="managerID" name="managerID">
-                                <!-- ✅ allow null -->
-                                <option value="" selected>No Manager</option>
 
+                            <!-- ✅ Manager OPTIONAL -->
+                            <select id="managerID" name="managerID">
+                                <option value="" selected>No Manager</option>
                                 <% if (managers != null && !managers.isEmpty()) { %>
                                     <% for (Map<String, String> m : managers) { %>
                                         <option value="<%= m.get("id") %>"><%= m.get("name") %></option>
@@ -163,12 +162,11 @@
                                 <% } %>
                             </select>
                         </div>
-                        <!-- ✅ manager error boleh buang atau biar (tapi takkan dipakai) -->
                         <div class="error-message" id="managerError">Please select a manager</div>
                     </div>
                 </div>
 
-                <!-- Password | Confirm -->
+                <!-- Row 4: Password | Re-confirm Password -->
                 <div class="form-row">
                     <div class="form-group">
                         <div class="input-wrapper" style="position: relative;">
@@ -220,6 +218,7 @@
 </div>
 
 <script>
+    // Form elements
     const form = document.getElementById('signupForm');
     const fullName = document.getElementById('fullName');
     const phoneNumber = document.getElementById('phoneNumber');
@@ -227,19 +226,22 @@
     const homeAddress = document.getElementById('homeAddress');
     const profilePicture = document.getElementById('profilePicture');
     const staffRole = document.getElementById('staffRole');
-    const managerID = document.getElementById('managerID'); // still exists but optional
+    const managerID = document.getElementById('managerID');
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('confirmPassword');
 
+    // Toggle password elements
     const togglePasswordButton = document.getElementById("togglePassword");
     const passwordIcon = document.getElementById("passwordIcon");
     const toggleConfirmPasswordButton = document.getElementById("toggleConfirmPassword");
     const confirmPasswordIcon = document.getElementById("confirmPasswordIcon");
 
+    // Phone number validation - only numbers
     phoneNumber.addEventListener('input', function () {
         this.value = this.value.replace(/[^0-9]/g, '');
     });
 
+    // Toggle Password
     togglePasswordButton.addEventListener("click", () => {
         if (password.type === "password") {
             password.type = "text";
@@ -250,6 +252,7 @@
         }
     });
 
+    // Toggle Confirm Password
     toggleConfirmPasswordButton.addEventListener("click", () => {
         if (confirmPassword.type === "password") {
             confirmPassword.type = "text";
@@ -260,6 +263,7 @@
         }
     });
 
+    // File upload label + validation
     profilePicture.addEventListener('change', function (e) {
         const file = e.target.files[0];
         const uploadLabel = document.getElementById('uploadLabel');
@@ -277,7 +281,7 @@
                 return;
             }
 
-            if (file.size > 5 * 1024 * 1024) {
+            if (file.size > 5 * 1024 * 1024) { // 5MB
                 fileError.textContent = 'File size must be less than 5MB';
                 fileError.classList.add('show');
                 this.value = '';
@@ -299,39 +303,47 @@
         errorEl.classList.add('show');
     }
 
+    // Form submit validation + modal
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         let isValid = true;
 
+        // Reset errors (except server error)
         document.querySelectorAll('.error-message:not(.server-error)').forEach(el => el.classList.remove('show'));
         document.querySelectorAll('input, select').forEach(el => el.classList.remove('error'));
 
+        // Full Name
         if (fullName.value.trim() === '') {
             showError('fullName', 'fullNameError', 'Please enter your full name');
             isValid = false;
         }
 
+        // Phone
         if (phoneNumber.value.trim() === '' || !/^[0-9]+$/.test(phoneNumber.value)) {
             showError('phoneNumber', 'phoneError', 'Please enter a valid phone number (numbers only)');
             isValid = false;
         }
 
+        // Email
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailPattern.test(email.value)) {
             showError('email', 'emailError', 'Please enter a valid email address');
             isValid = false;
         }
 
+        // Address
         if (homeAddress.value.trim() === '') {
             showError('homeAddress', 'addressError', 'Please enter your home address');
             isValid = false;
         }
 
+        // Profile picture
         if (!profilePicture.files || profilePicture.files.length === 0) {
             document.getElementById('fileError').classList.add('show');
             isValid = false;
         }
 
+        // Role
         if (staffRole.value === '') {
             showError('staffRole', 'roleError', 'Please select a role');
             isValid = false;
@@ -339,11 +351,13 @@
 
         // ✅ Manager validation removed (manager optional)
 
+        // Password
         if (password.value.length < 8) {
             showError('password', 'passwordError', 'Password must be at least 8 characters');
             isValid = false;
         }
 
+        // Confirm password
         if (confirmPassword.value.length < 8) {
             showError('confirmPassword', 'confirmPasswordError', 'Password must be at least 8 characters');
             isValid = false;
@@ -357,15 +371,17 @@
         }
     });
 
+    // Modal buttons
     document.getElementById('modalNo').addEventListener('click', function () {
         document.getElementById('confirmModal').classList.remove('show');
     });
 
     document.getElementById('modalYes').addEventListener('click', function () {
         document.getElementById('confirmModal').classList.remove('show');
-        form.submit();
+        form.submit(); // ✅ submit to servlet
     });
 
+    // Close modal when clicking outside
     document.getElementById('confirmModal').addEventListener('click', function (e) {
         if (e.target === this) {
             this.classList.remove('show');

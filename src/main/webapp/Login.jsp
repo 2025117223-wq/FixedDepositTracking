@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/Login.css">
 </head>
+
 <style>
 /* ================= RESET ================= */
 * {
@@ -222,30 +223,8 @@ input.error {
     border-color: #e74c3c;
 }
 
-/* ================= RESPONSIVE ================= */
-@media (max-width: 968px) {
-    .container {
-        flex-direction: column;
-    }
-
-    .left-panel {
-        padding: 40px 20px;
-    }
-
-    .logo {
-        width: 120px;
-        height: 120px;
-    }
-
-    .system-title h1 {
-        font-size: 2.5rem;
-    }
-
-    .right-panel {
-        padding: 40px 20px;
-    }
-    
-    /* ================= SUCCESS MESSAGE ================= */
+/* ================= SUCCESS MESSAGE ================= */
+/* ✅ moved OUTSIDE media query so it works on desktop too */
 .success-message{
     position: fixed;
     top: 20px;
@@ -285,17 +264,36 @@ input.error {
     font-weight: 600;
 }
 
+/* ================= RESPONSIVE ================= */
+@media (max-width: 968px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .left-panel {
+        padding: 40px 20px;
+    }
+
+    .logo {
+        width: 120px;
+        height: 120px;
+    }
+
+    .system-title h1 {
+        font-size: 2.5rem;
+    }
+
+    .right-panel {
+        padding: 40px 20px;
+    }
 }
-
-
 </style>
+
 <body>
 <%
-    // Read server error only if this page is loaded via POST (prevents error showing on first GET)
     String error = (String) request.getAttribute("error");
     boolean isPost = "POST".equalsIgnoreCase(request.getMethod());
 
-    // Preserve email value if servlet sets it; fallback to empty
     Object emailObj = request.getAttribute("emailValue");
     String emailValue = emailObj != null ? emailObj.toString() : "";
 %>
@@ -379,7 +377,6 @@ input.error {
     if (urlParams.get('signup') === 'success') {
         const successMessage = document.getElementById('successMessage');
 
-        // show (because default is hidden)
         successMessage.style.display = 'block';
         successMessage.classList.add('show');
 
@@ -387,7 +384,7 @@ input.error {
             successMessage.classList.add('hide');
             setTimeout(() => {
                 successMessage.classList.remove('show', 'hide');
-                successMessage.style.display = 'none'; // hide again
+                successMessage.style.display = 'none';
                 window.history.replaceState({}, document.title, window.location.pathname);
             }, 500);
         }, 5000);
@@ -412,7 +409,7 @@ input.error {
         }
     });
 
-    // Form validation - prevent submit ONLY if invalid
+    // Form validation
     form.addEventListener('submit', function(e) {
         let isValid = true;
 
@@ -431,7 +428,6 @@ input.error {
         }
 
         if (!isValid) e.preventDefault();
-        // if valid -> POST to servlet
     });
 
     function showError(inputId, errorId, message) {
@@ -441,5 +437,6 @@ input.error {
         errorEl.classList.add('show');
     }
 </script>
+
 </body>
 </html>

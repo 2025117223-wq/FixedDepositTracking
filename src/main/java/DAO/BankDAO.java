@@ -10,6 +10,7 @@ public class BankDAO {
 
     public boolean insertBank(Bank bank) throws SQLException {
         String sql = "INSERT INTO bank (bankname, bankaddress, bankphone) VALUES (?, ?, ?)";
+
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -31,7 +32,7 @@ public class BankDAO {
 
             while (rs.next()) {
                 banks.add(new Bank(
-                        rs.getInt("bankid"),
+                        rs.getInt("bankid"),        // boleh tukar ke getLong
                         rs.getString("bankname"),
                         rs.getString("bankaddress"),
                         rs.getString("bankphone")

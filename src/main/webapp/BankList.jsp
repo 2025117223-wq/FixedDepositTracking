@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="Bean.Staff" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <%
     // =========================
     // SESSION PROTECTION
@@ -13,7 +15,11 @@
     String staffName = loggedStaff.getStaffName();
     String staffRole = loggedStaff.getStaffRole();
 %>
-<c:if test="${listBank == null}"><c:redirect url="BankController?action=list"/></c:if>
+
+<c:if test="${empty listBank}">
+    <c:redirect url="BankController?action=list"/>
+</c:if>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,7 +29,7 @@
     <link rel="stylesheet" href="css/BankList.css">
 </head>
 <body>
-     
+
    <%@ include file="includes/sidebar.jsp" %>
 
     <div class="main-content">
@@ -42,40 +48,66 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="main-content">
-        <div class="header"><h1>Bank Directory</h1></div>
         <div class="page-content">
-            
+
             <%-- Popup Message --%>
             <c:if test="${not empty param.msg}">
                 <div class="alert-banner" id="toast">
-                    <span><strong>Success!</strong> <c:out value="${param.bn}"/> 
-                    ${param.msg == 'created' ? 'has been created.' : 'details have been updated.'}</span>
+                    <span>
+                        <strong>Success!</strong>
+                        <c:out value="${param.bn}"/>
+                        <c:choose>
+                            <c:when test="${param.msg eq 'created'}"> has been created.</c:when>
+                            <c:otherwise> details have been updated.</c:otherwise>
+                        </c:choose>
+                    </span>
                 </div>
-                <script>setTimeout(() => { document.getElementById('toast').style.display='none'; }, 5000);</script>
+                <script>
+                    setTimeout(() => {
+                        const t = document.getElementById('toast');
+                        if (t) t.style.display = 'none';
+                    }, 5000);
+                </script>
             </c:if>
 
             <div class="table-container">
                 <table>
                     <thead>
-                        <tr><th>ID</th><th>Bank Name</th><th>Address</th><th>Phone</th><th>Actions</th></tr>
+                        <tr>
+                            <th>ID</th>
+                            <th>Bank Name</th>
+                            <th>Address</th>
+                            <th>Phone</th>
+                            <th>Actions</th>
+                        </tr>
                     </thead>
                     <tbody>
                         <c:forEach var="bank" items="${listBank}">
                             <tr>
-                                <td>${bank.bankId}</td>
-                                <td>${bank.bankName}</td>
-                                <td>${bank.bankAddress}</td>
-                                <td>${bank.bankPhone}</td>
-                                <td><a href="BankController?action=edit&id=${bank.bankId}" class="btn-edit">✏️ Edit</a></td>
+                                <td><c:out value="${bank.bankId}"/></td>
+                                <td><c:out value="${bank.bankName}"/></td>
+                                <td><c:out value="${bank.bankAddress}"/></td>
+                                <td><c:out value="${bank.bankPhone}"/></td>
+                                <td>
+                                    <a href="BankController?action=edit&id=${bank.bankId}" class="btn-edit">✏️ Edit</a>
+                                </td>
                             </tr>
                         </c:forEach>
+
+                        <c:if test="${empty listBank}">
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding:16px;">
+                                    No banks found.
+                                </td>
+                            </tr>
+                        </c:if>
                     </tbody>
                 </table>
             </div>
+
         </div>
     </div>
+
 </body>
 </html>

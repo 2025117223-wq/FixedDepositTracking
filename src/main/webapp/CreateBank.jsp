@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="Bean.Staff" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <%
     // =========================
     // SESSION PROTECTION
@@ -24,7 +26,6 @@
 </head>
 <body>
 
-    
    <%@ include file="includes/sidebar.jsp" %>
 
     <div class="main-content">
@@ -43,9 +44,7 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="main-content">
         <div class="form-card">
             <h2>Create New Bank</h2>
 
@@ -58,11 +57,13 @@
                     <input type="text" id="bankName" name="bankName"
                            placeholder="Enter bank name" required>
                 </div>
+
                 <div class="form-group">
                     <label for="bankPhone">Bank Phone Number</label>
                     <input type="text" id="bankPhone" name="bankPhone"
                            placeholder="Enter head office contact number" required>
                 </div>
+
                 <div class="form-group">
                     <label for="bankAddress">Bank Address</label>
                     <textarea id="bankAddress" name="bankAddress" rows="4"
