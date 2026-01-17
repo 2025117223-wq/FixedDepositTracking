@@ -118,32 +118,21 @@ body{
 }
 
 /* ================= ROWS ================= */
+/* ✅ semua row biasa = half-half */
 .form-row{
   display: flex;
   gap: 30px;
   margin-bottom: 30px;
 }
 
-.form-group{
+.form-row .form-group{
   flex: 1;
+  min-width: 0;
 }
 
-/* ✅ JSP uses "fullwidth" */
-.form-row.fullwidth{
-  width: 100%;
-}
-
+/* ✅ hanya row yang memang fullwidth (Full Name) jadi 1 baris penuh */
 .form-row.fullwidth .form-group{
   flex: 1 1 100%;
-}
-
-/* ✅ Fix: row Address + Upload -> ratio cantik (Address bigger) */
-.form-row .form-group.fullwidth{
-  flex: 2;
-}
-
-.form-row .profile-upload{
-  flex: 1;
 }
 
 /* input wrapper */
@@ -166,7 +155,6 @@ body{
   z-index: 2;
 }
 
-/* sizes */
 .input-icon{ width: 40px; height: 40px; }
 .phone-icon{ width: 56px; height: 56px; }
 .password-icon{ width: 35px; height: 35px; }
@@ -190,12 +178,10 @@ select{
   transition: border-color 0.3s ease, background 0.3s ease;
 }
 
-/* placeholder */
 input::placeholder{
   color: #a8a8a8;
 }
 
-/* focus */
 input:focus,
 select:focus{
   border-color: #1a4d5e;
@@ -223,7 +209,6 @@ select:valid{
   width: 100%;
 }
 
-/* ✅ Fix: make upload box same height/feel as inputs */
 .profile-upload-input{
   width: 100%;
   padding: 20px 25px 20px 90px;
