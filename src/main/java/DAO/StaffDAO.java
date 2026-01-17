@@ -7,8 +7,9 @@ import java.sql.*;
 
 public class StaffDAO {
 
+    // Check if the email already exists
     public boolean isEmailExists(String email) throws SQLException {
-        String sql = "SELECT 1 FROM staff WHERE LOWER(TRIM(staff_email)) = ? LIMIT 1";
+        String sql = "SELECT 1 FROM staff WHERE LOWER(TRIM(staffemail)) = ? LIMIT 1";
 
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -21,10 +22,11 @@ public class StaffDAO {
         }
     }
 
+    // Insert a new staff record
     public boolean insertStaff(Staff s) throws SQLException {
         String sql =
                 "INSERT INTO staff " +
-                "(staff_name, staff_phone, staff_address, staff_email, staff_role, password, staff_picture, manager_id, staff_status) " +
+                "(staffname, staffphone, staffaddress, staffemail, password, staffpicture, staffrole, staffstatus, managerid) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DBConn.getConnection()) {
@@ -36,29 +38,30 @@ public class StaffDAO {
                 ps.setString(2, s.getStaffPhone());
                 ps.setString(3, s.getStaffAddress());
                 ps.setString(4, (s.getStaffEmail() == null ? null : s.getStaffEmail().trim().toLowerCase()));
-                ps.setString(5, s.getStaffRole());
-                ps.setString(6, s.getPassword());
+                ps.setString(5, s.getPassword());
 
                 // staff_picture (PostgreSQL BYTEA) - Staff bean stores byte[]
                 byte[] pic = s.getStaffPicture();
                 if (pic != null && pic.length > 0) {
-                    ps.setBytes(7, pic);
+                    ps.setBytes(6, pic);
                 } else {
-                    ps.setNull(7, Types.BINARY);
+                    ps.setNull(6, Types.BINARY);
                 }
 
-                // manager_id (nullable)
-                Integer mid = s.getManagerID();
-                if (mid != null && mid > 0) {
-                    ps.setInt(8, mid);
-                } else {
-                    ps.setNull(8, Types.INTEGER);
-                }
+                ps.setString(7, s.getStaffRole());
 
-                // staff_status default
+                // Default staff_status is 'ACTIVE' if not provided
                 String status = s.getStaffStatus();
                 if (status == null || status.isBlank()) status = "ACTIVE";
-                ps.setString(9, status);
+                ps.setString(8, status);
+
+                // manager_id (nullable)
+                Long mid = s.getManagerID();
+                if (mid != null && mid > 0) {
+                    ps.setLong(9, mid);
+                } else {
+                    ps.setNull(9, Types.BIGINT);
+                }
 
                 int affected = ps.executeUpdate();
                 conn.commit();
@@ -73,11 +76,12 @@ public class StaffDAO {
         }
     }
 
+    // Login check
     public Staff login(String email, String password) throws SQLException {
         String sql =
-                "SELECT staff_id, staff_name, staff_email, staff_role, staff_status, manager_id " +
+                "SELECT staffid, staffname, staffemail, staffrole, staffstatus, managerid " +
                 "FROM staff " +
-                "WHERE LOWER(TRIM(staff_email)) = ? AND password = ? AND staff_status = 'ACTIVE'";
+                "WHERE LOWER(TRIM(staffemail)) = ? AND password = ? AND staffstatus = 'ACTIVE'";
 
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -88,14 +92,14 @@ public class StaffDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Staff s = new Staff();
-                    s.setStaffID(rs.getInt("staff_id"));
-                    s.setStaffName(rs.getString("staff_name"));
-                    s.setStaffEmail(rs.getString("staff_email"));
-                    s.setStaffRole(rs.getString("staff_role"));
-                    s.setStaffStatus(rs.getString("staff_status"));
+                    s.setStaffID(rs.getLong("staffid"));  // staffid is BIGINT
+                    s.setStaffName(rs.getString("staffname"));
+                    s.setStaffEmail(rs.getString("staffemail"));
+                    s.setStaffRole(rs.getString("staffrole"));
+                    s.setStaffStatus(rs.getString("staffstatus"));
 
-                    int mid = rs.getInt("manager_id");
-                    if (!rs.wasNull()) s.setManagerID(mid);
+                    Long mid = rs.getLong("managerid");
+                    if (!rs.wasNull()) s.setManagerID(mid);  // managerid is BIGINT
 
                     return s;
                 }
@@ -104,17 +108,18 @@ public class StaffDAO {
         return null;
     }
 
-    public byte[] getStaffPictureById(int staffID) throws SQLException {
-        String sql = "SELECT staff_picture FROM staff WHERE staff_id = ?";
+    // Get staff picture by ID
+    public byte[] getStaffPictureById(long staffID) throws SQLException {
+        String sql = "SELECT staffpicture FROM staff WHERE staffid = ?";
 
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, staffID);
+            ps.setLong(1, staffID);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getBytes("staff_picture");
+                    return rs.getBytes("staffpicture");  // staffpicture is BYTEA in Postgres
                 }
             }
         }
