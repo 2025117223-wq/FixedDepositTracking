@@ -17,9 +17,9 @@ import java.sql.SQLException;
 
 @WebServlet("/SignUpServlet")
 @MultipartConfig(
-        fileSizeThreshold = 1024 * 1024,
-        maxFileSize = 5 * 1024 * 1024,
-        maxRequestSize = 10 * 1024 * 1024
+        fileSizeThreshold = 1024 * 1024,  // 1MB
+        maxFileSize = 5 * 1024 * 1024,    // 5MB
+        maxRequestSize = 10 * 1024 * 1024 // 10MB
 )
 public class SignUpServlet extends HttpServlet {
 
@@ -115,6 +115,7 @@ public class SignUpServlet extends HttpServlet {
             boolean ok = dao.insertStaff(staff);
 
             if (ok) {
+                // Redirect to login page with success parameter
                 response.sendRedirect("Login.jsp?signup=success");
             } else {
                 request.setAttribute("error", "Sign up failed.");
