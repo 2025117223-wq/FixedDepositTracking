@@ -1,6 +1,6 @@
 package DAO;
 
-import Utill.DBConn;
+import Util.DBConn;
 import Bean.Bank;
 import java.sql.*;
 import java.util.ArrayList;
