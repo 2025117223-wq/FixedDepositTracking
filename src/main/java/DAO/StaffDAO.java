@@ -1,7 +1,7 @@
 package DAO;
 
 import Bean.Staff;
-import Utill.DBConn;
+import Util.DBConn;
 
 import java.io.InputStream;
 import java.sql.*;
