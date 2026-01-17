@@ -39,7 +39,7 @@
         <div class="form-card">
             <h2>Update Bank Details</h2>
 
-            <form action="BankController" method="post">
+            <form action="BankController" method="post" onsubmit="return confirm('Update bank details?')">
                 <input type="hidden" name="action" value="update">
                 
                 <div class="form-group">

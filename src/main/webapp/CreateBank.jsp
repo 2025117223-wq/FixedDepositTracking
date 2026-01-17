@@ -58,7 +58,7 @@
             <h2>Create New Bank</h2>
 
             <!-- ✅ CONNECTED TO BankController -->
-            <form action="BankController" method="post">
+            <form action="BankController" method="post" onsubmit="return confirm('Register this bank?')">
                 <input type="hidden" name="action" value="add">
 
                 <div class="form-group">
