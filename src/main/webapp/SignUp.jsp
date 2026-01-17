@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.*" %>
 <%@ page import="java.util.*" %>
+<%@ page import="Utill.DBConn" %>
 
 <%
     List<Map<String, String>> managers = new ArrayList<>();
@@ -9,25 +10,25 @@
     ResultSet rs = null;
 
     try {
-        conn = Util.DBConn.getConnection();
+        conn = DBConn.getConnection();
 
         String sqlManagers =
-            "SELECT staffID, staffName " +
-            "FROM Staff " +
-            "WHERE staffStatus = 'ACTIVE' " +
-            "AND staffRole = 'Administration' " +
-            "ORDER BY staffName";
+            "SELECT staffid, staffname " +
+            "FROM staff " +
+            "WHERE staffstatus = 'ACTIVE' " +
+            "AND staffrole = 'Administration' " +
+            "ORDER BY staffname";
 
         // Option B: show all active staff as managers (uncomment if you want)
-        // String sqlManagers = "SELECT staffID, staffName FROM Staff WHERE staffStatus = 'ACTIVE' ORDER BY staffName";
+        // String sqlManagers = "SELECT staffid, staffname FROM staff WHERE staffstatus = 'ACTIVE' ORDER BY staffname";
 
         ps = conn.prepareStatement(sqlManagers);
         rs = ps.executeQuery();
 
         while (rs.next()) {
             Map<String, String> m = new HashMap<>();
-            m.put("id", rs.getString("staffID"));
-            m.put("name", rs.getString("staffName"));
+            m.put("id", rs.getString("staffid"));
+            m.put("name", rs.getString("staffname"));
             managers.add(m);
         }
     } catch (Exception e) {
@@ -84,144 +85,129 @@
 
             <form id="signupForm" action="SignUpServlet" method="POST" enctype="multipart/form-data">
 
-        <!-- =========================
-            Full Name (Full Width)
-        ========================== -->
-        <div class="form-row fullwidth">
-            <div class="form-group">
-                <div class="input-wrapper">
-                    <img src="images/icons/user.jpg" alt="User" class="input-icon">
-                    <input type="text" id="fullName" name="fullName" placeholder="Full Name" required>
+                <!-- =========================
+                    Full Name (Full Width)
+                ========================== -->
+                <div class="form-row fullwidth">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <img src="images/icons/user.jpg" alt="User" class="input-icon">
+                            <input type="text" id="fullName" name="fullName" placeholder="Full Name" required>
+                        </div>
+                        <div class="error-message" id="fullNameError">Please enter your full name</div>
+                    </div>
                 </div>
-                <div class="error-message" id="fullNameError">Please enter your full name</div>
-            </div>
-        </div>
 
-        <!-- =========================
-            Row 1: Phone | Email
-        ========================== -->
-        <div class="form-row">
-            <div class="form-group">
-                <div class="input-wrapper">
-                    <img src="images/icons/phone.png" alt="Phone" class="phone-icon">
-                    <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" required pattern="[0-9]+">
+                <!-- =========================
+                    Row 1: Phone | Email
+                ========================== -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <img src="images/icons/phone.png" alt="Phone" class="phone-icon">
+                            <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Phone Number" required pattern="[0-9]+">
+                        </div>
+                        <div class="error-message" id="phoneError">Please enter a valid phone number (numbers only)</div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <img src="images/icons/email.png" alt="Email" class="input-icon">
+                            <input type="email" id="email" name="email" placeholder="Email Address" required>
+                        </div>
+                        <div class="error-message" id="emailError">Please enter a valid email address</div>
+                    </div>
                 </div>
-                <div class="error-message" id="phoneError">Please enter a valid phone number (numbers only)</div>
-            </div>
 
-            <div class="form-group">
-                <div class="input-wrapper">
-                    <img src="images/icons/email.png" alt="Email" class="input-icon">
-                    <input type="email" id="email" name="email" placeholder="Email Address" required>
+                <!-- =========================
+                    Row 2: Address | Profile Picture
+                ========================== -->
+                <div class="form-row">
+                    <div class="form-group fullwidth">
+                        <div class="input-wrapper">
+                            <img src="images/icons/haddress.png" alt="Home" class="address-icon">
+                            <input type="text" id="homeAddress" name="homeAddress" placeholder="Home Address" required>
+                        </div>
+                        <div class="error-message" id="addressError">Please enter your home address</div>
+                    </div>
+
+                    <div class="form-group profile-upload">
+                        <label for="profilePicture" class="profile-upload-wrapper">
+                            <img src="images/icons/file.png" alt="Upload" class="profile-icon">
+                            <div class="profile-upload-input" id="uploadLabel">Upload Profile Picture</div>
+                        </label>
+
+                        <div class="file-format">JPEG, PNG</div>
+                        <input type="file" id="profilePicture" name="profilePicture" accept=".jpg,.jpeg,.png" required>
+                        <div class="error-message" id="fileError">Please select a profile picture</div>
+                    </div>
                 </div>
-                <div class="error-message" id="emailError">Please enter a valid email address</div>
-            </div>
-        </div>
 
-        <!-- =========================
-            Row 2: Address | Profile Picture
-        ========================== -->
-        <div class="form-row">
-            <div class="form-group fullwidth">
-                <div class="input-wrapper">
-                    <img src="images/icons/haddress.png" alt="Home" class="address-icon">
-                    <input type="text" id="homeAddress" name="homeAddress" placeholder="Home Address" required>
+                <!-- =========================
+                    Row 3: Role | Manager
+                ========================== -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="input-wrapper select-wrapper">
+                            <img src="images/icons/role.png" alt="Role" class="role-icon">
+                            <select id="staffRole" name="staffRole" required>
+                                <option value="" disabled selected>Select Role</option>
+                                <option value="Administration">Administration</option>
+                                <option value="Finance Executive">Finance Executive</option>
+                                <option value="Finance Staff">Finance Staff</option>
+                            </select>
+                        </div>
+                        <div class="error-message" id="roleError">Please select a role</div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-wrapper select-wrapper">
+                            <img src="images/icons/role.png" alt="Manager" class="role-icon">
+                            <select id="managerID" name="managerID" required>
+                                <option value="" disabled selected>Select Manager</option>
+                                <% if (managers != null && !managers.isEmpty()) { %>
+                                    <% for (Map<String, String> m : managers) { %>
+                                        <option value="<%= m.get("id") %>"><%= m.get("name") %></option>
+                                    <% } %>
+                                <% } else { %>
+                                    <option value="" disabled>No manager found</option>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="error-message" id="managerError">Please select a manager</div>
+                    </div>
                 </div>
-                <div class="error-message" id="addressError">Please enter your home address</div>
-            </div>
 
-            <div class="form-group profile-upload">
-                <label for="profilePicture" class="profile-upload-wrapper">
-                    <img src="images/icons/file.png" alt="Upload" class="profile-icon">
-                    <div class="profile-upload-input" id="uploadLabel">Upload Profile Picture</div>
-                </label>
+                <!-- =========================
+                    Row 4: Password | Re-confirm Password
+                ========================== -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="input-wrapper" style="position: relative;">
+                            <img src="images/icons/password.png" alt="Password" class="password-icon">
+                            <input type="password" id="password" name="password" placeholder="Password" required minlength="8">
 
-                <div class="file-format">JPEG, PNG</div>
-                <input type="file" id="profilePicture" name="profilePicture" accept=".jpg,.jpeg,.png" required>
-                <div class="error-message" id="fileError">Please select a profile picture</div>
-            </div>
-        </div>
+                            <button type="button" id="togglePassword"
+                                    style="position:absolute; right:25px; background:none; border:none; cursor:pointer; z-index:2;">
+                                <img id="passwordIcon" src="images/icons/showpass.png" alt="Show Password" style="width:25px; height:25px;">
+                            </button>
+                        </div>
+                        <div class="error-message" id="passwordError">Password must be at least 8 characters</div>
+                    </div>
 
-        <!-- =========================
-            Row 3: Role | Manager
-        ========================== -->
-        <div class="form-row">
-            <div class="form-group">
-                <div class="input-wrapper select-wrapper">
-                    <img src="images/icons/role.png" alt="Role" class="role-icon">
-                    <select id="staffRole" name="staffRole" required>
-                        <option value="" disabled selected>Select Role</option>
-                        <option value="Administration">Administration</option>
-                        <option value="Finance Executive">Finance Executive</option>
-                        <option value="Finance Staff">Finance Staff</option>
-                    </select>
+                    <div class="form-group">
+                        <div class="input-wrapper" style="position: relative;">
+                            <img src="images/icons/password.png" alt="Confirm Password" class="password-icon">
+                            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-confirm Password" required minlength="8">
+
+                            <button type="button" id="toggleConfirmPassword"
+                                    style="position:absolute; right:25px; background:none; border:none; cursor:pointer; z-index:2;">
+                                <img id="confirmPasswordIcon" src="images/icons/showpass.png" alt="Show Password" style="width:25px; height:25px;">
+                            </button>
+                        </div>
+                        <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
+                    </div>
                 </div>
-                <div class="error-message" id="roleError">Please select a role</div>
-            </div>
-
-            <div class="form-group">
-                <div class="input-wrapper select-wrapper">
-                    <img src="images/icons/role.png" alt="Manager" class="role-icon">
-                    <select id="managerID" name="managerID" required>
-                        <option value="" disabled selected>Select Manager</option>
-                        <% if (managers != null && !managers.isEmpty()) { %>
-                            <% for (Map<String, String> m : managers) { %>
-                                <option value="<%= m.get("id") %>"><%= m.get("name") %></option>
-                            <% } %>
-                        <% } else { %>
-                            <option value="" disabled>No manager found</option>
-                        <% } %>
-                    </select>
-                </div>
-                <div class="error-message" id="managerError">Please select a manager</div>
-            </div>
-        </div>
-
-        <!-- =========================
-            Row 4: Password | Re-confirm Password
-        ========================== -->
-        <div class="form-row">
-            <div class="form-group">
-                <div class="input-wrapper" style="position: relative;">
-                    <img src="images/icons/password.png" alt="Password" class="password-icon">
-                    <input type="password" id="password" name="password" placeholder="Password" required minlength="8">
-
-                    <button type="button" id="togglePassword"
-                            style="position:absolute; right:25px; background:none; border:none; cursor:pointer; z-index:2;">
-                        <img id="passwordIcon" src="images/icons/showpass.png" alt="Show Password" style="width:25px; height:25px;">
-                    </button>
-                </div>
-                <div class="error-message" id="passwordError">Password must be at least 8 characters</div>
-            </div>
-
-            <div class="form-group">
-                <div class="input-wrapper" style="position: relative;">
-                    <img src="images/icons/password.png" alt="Confirm Password" class="password-icon">
-                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-confirm Password" required minlength="8">
-
-                    <button type="button" id="toggleConfirmPassword"
-                            style="position:absolute; right:25px; background:none; border:none; cursor:pointer; z-index:2;">
-                        <img id="confirmPasswordIcon" src="images/icons/showpass.png" alt="Show Password" style="width:25px; height:25px;">
-                    </button>
-                </div>
-                <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
-            </div>
-        </div>
-
-            <div class="form-group">
-                <div class="input-wrapper" style="position: relative;">
-                    <img src="images/icons/password.png" alt="Confirm Password" class="password-icon">
-                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-confirm Password" required minlength="8">
-
-                    <button type="button" id="toggleConfirmPassword"
-                            style="position:absolute; right:25px; background:none; border:none; cursor:pointer; z-index:2;">
-                        <img id="confirmPasswordIcon" src="images/icons/showpass.png" alt="Show Password" style="width:25px; height:25px;">
-                    </button>
-                </div>
-                <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
-            </div>
-        </div>
-
 
                 <button type="submit" class="submit-btn">Sign Up</button>
 
