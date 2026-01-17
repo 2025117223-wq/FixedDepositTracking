@@ -136,8 +136,7 @@ public class StaffDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getBytes("staff_picture");
-                }
+                    return rs.getBytes("staff_picture");                }
             }
         }
         return null;
