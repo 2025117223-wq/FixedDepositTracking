@@ -2,7 +2,7 @@ package Bean;
 
 public class Staff {
 
-    private int staffID;
+    private Long staffID;        // Changed to Long
     private String staffName;
     private String staffPhone;
     private String staffAddress;
@@ -11,15 +11,15 @@ public class Staff {
     private String password;
     private byte[] staffPicture;  
     private String staffStatus;
-    private Integer managerID;
+    private Long managerID;      // Changed to Long
 
     public Staff() {}
 
-    public int getStaffID() {
-        return staffID;
+    public Long getStaffID() {
+        return staffID;  // Changed to return Long
     }
 
-    public void setStaffID(int staffID) {
+    public void setStaffID(Long staffID) {  // Changed to accept Long
         this.staffID = staffID;
     }
 
@@ -86,11 +86,12 @@ public class Staff {
     public void setStaffStatus(String staffStatus) {
         this.staffStatus = staffStatus;
     }
-    public Integer getManagerID() {
+
+    public Long getManagerID() {   // Changed to return Long
         return managerID;
     }
 
-    public void setManagerID(Integer managerID) {
+    public void setManagerID(Long managerID) {  // Changed to accept Long
         this.managerID = managerID;
     }
 }
