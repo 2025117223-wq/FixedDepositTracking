@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.SQLException;
 
 @WebServlet("/SignUpServlet")
@@ -36,7 +35,7 @@ public class SignUpServlet extends HttpServlet {
         String confirmPassword = request.getParameter("confirmPassword");
         String homeAddress = request.getParameter("homeAddress");
         String staffRole = request.getParameter("staffRole");
-        String managerIDStr = request.getParameter("managerID"); // NEW
+        String managerIDStr = request.getParameter("managerID");
 
         Part profilePart = request.getPart("profilePicture");
 
@@ -95,15 +94,17 @@ public class SignUpServlet extends HttpServlet {
         staff.setStaffAddress(homeAddress.trim());
         staff.setStaffEmail(email.trim().toLowerCase());
         staff.setStaffRole(staffRole.trim());
-        staff.setManagerID(managerID);              // NEW
-        staff.setStaffStatus("ACTIVE");             // optional default
+        staff.setManagerID(managerID);
+        staff.setStaffStatus("ACTIVE");
         staff.setPassword(PasswordUtil.processPassword(password.trim()));
+
+        // Convert uploaded image InputStream -> byte[] (because Staff.staffPicture is byte[])
+        byte[] pictureBytes = profilePart.getInputStream().readAllBytes();
+        staff.setStaffPicture(pictureBytes);
 
         StaffDAO dao = new StaffDAO();
 
-        try (InputStream pictureStream = profilePart.getInputStream()) {
-            staff.setStaffPicture(pictureStream);
-
+        try {
             // ===== Duplicate email check =====
             if (dao.isEmailExists(staff.getStaffEmail())) {
                 request.setAttribute("error", "Email already registered.");
