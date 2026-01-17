@@ -2,24 +2,24 @@ package Bean;
 
 public class Staff {
 
-    private Integer staffID;        // Use Integer
+    private Integer staffID;
     private String staffName;
     private String staffPhone;
     private String staffAddress;
     private String staffEmail;
     private String staffRole;
     private String password;
-    private byte[] staffPicture;  
+    private byte[] staffPicture;
     private String staffStatus;
-    private Integer managerID;      // Use Integer
+    private Integer managerID;
 
     public Staff() {}
 
     public Integer getStaffID() {
-        return staffID;  // Return Integer
+        return staffID;
     }
 
-    public void setStaffID(Integer staffID) {  // Set Integer
+    public void setStaffID(Integer staffID) {
         this.staffID = staffID;
     }
 
@@ -87,11 +87,11 @@ public class Staff {
         this.staffStatus = staffStatus;
     }
 
-    public Integer getManagerID() {   // Use Integer
+    public Integer getManagerID() {
         return managerID;
     }
 
-    public void setManagerID(Integer managerID) {  // Use Integer
+    public void setManagerID(Integer managerID) {
         this.managerID = managerID;
     }
 }

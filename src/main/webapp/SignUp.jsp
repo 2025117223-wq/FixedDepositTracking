@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.*" %>
 <%@ page import="java.util.*" %>
-<%@ page import="Util.DBConn" %>
+<%@ page import="Utill.DBConn" %>
 
 <%
     List<Map<String, String>> managers = new ArrayList<>();
@@ -19,9 +19,6 @@
             "AND staffrole = 'Administration' " +
             "ORDER BY staffname";
 
-        // Option B: show all active staff as managers (uncomment if you want)
-        // String sqlManagers = "SELECT staffid, staffname FROM staff WHERE staffstatus = 'ACTIVE' ORDER BY staffname";
-
         ps = conn.prepareStatement(sqlManagers);
         rs = ps.executeQuery();
 
@@ -32,7 +29,6 @@
             managers.add(m);
         }
     } catch (Exception e) {
-        // Optional debug:
         // out.println("Error loading managers: " + e.getMessage());
     } finally {
         try { if (rs != null) rs.close(); } catch (Exception ex) {}
@@ -85,9 +81,7 @@
 
             <form id="signupForm" action="SignUpServlet" method="POST" enctype="multipart/form-data">
 
-                <!-- =========================
-                    Full Name (Full Width)
-                ========================== -->
+                <!-- Full Name -->
                 <div class="form-row fullwidth">
                     <div class="form-group">
                         <div class="input-wrapper">
@@ -98,9 +92,7 @@
                     </div>
                 </div>
 
-                <!-- =========================
-                    Row 1: Phone | Email
-                ========================== -->
+                <!-- Phone | Email -->
                 <div class="form-row">
                     <div class="form-group">
                         <div class="input-wrapper">
@@ -119,9 +111,7 @@
                     </div>
                 </div>
 
-                <!-- =========================
-                    Row 2: Address | Profile Picture
-                ========================== -->
+                <!-- Address | Picture -->
                 <div class="form-row">
                     <div class="form-group fullwidth">
                         <div class="input-wrapper">
@@ -143,9 +133,7 @@
                     </div>
                 </div>
 
-                <!-- =========================
-                    Row 3: Role | Manager
-                ========================== -->
+                <!-- Role | Manager (Manager OPTIONAL) -->
                 <div class="form-row">
                     <div class="form-group">
                         <div class="input-wrapper select-wrapper">
@@ -163,24 +151,24 @@
                     <div class="form-group">
                         <div class="input-wrapper select-wrapper">
                             <img src="images/icons/role.png" alt="Manager" class="role-icon">
-                            <select id="managerID" name="managerID" required>
-                                <option value="" disabled selected>Select Manager</option>
+                            <!-- ✅ removed "required" -->
+                            <select id="managerID" name="managerID">
+                                <!-- ✅ allow null -->
+                                <option value="" selected>No Manager</option>
+
                                 <% if (managers != null && !managers.isEmpty()) { %>
                                     <% for (Map<String, String> m : managers) { %>
                                         <option value="<%= m.get("id") %>"><%= m.get("name") %></option>
                                     <% } %>
-                                <% } else { %>
-                                    <option value="" disabled>No manager found</option>
                                 <% } %>
                             </select>
                         </div>
+                        <!-- ✅ manager error boleh buang atau biar (tapi takkan dipakai) -->
                         <div class="error-message" id="managerError">Please select a manager</div>
                     </div>
                 </div>
 
-                <!-- =========================
-                    Row 4: Password | Re-confirm Password
-                ========================== -->
+                <!-- Password | Confirm -->
                 <div class="form-row">
                     <div class="form-group">
                         <div class="input-wrapper" style="position: relative;">
@@ -232,7 +220,6 @@
 </div>
 
 <script>
-    // Form elements
     const form = document.getElementById('signupForm');
     const fullName = document.getElementById('fullName');
     const phoneNumber = document.getElementById('phoneNumber');
@@ -240,22 +227,19 @@
     const homeAddress = document.getElementById('homeAddress');
     const profilePicture = document.getElementById('profilePicture');
     const staffRole = document.getElementById('staffRole');
-    const managerID = document.getElementById('managerID');
+    const managerID = document.getElementById('managerID'); // still exists but optional
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('confirmPassword');
 
-    // Toggle password elements
     const togglePasswordButton = document.getElementById("togglePassword");
     const passwordIcon = document.getElementById("passwordIcon");
     const toggleConfirmPasswordButton = document.getElementById("toggleConfirmPassword");
     const confirmPasswordIcon = document.getElementById("confirmPasswordIcon");
 
-    // Phone number validation - only numbers
     phoneNumber.addEventListener('input', function () {
         this.value = this.value.replace(/[^0-9]/g, '');
     });
 
-    // ===== Toggle Password =====
     togglePasswordButton.addEventListener("click", () => {
         if (password.type === "password") {
             password.type = "text";
@@ -266,7 +250,6 @@
         }
     });
 
-    // ===== Toggle Confirm Password =====
     toggleConfirmPasswordButton.addEventListener("click", () => {
         if (confirmPassword.type === "password") {
             confirmPassword.type = "text";
@@ -277,7 +260,6 @@
         }
     });
 
-    // File upload label + validation
     profilePicture.addEventListener('change', function (e) {
         const file = e.target.files[0];
         const uploadLabel = document.getElementById('uploadLabel');
@@ -295,7 +277,7 @@
                 return;
             }
 
-            if (file.size > 5 * 1024 * 1024) { // 5MB
+            if (file.size > 5 * 1024 * 1024) {
                 fileError.textContent = 'File size must be less than 5MB';
                 fileError.classList.add('show');
                 this.value = '';
@@ -317,65 +299,51 @@
         errorEl.classList.add('show');
     }
 
-    // Form submit validation + modal
     form.addEventListener('submit', function (e) {
         e.preventDefault();
         let isValid = true;
 
-        // Reset errors (except server error)
         document.querySelectorAll('.error-message:not(.server-error)').forEach(el => el.classList.remove('show'));
         document.querySelectorAll('input, select').forEach(el => el.classList.remove('error'));
 
-        // Full Name
         if (fullName.value.trim() === '') {
             showError('fullName', 'fullNameError', 'Please enter your full name');
             isValid = false;
         }
 
-        // Phone
         if (phoneNumber.value.trim() === '' || !/^[0-9]+$/.test(phoneNumber.value)) {
             showError('phoneNumber', 'phoneError', 'Please enter a valid phone number (numbers only)');
             isValid = false;
         }
 
-        // Email
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailPattern.test(email.value)) {
             showError('email', 'emailError', 'Please enter a valid email address');
             isValid = false;
         }
 
-        // Address
         if (homeAddress.value.trim() === '') {
             showError('homeAddress', 'addressError', 'Please enter your home address');
             isValid = false;
         }
 
-        // Profile picture
         if (!profilePicture.files || profilePicture.files.length === 0) {
             document.getElementById('fileError').classList.add('show');
             isValid = false;
         }
 
-        // Role
         if (staffRole.value === '') {
             showError('staffRole', 'roleError', 'Please select a role');
             isValid = false;
         }
 
-        // Manager
-        if (managerID.value === '') {
-            showError('managerID', 'managerError', 'Please select a manager');
-            isValid = false;
-        }
+        // ✅ Manager validation removed (manager optional)
 
-        // Password
         if (password.value.length < 8) {
             showError('password', 'passwordError', 'Password must be at least 8 characters');
             isValid = false;
         }
 
-        // Confirm password
         if (confirmPassword.value.length < 8) {
             showError('confirmPassword', 'confirmPasswordError', 'Password must be at least 8 characters');
             isValid = false;
@@ -389,7 +357,6 @@
         }
     });
 
-    // Modal buttons
     document.getElementById('modalNo').addEventListener('click', function () {
         document.getElementById('confirmModal').classList.remove('show');
     });
@@ -399,7 +366,6 @@
         form.submit();
     });
 
-    // Close modal when clicking outside
     document.getElementById('confirmModal').addEventListener('click', function (e) {
         if (e.target === this) {
             this.classList.remove('show');

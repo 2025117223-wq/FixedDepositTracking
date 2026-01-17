@@ -35,15 +35,16 @@ public class SignUpServlet extends HttpServlet {
         String confirmPassword = request.getParameter("confirmPassword");
         String homeAddress = request.getParameter("homeAddress");
         String staffRole = request.getParameter("staffRole");
+
+        // ✅ manager now optional
         String managerIDStr = request.getParameter("managerID");
 
         Part profilePart = request.getPart("profilePicture");
 
-        // ===== Basic required validation =====
+        // ===== Basic required validation (manager removed) =====
         if (isBlank(fullName) || isBlank(phoneNumber) || isBlank(email)
                 || isBlank(password) || isBlank(confirmPassword)
                 || isBlank(homeAddress) || isBlank(staffRole)
-                || isBlank(managerIDStr)
                 || profilePart == null || profilePart.getSize() == 0) {
 
             request.setAttribute("error", "Please fill in all required fields.");
@@ -64,15 +65,17 @@ public class SignUpServlet extends HttpServlet {
             return;
         }
 
-        // ===== ManagerID parse =====
-        Integer managerID;
-        try {
-            managerID = Integer.valueOf(managerIDStr);
-            if (managerID <= 0) throw new NumberFormatException();
-        } catch (NumberFormatException ex) {
-            request.setAttribute("error", "Invalid manager selected.");
-            request.getRequestDispatcher("SignUp.jsp").forward(request, response);
-            return;
+        // ===== ManagerID parse (optional) =====
+        Integer managerID = null;
+        if (!isBlank(managerIDStr)) {
+            try {
+                managerID = Integer.valueOf(managerIDStr);
+                if (managerID <= 0) throw new NumberFormatException();
+            } catch (NumberFormatException ex) {
+                request.setAttribute("error", "Invalid manager selected.");
+                request.getRequestDispatcher("SignUp.jsp").forward(request, response);
+                return;
+            }
         }
 
         // ===== Profile picture validation =====
@@ -94,7 +97,10 @@ public class SignUpServlet extends HttpServlet {
         staff.setStaffAddress(homeAddress.trim());
         staff.setStaffEmail(email.trim().toLowerCase());
         staff.setStaffRole(staffRole.trim());
+
+        // ✅ allow null manager
         staff.setManagerID(managerID);
+
         staff.setStaffStatus("ACTIVE");
         staff.setPassword(PasswordUtil.processPassword(password.trim()));
 
@@ -115,7 +121,6 @@ public class SignUpServlet extends HttpServlet {
             boolean ok = dao.insertStaff(staff);
 
             if (ok) {
-                // Redirect to login page with success parameter
                 response.sendRedirect("Login.jsp?signup=success");
             } else {
                 request.setAttribute("error", "Sign up failed.");
