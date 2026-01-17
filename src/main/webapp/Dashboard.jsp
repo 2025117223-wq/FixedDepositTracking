@@ -2,8 +2,60 @@
 <%@ page import="Bean.Staff" %>
 <%@ page import="java.sql.*" %>
 <%@ page import="java.util.*" %>
+<<<<<<< HEAD
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="Util.DBConn" %>
+=======
+<%@ page import="java.util.Arrays" %>
+<%@ page import="java.text.DecimalFormat" %>
+<%@ page import="Utill.DBConn" %>
+
+<%!
+    // Escape untuk JS string
+    private String jsEscape(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "");
+    }
+
+    // HSL -> HEX (warna dynamic ikut index)
+    private String hslToHex(float h, float s, float l) {
+        // h: 0..360, s & l: 0..1
+        float c = (1 - Math.abs(2*l - 1)) * s;
+        float hp = h / 60f;
+        float x = c * (1 - Math.abs((hp % 2) - 1));
+
+        float r1=0, g1=0, b1=0;
+        if (0 <= hp && hp < 1) { r1=c; g1=x; b1=0; }
+        else if (1 <= hp && hp < 2) { r1=x; g1=c; b1=0; }
+        else if (2 <= hp && hp < 3) { r1=0; g1=c; b1=x; }
+        else if (3 <= hp && hp < 4) { r1=0; g1=x; b1=c; }
+        else if (4 <= hp && hp < 5) { r1=x; g1=0; b1=c; }
+        else if (5 <= hp && hp < 6) { r1=c; g1=0; b1=x; }
+
+        float m = l - c/2f;
+        int r = Math.round((r1 + m) * 255);
+        int g = Math.round((g1 + m) * 255);
+        int b = Math.round((b1 + m) * 255);
+
+        r = Math.max(0, Math.min(255, r));
+        g = Math.max(0, Math.min(255, g));
+        b = Math.max(0, Math.min(255, b));
+
+        return String.format("#%02x%02x%02x", r, g, b);
+    }
+
+    // Bagi warna ikut index bank (dynamic, tak static)
+    private String bankColor(int idx, int total) {
+        // Hue spread ikut bilangan bank supaya tak clash sangat
+        float hue = (total <= 0) ? (idx * 45f) : (idx * (360f / total));
+        float sat = 0.65f;
+        float light = 0.45f;
+        return hslToHex(hue % 360f, sat, light);
+    }
+
+    private double nz(Double d) { return (d == null ? 0.0 : d.doubleValue()); }
+%>
+>>>>>>> d50825d (initial commit)
 
 <%
     // =========================
@@ -40,6 +92,7 @@
     // Dropdown banks
     List<String> bankList = new ArrayList<>();
 
+<<<<<<< HEAD
     // Chart data: bank -> 12 months (NULL for months without data)
     Map<String, Double[]> bankMonthTotals = new LinkedHashMap<>();
 
@@ -67,6 +120,56 @@
         "ORDER BY b.bankname, mth";
 
     // Stats cards
+=======
+    // Chart data: bank -> Top3 (index 0..2)
+    Map<String, Double[]> bankTop3 = new LinkedHashMap<>();
+
+    String sqlBankList = "SELECT bankname FROM bank ORDER BY bankname";
+
+    // =========================
+    // PROFIT EXPRESSION (tukar ikut schema awak)
+    // =========================
+    // Contoh lain:
+    // String PROFIT_EXPR = "COALESCE(f.profitamount,0)";
+    // String PROFIT_EXPR = "COALESCE(f.interestamount,0)";
+    String PROFIT_EXPR = "COALESCE((f.maturityamount - f.depositamount),0)";
+
+    // =========================
+    // TOP 3 PROFIT PER BANK (PostgreSQL window function)
+    // =========================
+    String sqlTop3All =
+        "WITH ranked AS ( " +
+        "  SELECT b.bankname, " +
+        "         " + PROFIT_EXPR + " AS profit, " +
+        "         ROW_NUMBER() OVER (PARTITION BY b.bankname ORDER BY " + PROFIT_EXPR + " DESC) AS rn " +
+        "  FROM bank b " +
+        "  JOIN fixeddepositrecord f ON f.bankid = b.bankid " +
+        "  WHERE EXTRACT(YEAR FROM f.startdate) = ? " +
+        ") " +
+        "SELECT bankname, rn, profit " +
+        "FROM ranked " +
+        "WHERE rn <= 3 " +
+        "ORDER BY bankname, rn";
+
+    String sqlTop3One =
+        "WITH ranked AS ( " +
+        "  SELECT b.bankname, " +
+        "         " + PROFIT_EXPR + " AS profit, " +
+        "         ROW_NUMBER() OVER (PARTITION BY b.bankname ORDER BY " + PROFIT_EXPR + " DESC) AS rn " +
+        "  FROM bank b " +
+        "  JOIN fixeddepositrecord f ON f.bankid = b.bankid " +
+        "  WHERE EXTRACT(YEAR FROM f.startdate) = ? " +
+        "    AND b.bankname = ? " +
+        ") " +
+        "SELECT bankname, rn, profit " +
+        "FROM ranked " +
+        "WHERE rn <= 3 " +
+        "ORDER BY bankname, rn";
+
+    // =========================
+    // Stats cards (PostgreSQL)
+    // =========================
+>>>>>>> d50825d (initial commit)
     double thisMonthTotal = 0.0, lastMonthTotal = 0.0, lastYearTotal = 0.0;
     int totalStaff = 0;
 
@@ -76,17 +179,29 @@
     if (lastMonth == 0) { lastMonth = 12; lastMonthYear = currentYear - 1; }
 
     String sqlThisMonth =
+<<<<<<< HEAD
         "SELECT COALESCE(SUM(depositamount * tenure * interestrt),0) AS total " +
+=======
+        "SELECT COALESCE(SUM(depositamount),0) AS total " +
+>>>>>>> d50825d (initial commit)
         "FROM fixeddepositrecord " +
         "WHERE EXTRACT(YEAR FROM startdate)=? AND EXTRACT(MONTH FROM startdate)=?";
 
     String sqlLastMonth =
+<<<<<<< HEAD
         "SELECT COALESCE(SUM(depositamount * tenure * interestrt),0) AS total " +
+=======
+        "SELECT COALESCE(SUM(depositamount),0) AS total " +
+>>>>>>> d50825d (initial commit)
         "FROM fixeddepositrecord " +
         "WHERE EXTRACT(YEAR FROM startdate)=? AND EXTRACT(MONTH FROM startdate)=?";
 
     String sqlLastYear =
+<<<<<<< HEAD
         "SELECT COALESCE(SUM(depositamount * tenure * interestrt),0) AS total " +
+=======
+        "SELECT COALESCE(SUM(depositamount),0) AS total " +
+>>>>>>> d50825d (initial commit)
         "FROM fixeddepositrecord " +
         "WHERE EXTRACT(YEAR FROM startdate)=?";
 
@@ -95,12 +210,17 @@
 
     try (Connection con = DBConn.getConnection()) {
 
+<<<<<<< HEAD
         // --- Bank dropdown list ---  
+=======
+        // --- Bank dropdown list ---
+>>>>>>> d50825d (initial commit)
         try (PreparedStatement ps = con.prepareStatement(sqlBankList);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) bankList.add(rs.getString("bankname"));
         }
 
+<<<<<<< HEAD
         // --- Chart data ---
         if ("ALL".equalsIgnoreCase(selectedBank)) {
             try (PreparedStatement ps = con.prepareStatement(sqlChartAll)) {
@@ -139,6 +259,28 @@
                         }
                         if (mth >= 1 && mth <= 12) arr[mth - 1] = profit;
                     }
+=======
+        // --- Top 3 profit data ---
+        String sqlToUse = "ALL".equalsIgnoreCase(selectedBank) ? sqlTop3All : sqlTop3One;
+
+        try (PreparedStatement ps = con.prepareStatement(sqlToUse)) {
+            ps.setInt(1, selectedYear);
+            if (!"ALL".equalsIgnoreCase(selectedBank)) ps.setString(2, selectedBank);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String bankName = rs.getString("bankname");
+                    int rn = rs.getInt("rn"); // 1..3
+                    double profit = rs.getDouble("profit");
+
+                    Double[] arr = bankTop3.get(bankName);
+                    if (arr == null) {
+                        arr = new Double[3];
+                        Arrays.fill(arr, null);
+                        bankTop3.put(bankName, arr);
+                    }
+                    if (rn >= 1 && rn <= 3) arr[rn - 1] = profit;
+>>>>>>> d50825d (initial commit)
                 }
             }
         }
@@ -180,6 +322,7 @@
     }
 
     // =========================
+<<<<<<< HEAD
     // Check if we have any chart data
     // =========================
     boolean hasChartData = false;
@@ -187,10 +330,37 @@
         if (arr == null) continue;
         for (int i = 0; i < 12; i++) {
             if (arr[i] != null && arr[i] > 0) { hasChartData = true; break; }
+=======
+    // SORT BANKS ikut Top1 profit (desc)
+    // =========================
+    List<Map.Entry<String, Double[]>> sortedEntries = new ArrayList<>(bankTop3.entrySet());
+    Collections.sort(sortedEntries, new Comparator<Map.Entry<String, Double[]>>() {
+        public int compare(Map.Entry<String, Double[]> a, Map.Entry<String, Double[]> b) {
+            double aTop1 = (a.getValue() == null ? 0 : nz(a.getValue()[0]));
+            double bTop1 = (b.getValue() == null ? 0 : nz(b.getValue()[0]));
+            return Double.compare(bTop1, aTop1); // DESC
+        }
+    });
+
+    // rebuild map ikut susunan sorted
+    Map<String, Double[]> bankTop3Sorted = new LinkedHashMap<>();
+    for (Map.Entry<String, Double[]> e : sortedEntries) bankTop3Sorted.put(e.getKey(), e.getValue());
+    bankTop3 = bankTop3Sorted;
+
+    // =========================
+    // Check chart data
+    // =========================
+    boolean hasChartData = false;
+    for (Double[] arr : bankTop3.values()) {
+        if (arr == null) continue;
+        for (int i = 0; i < 3; i++) {
+            if (arr[i] != null && arr[i] != 0) { hasChartData = true; break; }
+>>>>>>> d50825d (initial commit)
         }
         if (hasChartData) break;
     }
 
+<<<<<<< HEAD
     // Start labels at first month with any value (so graph start when data starts)
     int firstIndex = 0;
     if (hasChartData) {
@@ -279,6 +449,52 @@
     jsDatasets.append("]");
 
     hasChartData = hasChartData && (appended > 0);
+=======
+    // =========================
+    // Chart JS labels = Top 1..Top 3
+    // datasets = per BANK (warna ikut bank)
+    // =========================
+    StringBuilder jsLabels = new StringBuilder("[\"Top 1\",\"Top 2\",\"Top 3\"]");
+
+    List<String> bankNames = new ArrayList<>(bankTop3.keySet());
+    int bankCount = bankNames.size();
+
+    StringBuilder jsDatasets = new StringBuilder("[");
+    int di = 0;
+    for (int i = 0; i < bankNames.size(); i++) {
+        String bankName = bankNames.get(i);
+        Double[] arr = bankTop3.get(bankName);
+
+        // skip kalau semua null/0
+        boolean allZero = true;
+        if (arr != null) {
+            for (int k = 0; k < 3; k++) {
+                if (arr[k] != null && arr[k] != 0) { allZero = false; break; }
+            }
+        }
+        if (allZero) continue;
+
+        if (di > 0) jsDatasets.append(",");
+
+        String color = bankColor(i, bankCount);
+
+        jsDatasets.append("{")
+                  .append("label:\"").append(jsEscape(bankName)).append("\",")
+                  .append("data:[")
+                  .append(arr == null || arr[0] == null ? "null" : arr[0]).append(",")
+                  .append(arr == null || arr[1] == null ? "null" : arr[1]).append(",")
+                  .append(arr == null || arr[2] == null ? "null" : arr[2])
+                  .append("],")
+                  .append("backgroundColor:\"").append(color).append("\",")
+                  .append("borderRadius:8")
+                  .append("}");
+
+        di++;
+    }
+    jsDatasets.append("]");
+
+    hasChartData = hasChartData && (di > 0);
+>>>>>>> d50825d (initial commit)
 
     DecimalFormat df = new DecimalFormat("#,##0.00");
 
@@ -328,7 +544,11 @@
 
                 <div class="report-section">
                     <div class="report-header">
+<<<<<<< HEAD
                         <h2>Fixed Deposit Profit by Month (Year <%= selectedYear %>)</h2>
+=======
+                        <h2>Top 3 Fixed Deposit Profit by Bank (Year <%= selectedYear %>)</h2>
+>>>>>>> d50825d (initial commit)
 
                         <div class="sort-dropdown">
                             <form method="get" style="display:flex; gap:10px; align-items:center;">
@@ -355,7 +575,11 @@
                         </div>
                     </div>
 
+<<<<<<< HEAD
                     <!-- ✅ Chart container ALWAYS shows, so layout never disappears -->
+=======
+                    <!-- Chart container ALWAYS shows -->
+>>>>>>> d50825d (initial commit)
                     <div class="chart-container" style="height:340px;">
                         <% if (hasChartData) { %>
                             <canvas id="reportChart"></canvas>
@@ -364,6 +588,7 @@
                                 No data available for selected year/bank.
                             </div>
                         <% } %>
+<<<<<<< HEAD
                     </div>
                 </div>
 
@@ -401,6 +626,41 @@
                     </div>
                 </div>
 
+=======
+                    </div>
+                </div>
+
+                <div class="stats-section">
+                    <% if (showThisMonth) { %>
+                    <div class="stat-card">
+                        <h3>This Month Total Deposit</h3>
+                        <div class="amount">RM<%= df.format(thisMonthTotal) %></div>
+                    </div>
+                    <% } %>
+
+                    <% if (showLastMonth) { %>
+                    <div class="stat-card">
+                        <h3>Last Month Total Deposit</h3>
+                        <div class="amount">RM<%= df.format(lastMonthTotal) %></div>
+                    </div>
+                    <% } %>
+
+                    <% if (showLastYear) { %>
+                    <div class="stat-card">
+                        <h3>Last Year Total Deposit</h3>
+                        <div class="amount">RM<%= df.format(lastYearTotal) %></div>
+                    </div>
+                    <% } %>
+
+                    <% if (showTotalStaff) { %>
+                    <div class="stat-card">
+                        <h3>Total Staff</h3>
+                        <div class="amount"><%= totalStaff %></div>
+                    </div>
+                    <% } %>
+                </div>
+
+>>>>>>> d50825d (initial commit)
             </div>
         </div>
     </div>
@@ -414,13 +674,32 @@
 
         const ctx = document.getElementById('reportChart').getContext('2d');
         new Chart(ctx, {
+<<<<<<< HEAD
             type: 'line',
+=======
+            type: 'bar',
+>>>>>>> d50825d (initial commit)
             data: { labels, datasets },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 interaction: { mode: 'index', intersect: false },
+<<<<<<< HEAD
                 plugins: { legend: { display: false }, tooltip: { enabled: true } },
+=======
+                plugins: {
+                    legend: { display: true },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const v = context.raw;
+                                const label = context.dataset.label || '';
+                                return `${label}: RM ${Number(v || 0).toLocaleString()}`;
+                            }
+                        }
+                    }
+                },
+>>>>>>> d50825d (initial commit)
                 scales: {
                     y: {
                         beginAtZero: true,
@@ -436,4 +715,7 @@
 
 </body>
 </html>
+<<<<<<< HEAD
 
+=======
+>>>>>>> d50825d (initial commit)
