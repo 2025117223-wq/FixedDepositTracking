@@ -7,6 +7,7 @@ import java.sql.*;
 
 public class StaffDAO {
 
+    // Check if the email already exists in the database
     public boolean isEmailExists(String email) throws SQLException {
         String sql = "SELECT 1 FROM staff WHERE LOWER(TRIM(staffemail)) = ? LIMIT 1";
 
@@ -21,6 +22,7 @@ public class StaffDAO {
         }
     }
 
+    // Insert a new staff record
     public boolean insertStaff(Staff s) throws SQLException {
         String sql =
                 "INSERT INTO staff " +
@@ -56,7 +58,7 @@ public class StaffDAO {
                 // manager_id (nullable, now Long for BIGINT)
                 Long mid = s.getManagerID();  // Ensure Long type for managerID
                 if (mid != null && mid > 0) {
-                    ps.setLong(9, mid);
+                    ps.setLong(9, mid);  // setLong for Long value (BIGINT)
                 } else {
                     ps.setNull(9, Types.BIGINT);
                 }
@@ -74,6 +76,7 @@ public class StaffDAO {
         }
     }
 
+    // Login check for active staff
     public Staff login(String email, String password) throws SQLException {
         String sql =
                 "SELECT staffid, staffname, staffemail, staffrole, staffstatus, managerid " +
@@ -105,13 +108,14 @@ public class StaffDAO {
         return null;
     }
 
+    // Retrieve the staff picture by ID
     public byte[] getStaffPictureById(long staffID) throws SQLException {
         String sql = "SELECT staffpicture FROM staff WHERE staffid = ?";
 
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setLong(1, staffID);  // staffID is BIGINT
+            ps.setLong(1, staffID);  // staffID is BIGINT, use Long
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
