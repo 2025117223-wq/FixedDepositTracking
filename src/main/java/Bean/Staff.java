@@ -11,6 +11,7 @@ public class Staff {
     private String password;
     private byte[] staffPicture;  
     private String staffStatus;
+    private Integer managerID;
 
     public Staff() {}
 

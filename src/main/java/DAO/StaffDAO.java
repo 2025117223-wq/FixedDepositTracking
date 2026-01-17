@@ -3,20 +3,10 @@ package DAO;
 import Bean.Staff;
 import Util.DBConn;
 
-import java.io.InputStream;
 import java.sql.*;
 
 public class StaffDAO {
 
-    /**
-     * NOTE (PostgreSQL):
-     * - Use lowercase / snake_case in your real DB schema if possible.
-     * - Example columns used below:
-     *   staff_id, staff_name, staff_phone, staff_address, staff_email,
-     *   staff_role, password, staff_picture (BYTEA), manager_id, staff_status
-     *
-     * If your actual table/column names differ, change them accordingly.
-     */
     public boolean isEmailExists(String email) throws SQLException {
         String sql = "SELECT 1 FROM staff WHERE LOWER(TRIM(staff_email)) = ? LIMIT 1";
 
@@ -31,12 +21,6 @@ public class StaffDAO {
         }
     }
 
-    /**
-     * Insert staff.
-     * PostgreSQL image storage:
-     * - staff_picture should be BYTEA
-     * - Use setBinaryStream (or setBytes) instead of setBlob
-     */
     public boolean insertStaff(Staff s) throws SQLException {
         String sql =
                 "INSERT INTO staff " +
@@ -55,17 +39,18 @@ public class StaffDAO {
                 ps.setString(5, s.getStaffRole());
                 ps.setString(6, s.getPassword());
 
-                // staff_picture (BYTEA)
-                InputStream in = s.getStaffPicture();
-                if (in != null) {
-                    ps.setBinaryStream(7, in);
+                // staff_picture (PostgreSQL BYTEA) - Staff bean stores byte[]
+                byte[] pic = s.getStaffPicture();
+                if (pic != null && pic.length > 0) {
+                    ps.setBytes(7, pic);
                 } else {
                     ps.setNull(7, Types.BINARY);
                 }
 
-                // manager_id
-                if (s.getManagerID() > 0) {
-                    ps.setInt(8, s.getManagerID());
+                // manager_id (nullable)
+                Integer mid = s.getManagerID();
+                if (mid != null && mid > 0) {
+                    ps.setInt(8, mid);
                 } else {
                     ps.setNull(8, Types.INTEGER);
                 }
@@ -88,10 +73,6 @@ public class StaffDAO {
         }
     }
 
-    /**
-     * Login only if ACTIVE (recommended).
-     * If you don't want status filtering, remove "AND staff_status = 'ACTIVE'".
-     */
     public Staff login(String email, String password) throws SQLException {
         String sql =
                 "SELECT staff_id, staff_name, staff_email, staff_role, staff_status, manager_id " +
@@ -123,9 +104,6 @@ public class StaffDAO {
         return null;
     }
 
-    /**
-     * PostgreSQL BYTEA: use getBytes directly (no Blob).
-     */
     public byte[] getStaffPictureById(int staffID) throws SQLException {
         String sql = "SELECT staff_picture FROM staff WHERE staff_id = ?";
 
@@ -136,7 +114,8 @@ public class StaffDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getBytes("staff_picture");                }
+                    return rs.getBytes("staff_picture");
+                }
             }
         }
         return null;
