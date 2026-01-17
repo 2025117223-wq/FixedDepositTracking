@@ -55,12 +55,12 @@ public class StaffDAO {
                 if (status == null || status.isBlank()) status = "ACTIVE";
                 ps.setString(8, status);
 
-                // manager_id (nullable, now Long for BIGINT)
-                Long mid = s.getManagerID();  // Ensure Long type for managerID
+                // manager_id (nullable, now Integer for INT)
+                Integer mid = s.getManagerID();  // Use Integer for managerID
                 if (mid != null && mid > 0) {
-                    ps.setLong(9, mid);  // setLong for Long value (BIGINT)
+                    ps.setInt(9, mid);  // Use setInt for Integer value (INT)
                 } else {
-                    ps.setNull(9, Types.BIGINT);
+                    ps.setNull(9, Types.INTEGER);
                 }
 
                 int affected = ps.executeUpdate();
@@ -92,13 +92,13 @@ public class StaffDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Staff s = new Staff();
-                    s.setStaffID(rs.getLong("staffid"));  // staffid is BIGINT, use Long
+                    s.setStaffID(rs.getInt("staffid"));  // Use getInt for staffid
                     s.setStaffName(rs.getString("staffname"));
                     s.setStaffEmail(rs.getString("staffemail"));
                     s.setStaffRole(rs.getString("staffrole"));
                     s.setStaffStatus(rs.getString("staffstatus"));
 
-                    Long mid = rs.getLong("managerid");  // managerid is BIGINT, use Long
+                    Integer mid = rs.getInt("managerid");  // Use getInt for managerid
                     if (!rs.wasNull()) s.setManagerID(mid);
 
                     return s;
@@ -109,13 +109,13 @@ public class StaffDAO {
     }
 
     // Retrieve the staff picture by ID
-    public byte[] getStaffPictureById(long staffID) throws SQLException {
+    public byte[] getStaffPictureById(int staffID) throws SQLException {
         String sql = "SELECT staffpicture FROM staff WHERE staffid = ?";
 
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setLong(1, staffID);  // staffID is BIGINT, use Long
+            ps.setInt(1, staffID);  // Use setInt for staffID
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
