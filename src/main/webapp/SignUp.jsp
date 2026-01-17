@@ -84,7 +84,7 @@
 
             <form id="signupForm" action="SignUpServlet" method="POST" enctype="multipart/form-data">
 
-    <!-- =========================
+        <!-- =========================
             Full Name (Full Width)
         ========================== -->
         <div class="form-row fullwidth">
@@ -193,6 +193,20 @@
                 </div>
                 <div class="error-message" id="passwordError">Password must be at least 8 characters</div>
             </div>
+
+            <div class="form-group">
+                <div class="input-wrapper" style="position: relative;">
+                    <img src="images/icons/password.png" alt="Confirm Password" class="password-icon">
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-confirm Password" required minlength="8">
+
+                    <button type="button" id="toggleConfirmPassword"
+                            style="position:absolute; right:25px; background:none; border:none; cursor:pointer; z-index:2;">
+                        <img id="confirmPasswordIcon" src="images/icons/showpass.png" alt="Show Password" style="width:25px; height:25px;">
+                    </button>
+                </div>
+                <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
+            </div>
+        </div>
 
             <div class="form-group">
                 <div class="input-wrapper" style="position: relative;">
