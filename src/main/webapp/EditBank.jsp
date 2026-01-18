@@ -100,7 +100,7 @@
             border-radius: 50%;
             object-fit: cover;
         }
-
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background: #f5f5f5; display: flex; }
 
@@ -180,7 +180,19 @@
 <div class="main-content">
 
     <div class="header">
-        <h1>Edit Bank</h1>
+        <h1>Update Bank</h1>
+
+        <div class="user-profile">
+            <div class="user-info">
+                <div class="user-name"><%= staffName %></div>
+                <div class="user-role"><%= staffRole %></div>
+            </div>
+            <div class="user-avatar">
+                <img src="ProfileImagesServlet" alt="User Avatar"
+                     onerror="this.src='images/icons/user.jpg'">
+            </div>
+        </div>
+    </div>
 
     <div class="page-content">
         <div class="form-card">

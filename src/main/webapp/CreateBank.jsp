@@ -156,9 +156,19 @@
     <div class="header">
         <h1>Create Bank</h1>
 
-    <div class="page-content">
-        <div class="form-card">
-            <h2>Create New Bank</h2>
+        <div class="user-profile">
+            <div class="user-info">
+                <div class="user-name"><%= staffName %></div>
+                <div class="user-role"><%= staffRole %></div>
+            </div>
+            <div class="user-avatar">
+                <img src="ProfileImagesServlet" alt="User Avatar"
+                     onerror="this.src='images/icons/user.jpg'">
+            </div>
+        </div>
+    </div>
+
+    <div class="page-content"
 
             <form action="BankController" method="post" onsubmit="return confirm('Register this bank?')">
                 <input type="hidden" name="action" value="add">
@@ -184,6 +194,8 @@
     </div>
 
 </div>
+
+
 
 </body>
 </html>
