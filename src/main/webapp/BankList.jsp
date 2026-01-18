@@ -17,18 +17,33 @@
     <c:redirect url="BankController?action=list"/>
 </c:if>
 
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bank Directory</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f5f5f5; display: flex; }
+        .main-content { margin-left: 250px; flex: 1; }
+        .header { background: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .page-content { padding: 40px; }
+        
+        /* Alert Banner Styling */
+        .alert-banner { 
+            padding: 15px 25px; background: #27ae60; color: white; border-radius: 8px; 
+            margin-bottom: 25px; display: flex; justify-content: space-between; 
+            animation: slideDown 0.4s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="css/BankList.css">
+        .table-container { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 18px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #fafafa; color: #2c3e50; }
+        .btn-edit { color: #1976d2; text-decoration: none; font-weight: 600; }
+    </style>
 </head>
 <body>
 
@@ -53,67 +68,34 @@
 
     <div class="page-content">
 
-        <c:if test="${not empty param.msg}">
-            <div class="toast" id="toast">
-                <span>
-                    <strong>Success!</strong>
-                    <c:out value="${param.bn}"/>
-                    <c:choose>
-                        <c:when test="${param.msg eq 'created'}"> has been created.</c:when>
-                        <c:otherwise> details have been updated.</c:otherwise>
-                    </c:choose>
-                </span>
-            </div>
-            <script>
-                setTimeout(() => {
-                    const t = document.getElementById('toast');
-                    if (t) t.style.display = 'none';
-                }, 4000);
-            </script>
-        </c:if>
+        <%-- Popup Message --%>
+            <c:if test="${not empty param.msg}">
+                <div class="alert-banner" id="toast">
+                    <span><strong>Success!</strong> <c:out value="${param.bn}"/> 
+                    ${param.msg == 'created' ? 'has been created.' : 'details have been updated.'}</span>
+                </div>
+                <script>setTimeout(() => { document.getElementById('toast').style.display='none'; }, 5000);</script>
+            </c:if>
 
-        <div class="card">
-            <div class="card-header">
-                <h2>All Banks</h2>
-                <a href="CreateBank.jsp" class="btn-outline">+ Create Bank</a>
-            </div>
-
-            <div class="table-wrap">
+            <div class="table-container">
                 <table>
                     <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Bank Name</th>
-                        <th>Address</th>
-                        <th>Phone</th>
-                        <th style="width:120px;">Actions</th>
-                    </tr>
+                        <tr><th>ID</th><th>Bank Name</th><th>Address</th><th>Phone</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
-                    <c:forEach var="bank" items="${listBank}">
-                        <tr>
-                            <td><c:out value="${bank.bankId}"/></td>
-                            <td><c:out value="${bank.bankName}"/></td>
-                            <td><c:out value="${bank.bankAddress}"/></td>
-                            <td><c:out value="${bank.bankPhone}"/></td>
-                            <td>
-                                <a class="btn-small" href="BankController?action=edit&id=${bank.bankId}">Edit</a>
-                            </td>
-                        </tr>
-                    </c:forEach>
-
-                    <c:if test="${empty listBank}">
-                        <tr>
-                            <td colspan="5" class="empty">No banks found.</td>
-                        </tr>
-                    </c:if>
+                        <c:forEach var="bank" items="${listBank}">
+                            <tr>
+                                <td>${bank.bankId}</td>
+                                <td>${bank.bankName}</td>
+                                <td>${bank.bankAddress}</td>
+                                <td>${bank.bankPhone}</td>
+                                <td><a href="BankController?action=edit&id=${bank.bankId}" class="btn-edit">✏️ Edit</a></td>
+                            </tr>
+                        </c:forEach>
                     </tbody>
                 </table>
             </div>
         </div>
-
     </div>
-</div>
-
 </body>
 </html>
