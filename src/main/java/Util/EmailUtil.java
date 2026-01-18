@@ -15,7 +15,7 @@ public class EmailUtil {
 
 	private static final String FROM_EMAIL = "imann0259@gmail.com";
 
-	private static final String APP_PASSWORD = "jcwzvdgdvisadncz";
+	private static final String APP_PASSWORD = "dikjmowcukafsgwi";
 
     public static void sendEmail(String toEmail, String subject, String body) {
 
