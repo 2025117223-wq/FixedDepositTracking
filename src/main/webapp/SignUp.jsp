@@ -16,7 +16,7 @@
             "SELECT staffid, staffname " +
             "FROM staff " +
             "WHERE staffstatus = 'ACTIVE' " +
-            "AND staffrole = 'Administration' " +
+            "AND staffrole = 'Senior Finance Executive' " +
             "ORDER BY staffname";
 
         ps = conn.prepareStatement(sqlManagers);
@@ -139,9 +139,8 @@
                             <img src="images/icons/role.png" alt="Role" class="role-icon">
                             <select id="staffRole" name="staffRole" required>
                                 <option value="" disabled selected>Select Role</option>
-                                <option value="Administration">Administration</option>
+                                <option value="Administration">Senior Finance Excutive</option>
                                 <option value="Finance Executive">Finance Executive</option>
-                                <option value="Finance Staff">Finance Staff</option>
                             </select>
                         </div>
                         <div class="error-message" id="roleError">Please select a role</div>
