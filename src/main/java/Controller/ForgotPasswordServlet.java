@@ -72,8 +72,7 @@ public class ForgotPasswordServlet extends HttpServlet {
     }
 
     private Integer getActiveStaffIdByEmail(String email) {
-        // ✅ PostgreSQL default: lowercase table/columns
-        String sql = "SELECT staffid FROM staff WHERE staffemail = ? AND staffstatus = 'ACTIVE'";
+        String sql = "SELECT staffID FROM Staff WHERE LOWER(staffEmail)=? AND staffStatus='ACTIVE'";
 
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -82,7 +81,7 @@ public class ForgotPasswordServlet extends HttpServlet {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt("staffid");
+                    return rs.getInt("staffID");
                 }
             }
 
