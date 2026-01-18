@@ -23,12 +23,9 @@
     <meta charset="UTF-8">
     <title>Edit Bank - Fixed Deposit Tracking System</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -37,22 +34,21 @@
             min-height: 100vh;
         }
 
-        /* Main Content */
         .main-content {
             margin-left: 250px;
             flex: 1;
             display: flex;
             flex-direction: column;
+            min-height: 100vh;
         }
 
-        /* Header */
         .header {
             background: white;
             padding: 20px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
         }
 
         .header h1 {
@@ -67,9 +63,7 @@
             gap: 15px;
         }
 
-        .user-info {
-            text-align: right;
-        }
+        .user-info { text-align: right; }
 
         .user-name {
             font-weight: 600;
@@ -91,7 +85,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            position: relative;
+            overflow: hidden;
         }
 
         .user-avatar img {
@@ -100,27 +94,13 @@
             border-radius: 50%;
             object-fit: cover;
         }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #f5f5f5; display: flex; }
-
-        .main-content { margin-left: 250px; flex: 1; min-height: 100vh; }
-
-        .header {
-            background: white;
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-        }
 
         .page-content {
             padding: 40px;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: calc(100vh - 80px);
+            flex: 1;
         }
 
         .form-card {
@@ -132,11 +112,24 @@
             max-width: 500px;
         }
 
-        .form-card h2 { color: #2c3e50; margin-bottom: 30px; font-size: 1.5rem; text-align: center; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; font-weight: 600; color: #34495e; margin-bottom: 8px; }
+        .form-card h2 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
 
-        .form-group input, .form-group textarea {
+        .form-group { margin-bottom: 20px; }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #34495e;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group textarea {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
@@ -145,12 +138,20 @@
             font-size: 14px;
         }
 
-        .form-group input:focus, .form-group textarea:focus { border-color: #003f5c; outline: none; }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #003f5c;
+            outline: none;
+        }
 
-        .readonly-field { background-color: #f0f0f0; cursor: not-allowed; color: #7f8c8d; }
+        .readonly-field {
+            background-color: #f0f0f0;
+            cursor: not-allowed;
+            color: #7f8c8d;
+        }
 
         .submit-btn {
-            background: #3498db;
+            background: #003f5c;
             color: white;
             border: none;
             padding: 15px;
@@ -161,7 +162,8 @@
             font-size: 16px;
             margin-top: 10px;
         }
-        .submit-btn:hover { background: #2980b9; }
+
+        .submit-btn:hover { background: #002d42; }
 
         .cancel-link {
             display: block;
@@ -171,63 +173,62 @@
             color: #7f8c8d;
             font-size: 14px;
         }
+
+        .cancel-link:hover { text-decoration: underline; }
     </style>
 </head>
+
 <body>
+    <%@ include file="includes/sidebar.jsp" %>
 
-<%@ include file="includes/sidebar.jsp" %>
+    <div class="main-content">
+        <div class="header">
+            <h1>Update Bank</h1>
 
-<div class="main-content">
-
-    <div class="header">
-        <h1>Update Bank</h1>
-
-        <div class="user-profile">
-            <div class="user-info">
-                <div class="user-name"><%= staffName %></div>
-                <div class="user-role"><%= staffRole %></div>
+            <div class="user-profile">
+                <div class="user-info">
+                    <div class="user-name"><%= staffName %></div>
+                    <div class="user-role"><%= staffRole %></div>
+                </div>
+                <div class="user-avatar">
+                    <img src="ProfileImagesServlet" alt="User Avatar"
+                         onerror="this.src='images/icons/user.jpg'">
+                </div>
             </div>
-            <div class="user-avatar">
-                <img src="ProfileImagesServlet" alt="User Avatar"
-                     onerror="this.src='images/icons/user.jpg'">
+        </div>
+
+        <div class="page-content">
+            <div class="form-card">
+                <h2>Update Bank Details</h2>
+
+                <form action="BankController" method="post" onsubmit="return confirm('Update bank details?')">
+                    <input type="hidden" name="action" value="update">
+
+                    <div class="form-group">
+                        <label>Bank ID</label>
+                        <input type="text" name="bankId" value="${bank.bankId}" class="readonly-field" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Bank Name</label>
+                        <input type="text" name="bankName" value="${bank.bankName}" class="readonly-field" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bankPhone">Update Phone Number</label>
+                        <input type="text" id="bankPhone" name="bankPhone" value="${bank.bankPhone}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bankAddress">Update Address</label>
+                        <textarea id="bankAddress" name="bankAddress" rows="4" required>${bank.bankAddress}</textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Save Changes</button>
+                    <a href="BankController?action=list" class="cancel-link">Cancel and Go Back</a>
+                </form>
             </div>
         </div>
     </div>
-
-    <div class="page-content">
-        <div class="form-card">
-            <h2>Update Bank Details</h2>
-
-            <form action="BankController" method="post" onsubmit="return confirm('Update bank details?')">
-                <input type="hidden" name="action" value="update">
-
-                <div class="form-group">
-                    <label>Bank ID</label>
-                    <input type="text" name="bankId" value="${bank.bankId}" class="readonly-field" readonly>
-                </div>
-
-                <div class="form-group">
-                    <label>Bank Name</label>
-                    <input type="text" name="bankName" value="${bank.bankName}" class="readonly-field" readonly>
-                </div>
-
-                <div class="form-group">
-                    <label for="bankPhone">Update Phone Number</label>
-                    <input type="text" id="bankPhone" name="bankPhone" value="${bank.bankPhone}" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="bankAddress">Update Address</label>
-                    <textarea id="bankAddress" name="bankAddress" rows="4" required>${bank.bankAddress}</textarea>
-                </div>
-
-                <button type="submit" class="submit-btn">Save Changes</button>
-                <a href="BankController?action=list" class="cancel-link">Cancel and Go Back</a>
-            </form>
-        </div>
-    </div>
-
-</div>
-
 </body>
 </html>
