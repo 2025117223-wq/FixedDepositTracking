@@ -67,12 +67,13 @@ public class ForgotPasswordServlet extends HttpServlet {
             return;
         }
 
-        // 5) Redirect to verify page
-        response.sendRedirect("VerifyCode.jsp");
+        // 5) Redirect to verify page + show message on VerifyCode.jsp
+        response.sendRedirect("VerifyCode.jsp?sent=true");
     }
 
     private Integer getActiveStaffIdByEmail(String email) {
-        String sql = "SELECT staffID FROM Staff WHERE LOWER(staffEmail)=? AND staffStatus='ACTIVE'";
+        // PostgreSQL default: lowercase table/columns (unless created with "Quotes")
+        String sql = "SELECT staffid FROM staff WHERE staffemail = ? AND staffstatus = 'ACTIVE'";
 
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -81,7 +82,7 @@ public class ForgotPasswordServlet extends HttpServlet {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getInt("staffID");
+                    return rs.getInt("staffid");
                 }
             }
 

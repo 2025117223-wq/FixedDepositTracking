@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,11 +34,17 @@
           <hr class="divider">
         </div>
 
+        <!-- Success message from redirect (ForgotPasswordServlet -> VerifyCode.jsp?sent=true) -->
+        <c:if test="${param.sent == 'true'}">
+          <div class="success-message" style="margin-bottom: 12px;">
+            The verification code has been sent to your email. Please check it.
+          </div>
+        </c:if>
+
         <form action="VerifyCodeServlet" method="post">
           <div class="form-row">
             <div class="form-group">
               <div class="input-wrapper">
-                <!-- Tukar icon ikut apa yang ada -->
                 <img src="images/icons/email.png" alt="Email Icon" class="input-icon">
                 <input type="text" name="code" placeholder="Enter OTP" required>
               </div>
@@ -48,13 +55,14 @@
 
           <button type="submit" class="submit-btn">Verify</button>
 
-          <div class="error-message" style="${empty error ? 'display:none;' : ''}">
-            ${error}
-          </div>
+          <!-- Server-side messages (from VerifyCodeServlet forward) -->
+          <c:if test="${not empty error}">
+            <div class="error-message">${error}</div>
+          </c:if>
 
-          <div class="success-message" style="${empty success ? 'display:none;' : ''}">
-            ${success}
-          </div>
+          <c:if test="${not empty success}">
+            <div class="success-message">${success}</div>
+          </c:if>
         </form>
       </div>
     </div>

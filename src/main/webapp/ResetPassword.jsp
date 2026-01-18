@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,7 +34,14 @@
           <hr class="divider">
         </div>
 
-        <form id="resetForm" action="ResetPasswordServlet" method="post">
+        <!-- Message after OTP verified -->
+        <c:if test="${param.verified == 'true'}">
+          <div class="success-message" style="margin-bottom: 12px;">
+            Your account has been verified. You can now reset your password.
+          </div>
+        </c:if>
+
+        <form id="resetForm" action="ResetPasswordServlet" method="post" novalidate>
           <!-- New Password -->
           <div class="form-row">
             <div class="form-group">
@@ -66,21 +74,21 @@
 
               <div class="helper-text">Make sure both passwords match.</div>
 
-              <!-- Client-side error -->
+              <!-- Client-side error (only shown after submit) -->
               <div id="clientError" class="error-message" style="display:none;"></div>
             </div>
           </div>
 
           <button type="submit" class="submit-btn">Reset</button>
 
-          <!-- Server-side messages -->
-          <div class="error-message" style="${empty error ? 'display:none;' : ''}">
-            ${error}
-          </div>
+          <!-- Server-side messages (only show if servlet sets them) -->
+          <c:if test="${not empty error}">
+            <div class="error-message">${error}</div>
+          </c:if>
 
-          <div class="success-message" style="${empty success ? 'display:none;' : ''}">
-            ${success}
-          </div>
+          <c:if test="${not empty success}">
+            <div class="success-message">${success}</div>
+          </c:if>
         </form>
       </div>
     </div>
@@ -131,26 +139,23 @@
       clientError.style.display = "none";
     }
 
-    // Live validation: passwords must match
-    function validateMatch() {
-      if (passwordField.value && confirmField.value && passwordField.value !== confirmField.value) {
-        showClientError("Password and Confirm Password do not match.");
-        return false;
-      }
-      clearClientError();
-      return true;
-    }
-
-    passwordField.addEventListener("input", validateMatch);
-    confirmField.addEventListener("input", validateMatch);
-
-    // Submit validation
+    // Only validate when submit is pressed
     form.addEventListener("submit", (e) => {
       clearClientError();
 
-      if (passwordField.value !== confirmField.value) {
+      const p = passwordField.value.trim();
+      const c = confirmField.value.trim();
+
+      if (!p || !c) {
+        e.preventDefault();
+        showClientError("Please fill in all fields.");
+        return;
+      }
+
+      if (p !== c) {
         e.preventDefault();
         showClientError("Password and Confirm Password must match.");
+        return;
       }
     });
   </script>

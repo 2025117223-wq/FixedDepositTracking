@@ -20,9 +20,14 @@
     String emailValue = emailObj != null ? emailObj.toString() : "";
 %>
 
-    <!-- Success Message (hidden by default; show only when ?signup=success) -->
+    <!-- Success Message (signup) -->
     <div class="success-message" id="successMessage" style="display:none;">
         User Account Created Successfully!
+    </div>
+
+    <!-- Success Message (reset password) -->
+    <div class="success-message" id="resetSuccessMessage" style="display:none;">
+        Your password has been updated successfully. Please log in.
     </div>
 
     <div class="container">
@@ -94,22 +99,34 @@
     </div>
 
 <script>
-    // success message (signup)
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('signup') === 'success') {
-        const successMessage = document.getElementById('successMessage');
 
-        successMessage.style.display = 'block';
-        successMessage.classList.add('show');
+    function showSuccessMessage(elementId) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+
+        el.style.display = 'block';
+        el.classList.add('show');
 
         setTimeout(() => {
-            successMessage.classList.add('hide');
+            el.classList.add('hide');
             setTimeout(() => {
-                successMessage.classList.remove('show', 'hide');
-                successMessage.style.display = 'none';
+                el.classList.remove('show', 'hide');
+                el.style.display = 'none';
+                // remove query params after showing
                 window.history.replaceState({}, document.title, window.location.pathname);
             }, 500);
         }, 5000);
+    }
+
+    // success message (signup)
+    if (urlParams.get('signup') === 'success') {
+        showSuccessMessage('successMessage');
+    }
+
+    // success message (reset password)
+    if (urlParams.get('reset') === 'success') {
+        showSuccessMessage('resetSuccessMessage');
     }
 
     // Elements

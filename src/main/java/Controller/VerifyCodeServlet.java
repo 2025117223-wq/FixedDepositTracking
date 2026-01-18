@@ -42,7 +42,10 @@ public class VerifyCodeServlet extends HttpServlet {
             return;
         }
 
+        // OTP correct
         session.setAttribute("fp_verified", true);
-        response.sendRedirect("ResetPassword.jsp");
+
+        // Redirect with message flag
+        response.sendRedirect("ResetPassword.jsp?verified=true");
     }
 }

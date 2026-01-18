@@ -1,8 +1,6 @@
 package Controller;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,6 +23,7 @@ public class ResetPasswordServlet extends HttpServlet {
 
         HttpSession session = request.getSession(false);
 
+        // Must be verified first (from VerifyCode step)
         if (session == null || session.getAttribute("fp_verified") == null
                 || !(Boolean) session.getAttribute("fp_verified")) {
             response.sendRedirect("ForgotPassword.jsp");
@@ -40,17 +39,17 @@ public class ResetPasswordServlet extends HttpServlet {
         newPassword = newPassword.trim();
         confirmPassword = confirmPassword.trim();
 
-        // ✅ Validate empty
+        // Validate empty
         if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
             request.setAttribute("error", "Please fill in all fields.");
-            request.getRequestDispatcher("ResetPassword.jsp").forward(request, response);
+            request.getRequestDispatcher("ResetPassword.jsp?verified=true").forward(request, response);
             return;
         }
 
-        // ✅ Validate match
+        // Validate match
         if (!newPassword.equals(confirmPassword)) {
             request.setAttribute("error", "Password and Confirm Password do not match!");
-            request.getRequestDispatcher("ResetPassword.jsp").forward(request, response);
+            request.getRequestDispatcher("ResetPassword.jsp?verified=true").forward(request, response);
             return;
         }
 
@@ -60,37 +59,36 @@ public class ResetPasswordServlet extends HttpServlet {
             return;
         }
 
-        // ✅ Check new password != old password (compare hash)
-        String newHash = sha256(newPassword);
-
-        String oldHash = getStaffPasswordHash(staffId);
-        if (oldHash == null) {
+        // Compare new password with old password (PLAIN TEXT)
+        String oldPassword = getStaffPasswordPlain(staffId);
+        if (oldPassword == null) {
             request.setAttribute("error", "User not found. Please try again.");
-            request.getRequestDispatcher("ResetPassword.jsp").forward(request, response);
+            request.getRequestDispatcher("ResetPassword.jsp?verified=true").forward(request, response);
             return;
         }
 
-        if (newHash.equals(oldHash)) {
+        if (newPassword.equals(oldPassword)) {
             request.setAttribute("error", "New password cannot be the same as the old password.");
-            request.getRequestDispatcher("ResetPassword.jsp").forward(request, response);
+            request.getRequestDispatcher("ResetPassword.jsp?verified=true").forward(request, response);
             return;
         }
 
-        // ✅ Update password (store hash)
-        boolean updated = updateStaffPasswordHash(staffId, newHash);
+        // Update password (store PLAIN TEXT)
+        boolean updated = updateStaffPasswordPlain(staffId, newPassword);
 
         if (!updated) {
             request.setAttribute("error", "Failed to reset password. Please try again.");
-            request.getRequestDispatcher("ResetPassword.jsp").forward(request, response);
+            request.getRequestDispatcher("ResetPassword.jsp?verified=true").forward(request, response);
             return;
         }
 
+        // Clear session data
         session.invalidate();
         response.sendRedirect("Login.jsp?reset=success");
     }
 
-    private String getStaffPasswordHash(int staffId) {
-        String sql = "SELECT password FROM Staff WHERE staffID=?";
+    private String getStaffPasswordPlain(int staffId) {
+        String sql = "SELECT password FROM staff WHERE staffid = ?";
 
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -99,7 +97,7 @@ public class ResetPasswordServlet extends HttpServlet {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return rs.getString("password"); // assumed stored hash
+                    return rs.getString("password");
                 }
                 return null;
             }
@@ -110,13 +108,13 @@ public class ResetPasswordServlet extends HttpServlet {
         }
     }
 
-    private boolean updateStaffPasswordHash(int staffId, String newHash) {
-        String sql = "UPDATE Staff SET password=? WHERE staffID=?";
+    private boolean updateStaffPasswordPlain(int staffId, String newPassword) {
+        String sql = "UPDATE staff SET password = ? WHERE staffid = ?";
 
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, newHash);
+            ps.setString(1, newPassword);
             ps.setInt(2, staffId);
 
             return ps.executeUpdate() == 1;
@@ -124,18 +122,6 @@ public class ResetPasswordServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             return false;
-        }
-    }
-
-    private static String sha256(String input) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] digest = md.digest(input.getBytes(StandardCharsets.UTF_8));
-            StringBuilder sb = new StringBuilder();
-            for (byte b : digest) sb.append(String.format("%02x", b));
-            return sb.toString();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
     }
 }
