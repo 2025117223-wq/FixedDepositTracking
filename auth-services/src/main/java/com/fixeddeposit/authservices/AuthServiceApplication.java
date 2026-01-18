@@ -1,4 +1,5 @@
-package com.fixeddeposit.authservice;
+package c.f.authservice.service;
+import c.f.authservice.dto.LoginResponse;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

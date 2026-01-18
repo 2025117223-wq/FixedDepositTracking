@@ -1,4 +1,4 @@
-package com.fixeddeposit.authservice.dto;
+package c.f.authservice.dto;
 
 public class LoginRequest {
     public String email;

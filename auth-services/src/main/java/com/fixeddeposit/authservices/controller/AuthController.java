@@ -1,44 +1,29 @@
-package com.fixeddeposit.authservice.controller;
+package com.fixeddeposit.authservices.controller;
 
-import com.fixeddeposit.authservice.dto.LoginRequest;
-import com.fixeddeposit.authservice.dto.RegisterRequest;
-import com.fixeddeposit.authservice.model.Staff;
-import com.fixeddeposit.authservice.repository.StaffRepository;
+import com.fixeddeposit.authservices.dto.LoginRequest;
+import com.fixeddeposit.authservices.dto.LoginResponse;
+import com.fixeddeposit.authservices.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final StaffRepository staffRepository;
+    private final AuthService authService;
 
-    public AuthController(StaffRepository staffRepository) {
-        this.staffRepository = staffRepository;
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
+
+    @GetMapping("/ping")
+    public String ping() {
+        return "Auth Service is running";
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
-        String email = req.email == null ? "" : req.email.trim().toLowerCase();
-        String password = req.password == null ? "" : req.password.trim();
-
-        Optional<Staff> staffOpt = staffRepository.findByStaffemail(email);
-        if (staffOpt.isEmpty()) return ResponseEntity.status(401).body("Invalid credentials");
-
-        Staff staff = staffOpt.get();
-        if (!"ACTIVE".equalsIgnoreCase(staff.getStaffstatus())) {
-            return ResponseEntity.status(403).body("Staff inactive");
-        }
-
-        // PLAIN compare (ikut sistem kau sekarang)
-        if (!password.equals(staff.getPassword())) {
-            return ResponseEntity.status(401).body("Invalid credentials");
-        }
-
-        return ResponseEntity.ok("OK");
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req) {
+        LoginResponse res = authService.login(req.email(), req.password());
+        return ResponseEntity.ok(res);
     }
-
-
 }
