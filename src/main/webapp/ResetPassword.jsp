@@ -62,7 +62,7 @@
           <div class="form-row">
             <div class="form-group">
               <div class="input-wrapper" style="position: relative;">
-                <img src="images/icons/lock.png" alt="Confirm Password Icon" class="input-icon">
+                <img src="images/icons/password.png" alt="Confirm Password Icon" class="input-icon">
 
                 <input type="password" id="confirm" name="confirm" placeholder="Re-enter Password" required>
 
