@@ -16,6 +16,11 @@
     String staffRole = loggedStaff.getStaffRole();
 %>
 
+<!-- ✅ Safety: kalau bank attribute tak wujud, redirect balik list -->
+<c:if test="${bank == null}">
+    <c:redirect url="BankController?action=list"/>
+</c:if>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,22 +59,25 @@
 
             <div class="form-group">
                 <label>Bank ID</label>
-                <input type="text" name="bankId" value="${bank.bankId}" class="readonly-field" readonly>
+                <input type="text" name="bankId" value="<c:out value='${bank.bankId}'/>"
+                       class="readonly-field" readonly>
             </div>
 
             <div class="form-group">
                 <label>Bank Name</label>
-                <input type="text" name="bankName" value="${bank.bankName}" class="readonly-field" readonly>
+                <input type="text" name="bankName" value="<c:out value='${bank.bankName}'/>"
+                       class="readonly-field" readonly>
             </div>
 
             <div class="form-group">
                 <label for="bankPhone">Update Phone Number</label>
-                <input type="text" id="bankPhone" name="bankPhone" value="${bank.bankPhone}" required>
+                <input type="text" id="bankPhone" name="bankPhone"
+                       value="<c:out value='${bank.bankPhone}'/>" required>
             </div>
 
             <div class="form-group">
                 <label for="bankAddress">Update Address</label>
-                <textarea id="bankAddress" name="bankAddress" rows="4" required>${bank.bankAddress}</textarea>
+                <textarea id="bankAddress" name="bankAddress" rows="4" required><c:out value="${bank.bankAddress}"/></textarea>
             </div>
 
             <button type="submit" class="submit-btn">Save Changes</button>
