@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="Bean.Staff" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%
     // =========================
@@ -48,8 +49,7 @@
     <div class="form-card">
         <h2>Create New Bank</h2>
 
-        <form action="<%= request.getContextPath() %>/BankController" method="post"
-              onsubmit="return confirm('Register this bank?')">
+        <form action="BankController" method="post" onsubmit="return confirm('Register this bank?')">
             <input type="hidden" name="action" value="add">
 
             <div class="form-group">
