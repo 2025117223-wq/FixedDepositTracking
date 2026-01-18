@@ -17,7 +17,7 @@
     <c:redirect url="BankController?action=list"/>
 </c:if>
 
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -29,11 +29,10 @@
         .main-content { margin-left: 250px; flex: 1; }
         .header { background: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .page-content { padding: 40px; }
-        
-        /* Alert Banner Styling */
-        .alert-banner { 
-            padding: 15px 25px; background: #27ae60; color: white; border-radius: 8px; 
-            margin-bottom: 25px; display: flex; justify-content: space-between; 
+
+        .alert-banner {
+            padding: 15px 25px; background: #27ae60; color: white; border-radius: 8px;
+            margin-bottom: 25px; display: flex; align-items: center;
             animation: slideDown 0.4s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -69,33 +68,46 @@
     <div class="page-content">
 
         <%-- Popup Message --%>
-            <c:if test="${not empty param.msg}">
-                <div class="alert-banner" id="toast">
-                    <span><strong>Success!</strong> <c:out value="${param.bn}"/> 
-                    ${param.msg == 'created' ? 'has been created.' : 'details have been updated.'}</span>
-                </div>
-                <script>setTimeout(() => { document.getElementById('toast').style.display='none'; }, 5000);</script>
-            </c:if>
-
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr><th>ID</th><th>Bank Name</th><th>Address</th><th>Phone</th><th>Actions</th></tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach var="bank" items="${listBank}">
-                            <tr>
-                                <td>${bank.bankId}</td>
-                                <td>${bank.bankName}</td>
-                                <td>${bank.bankAddress}</td>
-                                <td>${bank.bankPhone}</td>
-                                <td><a href="BankController?action=edit&id=${bank.bankId}" class="btn-edit">✏️ Edit</a></td>
-                            </tr>
-                        </c:forEach>
-                    </tbody>
-                </table>
+        <c:if test="${not empty param.msg}">
+            <div class="alert-banner" id="toast">
+                <span>
+                    <strong>Success!</strong>
+                    <c:out value="${param.bn}"/>
+                    <c:choose>
+                        <c:when test="${param.msg eq 'created'}"> has been created.</c:when>
+                        <c:otherwise> details have been updated.</c:otherwise>
+                    </c:choose>
+                </span>
             </div>
+            <script>
+                setTimeout(function () {
+                    var t = document.getElementById('toast');
+                    if (t) t.style.display = 'none';
+                }, 5000);
+            </script>
+        </c:if>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                <tr><th>ID</th><th>Bank Name</th><th>Address</th><th>Phone</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                <c:forEach var="bank" items="${listBank}">
+                    <tr>
+                        <td>${bank.bankId}</td>
+                        <td>${bank.bankName}</td>
+                        <td>${bank.bankAddress}</td>
+                        <td>${bank.bankPhone}</td>
+                        <td><a href="BankController?action=edit&id=${bank.bankId}" class="btn-edit">✏️ Edit</a></td>
+                    </tr>
+                </c:forEach>
+                </tbody>
+            </table>
         </div>
+
     </div>
+</div>
+
 </body>
 </html>
