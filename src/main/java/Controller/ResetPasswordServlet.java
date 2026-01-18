@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -39,13 +40,14 @@ public class ResetPasswordServlet extends HttpServlet {
         newPassword = newPassword.trim();
         confirmPassword = confirmPassword.trim();
 
-        // ✅ Validate
+        // ✅ Validate empty
         if (newPassword.isEmpty() || confirmPassword.isEmpty()) {
             request.setAttribute("error", "Please fill in all fields.");
             request.getRequestDispatcher("ResetPassword.jsp").forward(request, response);
             return;
         }
 
+        // ✅ Validate match
         if (!newPassword.equals(confirmPassword)) {
             request.setAttribute("error", "Password and Confirm Password do not match!");
             request.getRequestDispatcher("ResetPassword.jsp").forward(request, response);
@@ -58,8 +60,24 @@ public class ResetPasswordServlet extends HttpServlet {
             return;
         }
 
-        // ✅ Hash password (recommended)
-        boolean updated = updateStaffPassword(staffId, newPassword);
+        // ✅ Check new password != old password (compare hash)
+        String newHash = sha256(newPassword);
+
+        String oldHash = getStaffPasswordHash(staffId);
+        if (oldHash == null) {
+            request.setAttribute("error", "User not found. Please try again.");
+            request.getRequestDispatcher("ResetPassword.jsp").forward(request, response);
+            return;
+        }
+
+        if (newHash.equals(oldHash)) {
+            request.setAttribute("error", "New password cannot be the same as the old password.");
+            request.getRequestDispatcher("ResetPassword.jsp").forward(request, response);
+            return;
+        }
+
+        // ✅ Update password (store hash)
+        boolean updated = updateStaffPasswordHash(staffId, newHash);
 
         if (!updated) {
             request.setAttribute("error", "Failed to reset password. Please try again.");
@@ -67,20 +85,38 @@ public class ResetPasswordServlet extends HttpServlet {
             return;
         }
 
-
         session.invalidate();
-
-
         response.sendRedirect("Login.jsp?reset=success");
     }
 
-    private boolean updateStaffPassword(int staffId, String newPassword) {
+    private String getStaffPasswordHash(int staffId) {
+        String sql = "SELECT password FROM Staff WHERE staffID=?";
+
+        try (Connection conn = DBConn.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, staffId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("password"); // assumed stored hash
+                }
+                return null;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private boolean updateStaffPasswordHash(int staffId, String newHash) {
         String sql = "UPDATE Staff SET password=? WHERE staffID=?";
 
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, newPassword);
+            ps.setString(1, newHash);
             ps.setInt(2, staffId);
 
             return ps.executeUpdate() == 1;
