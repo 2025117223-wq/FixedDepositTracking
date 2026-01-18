@@ -37,7 +37,7 @@
           <div class="form-row">
             <div class="form-group">
               <div class="input-wrapper">
-                <img src="images/icons/lock.png" alt="Password Icon" class="input-icon">
+                <img src="images/icons/password.png" alt="Password Icon" class="input-icon">
                 <input type="password" name="password" placeholder="New Password" required>
               </div>
             </div>

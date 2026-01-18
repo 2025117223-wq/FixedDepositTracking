@@ -38,7 +38,7 @@
             <div class="form-group">
               <div class="input-wrapper">
                 <!-- Tukar icon ikut apa yang ada -->
-                <img src="images/icons/otp.png" alt="OTP Icon" class="input-icon">
+                <img src="images/icons/email.png" alt="Email Icon" class="input-icon">
                 <input type="text" name="code" placeholder="Enter OTP" required>
               </div>
 
