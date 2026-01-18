@@ -26,36 +26,55 @@
 </head>
 <body>
 
-   <%@ include file="includes/sidebar.jsp" %>
-        <div class="form-card">
-            <h2>Create New Bank</h2>
+<%@ include file="includes/sidebar.jsp" %>
 
-            <!-- ✅ CONNECTED TO BankController -->
-            <form action="BankController" method="post" onsubmit="return confirm('Register this bank?')">
-                <input type="hidden" name="action" value="add">
+<div class="main-content">
 
-                <div class="form-group">
-                    <label for="bankName">Bank Name</label>
-                    <input type="text" id="bankName" name="bankName"
-                           placeholder="Enter bank name" required>
-                </div>
+    <div class="header">
+        <h1>Create Bank</h1>
 
-                <div class="form-group">
-                    <label for="bankPhone">Bank Phone Number</label>
-                    <input type="text" id="bankPhone" name="bankPhone"
-                           placeholder="Enter head office contact number" required>
-                </div>
+        <div class="user-profile">
+            <div class="user-info">
+                <div class="user-name"><%= staffName %></div>
+                <div class="user-role"><%= staffRole %></div>
+            </div>
 
-                <div class="form-group">
-                    <label for="bankAddress">Bank Address</label>
-                    <textarea id="bankAddress" name="bankAddress" rows="4"
-                              placeholder="Enter office branch address" required></textarea>
-                </div>
-
-                <button type="submit" class="submit-btn">Register Bank</button>
-            </form>
+            <div class="user-avatar">
+                <img src="ProfileImagesServlet" alt="User Avatar"
+                     onerror="this.src='images/icons/user.jpg'">
+            </div>
         </div>
     </div>
+
+    <div class="form-card">
+        <h2>Create New Bank</h2>
+
+        <form action="BankController" method="post" onsubmit="return confirm('Register this bank?')">
+            <input type="hidden" name="action" value="add">
+
+            <div class="form-group">
+                <label for="bankName">Bank Name</label>
+                <input type="text" id="bankName" name="bankName"
+                       placeholder="Enter bank name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="bankPhone">Bank Phone Number</label>
+                <input type="text" id="bankPhone" name="bankPhone"
+                       placeholder="Enter head office contact number" required>
+            </div>
+
+            <div class="form-group">
+                <label for="bankAddress">Bank Address</label>
+                <textarea id="bankAddress" name="bankAddress" rows="4"
+                          placeholder="Enter office branch address" required></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">Register Bank</button>
+        </form>
+    </div>
+
+</div>
 
 </body>
 </html>
