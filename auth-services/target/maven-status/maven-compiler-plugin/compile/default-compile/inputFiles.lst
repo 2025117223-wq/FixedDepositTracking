@@ -1,6 +1,0 @@
-/workspaces/FixedDepositTracking/auth-services/src/main/java/com/fixeddeposit/authservices/AuthServiceApplication.java
-/workspaces/FixedDepositTracking/auth-services/src/main/java/com/fixeddeposit/authservices/controller/AuthController.java
-/workspaces/FixedDepositTracking/auth-services/src/main/java/com/fixeddeposit/authservices/dto/LoginRequest.java
-/workspaces/FixedDepositTracking/auth-services/src/main/java/com/fixeddeposit/authservices/dto/LoginResponse.java
-/workspaces/FixedDepositTracking/auth-services/src/main/java/com/fixeddeposit/authservices/dto/RegisterRequest.java
-/workspaces/FixedDepositTracking/auth-services/src/main/java/com/fixeddeposit/authservices/service/AuthService.java
