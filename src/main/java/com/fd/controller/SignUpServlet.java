@@ -15,11 +15,6 @@ import jakarta.servlet.http.Part;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * SignUpServlet - FINAL VERSION
- * Matches YOUR Staff.java model exactly
- * For Tomcat 10+ (Jakarta EE)
- */
 @WebServlet("/SignUpServlet")
 @MultipartConfig(
     fileSizeThreshold = 1024 * 1024,  // 1MB
@@ -44,7 +39,7 @@ public class SignUpServlet extends HttpServlet {
         
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
-        
+
         System.out.println("========================================");
         System.out.println("📝 SignUpServlet - New User Registration");
         System.out.println("========================================");

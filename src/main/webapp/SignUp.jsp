@@ -508,7 +508,7 @@
 
                     <div class="form-group">
                         <div class="input-wrapper select-wrapper">
-                            <img src="images/icons/manager.png" alt="Manager" class="manager-icon">
+                            <img src="images/icons/profile.png" alt="Manager" class="manager-icon">
                             <!-- REMOVED required attribute -->
                             <select id="managerId" name="managerId">
                                 <option value="" disabled selected>Select Manager</option>
@@ -569,7 +569,7 @@
 
                             <button type="button" id="toggleConfirmPassword"
                                     style="position:absolute; right:25px; background:none; border:none; cursor:pointer; z-index:2;">
-                                <img id="confirmPasswordIcon" src="images/icons/eyeDisable.png" alt="Show Password" style="width:25px; height:25px;">
+                                <img id="confirmPasswordIcon" src="images/icons/hidepass.png" alt="Show Password" style="width:25px; height:25px;">
                             </button>
                         </div>
                         <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
