@@ -1,10 +1,10 @@
-package Util;
+package com.fd.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DBConn {
+public class DBConnection {
 
     private static final String URL  = "jdbc:postgresql://cee3ebbhveeoab.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/dbu39dr34ej0dq";
     private static final String USER = "u375elp7att1k5";
