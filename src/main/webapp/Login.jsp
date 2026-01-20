@@ -408,7 +408,7 @@
                     }
                 %>
 
-                <form id="loginForm" action="<%= request.getContextPath() %>/login" method="POST">
+                <form id="loginForm" action="${pageContext.request.contextPath}/login" method="POST">
                     <div class="form-group">
                         <div class="input-wrapper">
                             <img src="images/icons/user.jpg" alt="Email" class="input-icon">
@@ -530,4 +530,5 @@
 
 </body>
 </html>
+
 
