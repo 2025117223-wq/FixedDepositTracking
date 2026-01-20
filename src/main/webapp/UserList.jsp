@@ -1,4 +1,81 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="com.fd.dao.StaffDAO" %>
+<%@ page import="com.fd.model.Staff" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%
+    // Get logged-in user info from session
+    Integer loggedInStaffId = (Integer) session.getAttribute("staffId");
+    String loggedInUserRole = (String) session.getAttribute("staffRole");
+    
+    if (loggedInStaffId == null) {
+        response.sendRedirect("Login.jsp");
+        return;
+    }
+    
+    // Load data from database
+    StaffDAO staffDAO = new StaffDAO();
+    List<Staff> staffList = staffDAO.getAllStaff();
+    
+    System.out.println("========================================");
+    System.out.println("🔍 UserList.jsp: Loading data");
+    System.out.println("   Logged in Staff ID: " + loggedInStaffId);
+    System.out.println("   Role: " + loggedInUserRole);
+    System.out.println("📊 Retrieved " + staffList.size() + " total staff records");
+    
+    // Filter based on role AND manager ID
+    List<Staff> filteredStaffList = new ArrayList<>();
+    
+    // Show only users who have THIS manager
+    for (Staff s : staffList) {
+        // Show users where their MANAGERID matches the logged-in user's ID
+        if (s.getManagerId() == loggedInStaffId) {
+            filteredStaffList.add(s);
+        }
+    }
+    
+    System.out.println("✅ Showing users managed by Staff ID " + loggedInStaffId + ": " + filteredStaffList.size() + " users");
+    
+    // Build JSON from filtered list
+    StringBuilder jsonBuilder = new StringBuilder();
+    jsonBuilder.append("[");
+    for (int i = 0; i < filteredStaffList.size(); i++) {
+        Staff s = filteredStaffList.get(i);
+        
+        if (i == 0) {
+            System.out.println("📋 First staff: " + s.getName());
+        }
+        
+        jsonBuilder.append("{");
+        jsonBuilder.append("\"staffId\":\"").append(s.getFormattedStaffId()).append("\",");
+        jsonBuilder.append("\"numericId\":").append(s.getStaffId()).append(",");
+        jsonBuilder.append("\"name\":\"").append(s.getName() != null ? s.getName().replace("\"", "\\\"").replace("\\", "\\\\") : "").append("\",");
+        jsonBuilder.append("\"role\":\"").append(s.getRole() != null ? s.getRole().replace("\"", "\\\"") : "").append("\",");
+        jsonBuilder.append("\"status\":\"").append(s.getStatus() != null ? s.getStatus().replace("\"", "\\\"") : "").append("\",");
+        jsonBuilder.append("\"manageBy\":\"").append(s.getManagerName() != null ? s.getManagerName().replace("\"", "\\\"") : "").append("\",");
+        jsonBuilder.append("\"email\":\"").append(s.getEmail() != null ? s.getEmail().replace("\"", "\\\"") : "").append("\",");
+        jsonBuilder.append("\"phone\":\"").append(s.getPhone() != null ? s.getPhone().replace("\"", "\\\"") : "").append("\",");
+        jsonBuilder.append("\"address\":\"").append(s.getAddress() != null ? s.getAddress().replace("\"", "\\\"").replace("\n", " ").replace("\r", " ") : "").append("\",");
+        jsonBuilder.append("\"reason\":").append(s.getReason() != null ? "\"" + s.getReason().replace("\"", "\\\"") + "\"" : "null");
+        jsonBuilder.append("}");
+        if (i < filteredStaffList.size() - 1) jsonBuilder.append(",");
+    }
+    jsonBuilder.append("]");
+    
+    String userJsonData = jsonBuilder.toString();
+    System.out.println("✅ JSON data prepared for " + filteredStaffList.size() + " users");
+    System.out.println("========================================");
+%>
+<%
+    // Simple session check - No includes needed!
+    String userName = (String) session.getAttribute("staffName");
+    String userRole = (String) session.getAttribute("staffRole");
+    
+    if (userName == null) {
+        response.sendRedirect("Login.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,7 +173,7 @@
 
         .search-input {
             width: 100%;
-            padding: 15px 50px 15px 20px;
+            padding: 10px 50px 15px 20px;
             border: 2px solid #d0d0d0;
             border-radius: 10px;
             font-size: 15px;
@@ -115,10 +192,11 @@
 
         .search-icon {
             position: absolute;
-            right: 20px;
+            right: 10px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 20px;
+            width: 35px;
+            height: 35px;
             color: #7f8c8d;
             pointer-events: none;
         }
@@ -160,19 +238,31 @@
             background: #f8f9fa;
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            justify-content: center;
+        .status {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .status.active {
+            background: #e5f5f0;
+            color: #0c7a5a;
+        }
+
+        .status.inactive {
+            background: #ffe5e5;
+            color: #c0392b;
         }
 
         .action-btn {
-            display: flex;
+            display: inline-flex;
             flex-direction: column;
             align-items: center;
             gap: 5px;
             cursor: pointer;
+            margin-top: 10px;
             transition: all 0.3s ease;
         }
 
@@ -181,27 +271,30 @@
         }
 
         .action-icon {
-            width: 35px;
-            height: 35px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 20px;
         }
 
         .action-icon.update {
             color: #3498db;
         }
 
-        .action-icon.delete {
-            color: #e74c3c;
-        }
-
         .action-label {
-            font-size: 12px;
+            font-size: 11px;
             color: #7f8c8d;
             font-weight: 500;
         }
+        
+        .action-icon img {
+		    width: 100%;
+		    height: 100%;
+		    object-fit: contain;
+		    display: block; /* removes default inline gap */
+		}
 
         .no-data {
             text-align: center;
@@ -210,7 +303,6 @@
             font-size: 16px;
         }
 
-        /* Success Message */
         .success-message {
             position: fixed;
             top: 100px;
@@ -224,18 +316,14 @@
             font-weight: 500;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 10000;
-            margin-left: 100px;
-            margin-top: -50px;
             opacity: 0;
             display: block;
         }
         
-        /* Show animation */
         .success-message.show {
             animation: slideDown 0.4s ease forwards;
         }
         
-        /* Hide animation */
         .success-message.hide {
             animation: slideUpFade 0.4s ease forwards;
         }
@@ -262,7 +350,6 @@
             }
         }
 
-        /* Modal Styles */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -280,64 +367,286 @@
             display: flex;
         }
 
-        .modal-content {
+        .user-details-modal {
             background: white;
-            padding: 30px 40px;
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            max-width: 900px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-header {
+            background: white;
+            padding: 30px 40px 20px;
+            border-bottom: 2px solid #f0f0f0;
+            position: relative;
+        }
+
+        .modal-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ff8c42;
             text-align: center;
-            min-width: 400px;
+            margin-bottom: 10px;
         }
 
-        .modal-message {
-            font-size: 16px;
-            color: #2c3e50;
-            margin-bottom: 30px;
-            line-height: 1.5;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-
-        .modal-btn {
-            padding: 12px 40px;
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 32px;
+            color: #7f8c8d;
+            cursor: pointer;
+            background: none;
             border: none;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: #2c3e50;
+        }
+
+        .modal-body {
+            padding: 30px 40px;
+        }
+
+        .profile-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-picture-container {
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .profile-picture {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #d0d0d0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            color: #7f8c8d;
+            overflow: hidden;
+        }
+
+        .profile-picture img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            padding: 12px 16px;
+            border: 2px solid #d0d0d0;
             border-radius: 8px;
             font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            color: #2c3e50;
+            background: #f5f5f5;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:disabled {
+            background: #e8e8e8;
+            cursor: not-allowed;
+            color: #666;
+        }
+
+        .form-input:not(:disabled) {
+            background: white;
+        }
+
+        .form-input:not(:disabled):focus {
+            outline: none;
+            border-color: #003f5c;
+        }
+
+        .form-select {
+            padding: 12px 16px;
+            border: 2px solid #d0d0d0;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            color: #2c3e50;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #003f5c;
+        }
+
+        .file-upload-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .file-upload-btn {
+            display: inline-block;
+            width: 100%;
+            padding: 8px 15px;
+            text-align: left;
+            background: white;
+            color: #2c3e50;
+            border-radius: 8px;
+            border: 2px solid #d0d0d0;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-btn:hover {
+            border-color: #003f5c;
+            background: #f8f9fa;
+        }
+
+        .file-upload-btn.disabled {
+            background: #d0d0d0;
+            cursor: not-allowed;
+            color: #7f8c8d;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-name {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+        
+        .confirmation-modal {
+		    display: none;
+		    position: fixed;
+		    top: 0;
+		    left: 0;
+		    width: 100%;
+		    height: 100%;
+		    background: rgba(0, 0, 0, 0.5);
+		    z-index: 10000;
+		    justify-content: center;
+		    align-items: center;
+		}
+		
+		.confirmation-modal.active {
+		    display: flex;
+		}
+		
+		.confirmation-content {
+		    background: white;
+		    padding: 30px 40px;
+		    border-radius: 12px;
+		    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+		    text-align: center;
+		    min-width: 400px;
+		}
+		
+		.confirmation-icon {
+		    font-size: 60px;
+		    margin-bottom: 20px;
+		}
+		
+		.confirmation-message {
+		    font-size: 18px;
+		    color: #2c3e50;
+		    margin-bottom: 30px;
+		    font-weight: 600;
+		}
+		
+		.confirmation-buttons {
+		    display: flex;
+		    gap: 15px;
+		    justify-content: center;
+		}
+		
+		.confirmation-btn {
+		    padding: 12px 40px;
+		    border: none;
+		    border-radius: 8px;
+		    font-size: 15px;
+		    font-weight: 600;
+		    cursor: pointer;
+		    font-family: 'Inter', sans-serif;
+		}
+		
+		.confirmation-btn-no {
+		    background: #95a5a6;
+		    color: white;
+		}
+		
+		.confirmation-btn-yes {
+		    background: #003f5c;
+		    color: white;
+		}
+
+        .update-btn {
+            display: block;
+            width: 200px;
+            margin: 30px auto 0;
+            padding: 15px 40px;
+            background: #003f5c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             font-family: 'Inter', sans-serif;
         }
 
-        .modal-btn-no {
-            background: #95a5a6;
-            color: white;
-        }
-
-        .modal-btn-no:hover {
-            background: #7f8c8d;
-        }
-
-        .modal-btn-yes {
-            background: #003f5c;
-            color: white;
-        }
-
-        .modal-btn-yes:hover {
+        .update-btn:hover {
             background: #002d42;
-        }
-
-        .modal-btn-delete {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .modal-btn-delete:hover {
-            background: #c0392b;
         }
 
         @media (max-width: 768px) {
@@ -349,11 +658,59 @@
                 padding: 20px;
             }
 
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
             th, td {
                 padding: 15px 10px;
                 font-size: 14px;
             }
         }
+        
+        .search-and-filter {
+		    display: flex;
+		    gap: 20px;
+		    margin-bottom: 30px;
+		    align-items: center;
+		}
+		
+		.search-container {
+		    flex: 1;
+		    max-width: 500px;
+		    margin-bottom: 0;
+		}
+		
+		.filter-container {
+		    display: flex;
+		    align-items: center;
+		    gap: 10px;
+		}
+		
+		.filter-label {
+		    font-size: 15px;
+		    font-weight: 500;
+		    color: #2c3e50;
+		    white-space: nowrap;
+		}
+		
+		.filter-select {
+		    padding: 10px 30px 10px 15px;
+		    border: 2px solid #d0d0d0;
+		    border-radius: 10px;
+		    font-size: 15px;
+		    font-family: 'Inter', sans-serif;
+		    background: white;
+		    color: #2c3e50;
+		    cursor: pointer;
+		    transition: all 0.3s ease;
+		    min-width: 150px;
+		}
+		
+		.filter-select:focus {
+		    outline: none;
+		    border-color: #003f5c;
+		}
     </style>
 </head>
 <body>
@@ -364,92 +721,172 @@
             <h1>Users Lists</h1>
             <div class="user-profile">
                 <div class="user-info">
-                    <div class="user-name">Nor Azlina</div>
-                    <div class="user-role">Administrator</div>
+                    <div class="user-name"><%= userName %></div>
+                    <div class="user-role"><%= userRole %></div>
                 </div>
-                <div class="user-avatar">
+                <div class="user-avatar" onclick="window.location.href='Profile.jsp'" style="cursor: pointer;">
                     <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
                 </div>
             </div>
         </div>
 
         <div class="page-content">
-            <div class="search-container">
-                <div class="search-box">
-                    <input 
-                        type="text" 
-                        class="search-input" 
-                        id="searchInput" 
-                        placeholder="Search"
-                        onkeyup="searchUsers()"
-                    >
-                    <span class="search-icon">🔍</span>
-                </div>
-            </div>
-
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Staff ID</th>
-                            <th>Name</th>
-                            <th>Roles</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userTableBody">
-                        <!-- Users will be inserted here by JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
+		    <div class="search-and-filter">
+		        <div class="search-container">
+		            <div class="search-box">
+		                <input type="text" class="search-input" id="searchInput" placeholder="Search" onkeyup="filterUsers()">
+		                <img src="images/icons/search-icon.png" alt="search" class="search-icon">
+		            </div>
+		        </div>
+		        
+		        <div class="filter-container">
+		            <label class="filter-label">Status:</label>
+		            <select class="filter-select" id="statusFilter" onchange="filterUsers()">
+		                <option value="all">All</option>
+		                <option value="active">Active</option>
+		                <option value="inactive">Inactive</option>
+		            </select>
+		        </div>
+		    </div>
+		
+		    <div class="table-container">
+		        <table>
+		            <thead>
+		                <tr>
+		                    <th>Staff ID</th>
+		                    <th>Name</th>
+		                    <th>Roles</th>
+		                    <th>Status</th>
+		                    <th>Manage By</th>
+		                    <th>Action</th>
+		                </tr>
+		            </thead>
+		            <tbody id="userTableBody"></tbody>
+		        </table>
+		    </div>
+		</div>
     </div>
 
-    <!-- Success Message -->
     <div class="success-message" id="successMessage"></div>
 
-    <!-- Update Confirmation Modal -->
-    <div class="modal-overlay" id="updateModal">
-        <div class="modal-content">
-            <div class="modal-message" id="updateModalMessage">
-                Are you sure you want to update this user?
+    <!-- User Details Modal -->
+    <div class="modal-overlay" id="userDetailsModal">
+        <div class="user-details-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Update User Information Details</h2>
+                <button type="button" class="close-btn" onclick="closeUserDetailsModal()">×</button>
             </div>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-no" onclick="closeUpdateModal()">No</button>
-                <button class="modal-btn modal-btn-yes" onclick="confirmUpdate()">Yes</button>
-            </div>
-        </div>
-    </div>
+            <div class="modal-body">
+                <div class="profile-section">
+                    <div class="profile-picture-container">
+                        <div class="profile-picture" id="profilePicture">👤</div>
+                    </div>
+                    <div class="profile-label">Profile Picture</div>
+                </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div class="modal-overlay" id="deleteModal">
-        <div class="modal-content">
-            <div class="modal-message" id="deleteModalMessage">
-                Are you sure you want to delete this user?
-            </div>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-no" onclick="closeDeleteModal()">No</button>
-                <button class="modal-btn modal-btn-delete" onclick="confirmDelete()">Yes</button>
+                <form id="userDetailsForm" action="UpdateUserServlet" method="post" enctype="multipart/form-data">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-input" id="userName" name="editName" disabled>
+                        </div>
+                        <input type="hidden" id="hiddenStaffId" name="editStaffId" value="">
+                        <div class="form-group">
+                            <label class="form-label">Staff ID</label>
+                            <input type="text" class="form-input" id="userStaffId" name="editStaffId" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Roles</label>
+                            <select class="form-select" id="userRole" name="editRole">
+                                <option value="Senior Finance Manager">Senior Finance Manager</option>
+                                <option value="Finance Executive">Finance Executive</option>
+                                
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-input" id="userEmail" name="editEmail" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Number Phone</label>
+                            <input type="text" class="form-input" id="userPhone" name="editPhone" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="userStatus" name="editStatus" onchange="toggleReasonField()">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">Manage By</label>
+                            <input type="text" class="form-input" id="userManageBy" name="editManageBy" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-input" id="userPassword" value="********" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Reason</label>
+                            <div class="file-upload-container">
+                                <label for="reasonFile" class="file-upload-btn" id="fileUploadBtn">
+                                    Choose File
+                                    <span style="font-size: 11px; display: block; margin-top: 2px;">JPEG, PNG</span>
+                                </label>
+                                <input type="file" id="reasonFile" name="editReasonFile" class="file-input" accept=".jpg,.jpeg,.png" onchange="displayFileName()">
+                                <div class="file-name" id="fileName"></div>
+                                <input type="hidden" id="reasonText" name="editReason">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label class="form-label">Address</label>
+                            <input type="text" class="form-input" id="userAddress" name="editAddress" disabled>
+                        </div>
+                    </div>
+
+                    <button type="button" class="update-btn" onclick="showConfirmation()">Update</button>
+                  
+                </form>
             </div>
         </div>
     </div>
+    
+    <div class="confirmation-modal" id="confirmationModal">
+    <div class="confirmation-content">
+        <div class="confirmation-icon">⚠️</div>
+        <div class="confirmation-message">
+            Are you sure you want to update this user information?
+        </div>
+        <div class="confirmation-buttons">
+            <button class="confirmation-btn confirmation-btn-no" onclick="closeConfirmation()">No</button>
+            <button class="confirmation-btn confirmation-btn-yes" onclick="confirmUpdate()">Yes</button>
+        </div>
+    </div>
+	</div>
 
     <script>
-        // Sample user data (in real implementation, this would come from database/servlet)
-        const users = [
-            { staffId: 'FinanceE02', name: 'Aufa Haniz Binti Khairuol Rin', role: 'Finance Executive' },
-            { staffId: 'FinanceS01', name: 'Nabella Ameliya Binti Fairuz', role: 'Finance Staff' },
-            { staffId: 'FinanceS02', name: 'Agus Syafiah Qaisara Binti Ikhwan Meon', role: 'Finance Staff' },
-            { staffId: 'FinanceS03', name: 'Khairina Izzaty Binti Md Nor Azim', role: 'Finance Staff' },
-            { staffId: 'FinanceS04', name: 'Aidil Danial Bin Badrul Khan', role: 'Finance Staff' },
-            { staffId: 'FinanceS05', name: 'Nor Tamia Shaheerah Binti Zakrul Zain', role: 'Finance Staff' },
-            { staffId: 'FinanceE03', name: 'Muhammad Luqman Ikmal Bin Rahmad', role: 'Finance Executive' }
-        ];
-
-        let filteredUsers = [...users]; // Copy of users for filtering
+        // Load users from database
+        const users = <%= userJsonData %>;
+        
+        console.log("========================================");
+        console.log("📊 Loaded " + users.length + " users from database");
+        if (users.length > 0) {
+            console.log("✅ First user:", users[0]);
+        } else {
+            console.error("❌ No users loaded!");
+        }
+        console.log("========================================");
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Load users into table
             loadUsers(users);
         });
 
@@ -458,107 +895,143 @@
             tbody.innerHTML = '';
 
             if (userList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="no-data">No users found.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="no-data">No users found.</td></tr>';
                 return;
             }
 
             userList.forEach(user => {
                 const row = document.createElement('tr');
+                const statusClass = user.status.toLowerCase();
+
                 row.innerHTML = 
                     '<td>' + user.staffId + '</td>' +
                     '<td>' + user.name + '</td>' +
                     '<td>' + user.role + '</td>' +
+                    '<td><span class="status ' + statusClass + '">' + user.status + '</span></td>' +
+                    '<td>' + user.manageBy + '</td>' +
                     '<td>' +
-                        '<div class="action-buttons">' +
-                            '<div class="action-btn" onclick="updateUser(\'' + user.staffId + '\')">' +
-                                '<div class="action-icon update">✏️</div>' +
-                                '<div class="action-label">Update</div>' +
-                            '</div>' +
-                            '<div class="action-btn" onclick="deleteUser(\'' + user.staffId + '\', \'' + user.name + '\')">' +
-                                '<div class="action-icon delete">🗑️</div>' +
-                                '<div class="action-label">Delete</div>' +
-                            '</div>' +
-                        '</div>' +
+	                    '<div class="action-buttons">' +
+	                    '<div class="action-btn" onclick="updateUser(\'' + user.staffId + '\')">' +
+	                        '<div class="action-icon update">' +
+	                            '<img src="images/icons/update-icon.png" alt="Update" style="width:100px; height:90px;">' +
+	                        '</div>' +
+	                        '<div class="action-label">Update</div>' +
+	                    '</div>' +
+                '</div>' +
                     '</td>';
                 tbody.appendChild(row);
             });
+            
+            console.log("✅ Table populated with " + userList.length + " rows");
         }
 
         function searchUsers() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = users.filter(user => {
+                return user.staffId.toString().toLowerCase().includes(searchTerm) ||
+                       user.name.toLowerCase().includes(searchTerm) ||
+                       user.role.toLowerCase().includes(searchTerm) ||
+                       user.status.toLowerCase().includes(searchTerm) ||
+                       user.manageBy.toLowerCase().includes(searchTerm);
+            });
+            loadUsers(filtered);
+        }
+        
+        function filterUsers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
             
             const filtered = users.filter(user => {
-                return user.staffId.toLowerCase().includes(searchTerm) ||
-                       user.name.toLowerCase().includes(searchTerm) ||
-                       user.role.toLowerCase().includes(searchTerm);
+                // Search filter
+                const matchesSearch = user.staffId.toString().toLowerCase().includes(searchTerm) ||
+                                     user.name.toLowerCase().includes(searchTerm) ||
+                                     user.role.toLowerCase().includes(searchTerm) ||
+                                     user.status.toLowerCase().includes(searchTerm) ||
+                                     user.manageBy.toLowerCase().includes(searchTerm);
+                
+                // Status filter
+                const matchesStatus = statusFilter === 'all' || user.status.toLowerCase() === statusFilter;
+                
+                return matchesSearch && matchesStatus;
             });
-
+            
             loadUsers(filtered);
+            
+            console.log("🔍 Filter applied - Search: '" + searchTerm + "', Status: '" + statusFilter + "', Results: " + filtered.length);
         }
 
         function updateUser(staffId) {
-            // Find the user
-            const user = users.find(u => u.staffId === staffId);
+            const user = users.find(u => u.staffId == staffId);
             if (!user) return;
             
-            // Store current update info
+            console.log("Opening modal for user:", user.name);
+            
+            // Store current user
             window.currentUpdateUser = user;
             
-            // Show update modal
-            document.getElementById('updateModalMessage').textContent = 
-                'Are you sure you want to update "' + user.name + '"?';
-            document.getElementById('updateModal').classList.add('active');
+            // Populate modal fields
+            document.getElementById('userName').value = user.name;
+            document.getElementById('userStaffId').value = user.staffId;
+            document.getElementById("hiddenStaffId").value = user.numericId; // Send numeric ID to servlet
+            document.getElementById('userRole').value = user.role;
+            document.getElementById('userEmail').value = user.email || '';
+            document.getElementById('userPhone').value = user.phone || '';
+            document.getElementById('userStatus').value = user.status;
+            document.getElementById('userManageBy').value = user.manageBy;
+            document.getElementById('userAddress').value = user.address || '';
+            
+            // Set reason if exists
+            if (user.reason) {
+                document.getElementById('fileName').textContent = user.reason;
+                document.getElementById('reasonText').value = user.reason;
+            } else {
+                document.getElementById('fileName').textContent = '';
+                document.getElementById('reasonText').value = '';
+            }
+            
+            // Clear file input
+            document.getElementById('reasonFile').value = '';
+            
+            // Toggle reason field based on status
+            toggleReasonField();
+            
+            // Show modal
+            document.getElementById('userDetailsModal').classList.add('active');
         }
 
-        function closeUpdateModal() {
-            document.getElementById('updateModal').classList.remove('active');
+        function closeUserDetailsModal() {
+            document.getElementById('userDetailsModal').classList.remove('active');
             window.currentUpdateUser = null;
         }
 
-        function confirmUpdate() {
-            const user = window.currentUpdateUser;
-            if (!user) return;
+        function toggleReasonField() {
+            const status = document.getElementById('userStatus').value;
+            const fileInput = document.getElementById('reasonFile');
+            const fileUploadBtn = document.getElementById('fileUploadBtn');
             
-            closeUpdateModal();
-            
-            // In real implementation, redirect to update page
-            // window.location.href = 'UpdateUser.jsp?id=' + user.staffId;
-            
-            showSuccessMessage('Redirecting to update page...');
+            if (status === 'Inactive') {
+                fileInput.disabled = false;
+                fileUploadBtn.classList.remove('disabled');
+                fileUploadBtn.style.pointerEvents = 'auto';
+            } else {
+                fileInput.disabled = true;
+                fileInput.value = '';
+                document.getElementById('fileName').textContent = '';
+                fileUploadBtn.classList.add('disabled');
+                fileUploadBtn.style.pointerEvents = 'none';
+            }
         }
 
-        function deleteUser(staffId, name) {
-            // Store current delete info
-            window.currentDeleteUser = { staffId: staffId, name: name };
+        function displayFileName() {
+            const fileInput = document.getElementById('reasonFile');
+            const fileName = document.getElementById('fileName');
             
-            // Show delete modal
-            document.getElementById('deleteModalMessage').textContent = 
-                'Are you sure you want to delete "' + name + '"?';
-            document.getElementById('deleteModal').classList.add('active');
-        }
-
-        function closeDeleteModal() {
-            document.getElementById('deleteModal').classList.remove('active');
-            window.currentDeleteUser = null;
-        }
-
-        function confirmDelete() {
-            const userInfo = window.currentDeleteUser;
-            if (!userInfo) return;
-            
-            closeDeleteModal();
-            
-            // In real implementation, call servlet/API to delete
-            
-            // Remove from array
-            const index = users.findIndex(u => u.staffId === userInfo.staffId);
-            if (index > -1) {
-                users.splice(index, 1);
-                
-                // Reload current search results
-                searchUsers();
-                
-                showSuccessMessage('User deleted successfully!');
+            if (fileInput.files.length > 0) {
+                fileName.textContent = fileInput.files[0].name;
+                document.getElementById('reasonText').value = fileInput.files[0].name;
+            } else {
+                fileName.textContent = '';
+                document.getElementById('reasonText').value = '';
             }
         }
 
@@ -566,21 +1039,61 @@
             const successMsg = document.getElementById('successMessage');
             successMsg.textContent = message;
             
-            // Add show class to trigger slideDown animation
             successMsg.classList.add('show');
             successMsg.classList.remove('hide');
 
-            // After 3 seconds, hide with animation
             setTimeout(function() {
                 successMsg.classList.remove('show');
                 successMsg.classList.add('hide');
                 
-                // Remove hide class after animation completes (400ms)
                 setTimeout(function() {
                     successMsg.classList.remove('hide');
                 }, 400);
             }, 3000);
         }
+        
+        // Check for success parameter in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('success') === 'true') {
+            showSuccessMessage('User information updated successfully!');
+        }
+        
+        function showConfirmation() {
+            const staffId = document.getElementById('hiddenStaffId').value;
+            const status = document.getElementById('userStatus').value;
+            
+            if (!staffId) {
+                alert('Error: Staff ID is missing!');
+                return;
+            }
+            
+            if (status === 'Inactive') {
+                const reasonFile = document.getElementById('reasonFile').files[0];
+                const reasonText = document.getElementById('reasonText').value;
+                
+                if (!reasonFile && !reasonText) {
+                    alert('Please provide a reason when setting status to Inactive');
+                    return;
+                }
+            }
+            
+            document.getElementById('confirmationModal').classList.add('active');
+        }
+
+        function closeConfirmation() {
+            document.getElementById('confirmationModal').classList.remove('active');
+        }
+
+        function confirmUpdate() {
+            closeConfirmation();
+            document.getElementById('userDetailsForm').submit();
+        }
+
+        document.getElementById('confirmationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeConfirmation();
+            }
+        });
     </script>
 </body>
 </html>

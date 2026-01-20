@@ -1,4 +1,36 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="com.fd.model.FixedDepositRecord" %>
+<%@ page import="com.fd.model.Bank" %>
+<%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.math.BigDecimal" %>
+<%
+    // Simple session check
+    String userName = (String) session.getAttribute("staffName");
+    String userRole = (String) session.getAttribute("staffRole");
+    
+    if (userName == null) {
+        response.sendRedirect("Login.jsp");
+        return;
+    }
+    
+    // Get FD list and bank list from request (set by GenerateReportServlet)
+    @SuppressWarnings("unchecked")
+    List<FixedDepositRecord> fdList = (List<FixedDepositRecord>) request.getAttribute("fdList");
+    if (fdList == null) {
+        fdList = new ArrayList<FixedDepositRecord>();
+    }
+    
+    @SuppressWarnings("unchecked")
+    List<Bank> bankList = (List<Bank>) request.getAttribute("bankList");
+    if (bankList == null) {
+        bankList = new ArrayList<Bank>();
+    }
+    
+    // Format for dates
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM");
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,6 +115,29 @@
             padding: 40px;
             flex: 1;
         }
+        
+        .back-button {
+            position: absolute;
+            top: 120px;
+            left: 290px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #7f8c8d;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            width: fit-content;
+        }
+
+        .back-button:hover {
+            color: #2c3e50;
+        }
+
+        .back-icon {
+            font-size: 24px;
+        }
+        
 
         .filter-container {
             background: white;
@@ -181,6 +236,58 @@
             background: #002d42;
         }
 
+        .validation-message {
+            grid-column: 1 / -1;
+            padding: 12px 18px;
+            background: #fee;
+            border: 1px solid #fcc;
+            border-radius: 8px;
+            color: #c33;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+            margin-top: 10px;
+        }
+
+        .validation-message.show {
+            display: block;
+        }
+
+        .filter-criteria-display {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-criteria-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .filter-criteria-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .filter-item {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .filter-item strong {
+            color: #003f5c;
+            margin-right: 4px;
+        }
+
         .results-header {
             display: flex;
             justify-content: flex-end;
@@ -188,7 +295,7 @@
         }
 
         .btn-print {
-            padding: 15px 40px;
+            padding: 8px 20px;
             background: #003f5c;
             color: white;
             border: none;
@@ -359,6 +466,11 @@
         .account-link {
             color: #3498db;
             text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .account-link:hover {
+            color: #2980b9;
         }
 
         .status {
@@ -396,6 +508,11 @@
             align-items: center;
             gap: 5px;
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            opacity: 0.7;
         }
 
         .action-icon {
@@ -404,10 +521,6 @@
 
         .action-icon.update {
             color: #3498db;
-        }
-
-        .action-icon.delete {
-            color: #e74c3c;
         }
 
         .action-label {
@@ -440,10 +553,10 @@
             <h1>Reports</h1>
             <div class="user-profile">
                 <div class="user-info">
-                    <div class="user-name">Nor Azlina</div>
-                    <div class="user-role">Administrator</div>
+                    <div class="user-name"><%= userName %></div>
+                    <div class="user-role"><%= userRole %></div>
                 </div>
-                <div class="user-avatar">
+                <div class="user-avatar" onclick="window.location.href='Profile.jsp'" style="cursor: pointer;">
                     <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
                 </div>
             </div>
@@ -487,13 +600,17 @@
                         <label>Bank Name</label>
                         <select id="bank">
                             <option value="">Select Bank</option>
-                            <option value="Maybank">Maybank</option>
-                            <option value="CIMB">CIMB</option>
-                            <option value="MBSB">MBSB</option>
-                            <option value="Public Bank">Public Bank</option>
-                            <option value="RHB">RHB</option>
-                            <option value="Hong Leong">Hong Leong</option>
-                            <option value="AmBank">AmBank</option>
+                            <% 
+                            if (bankList != null && !bankList.isEmpty()) {
+                                for (Bank bank : bankList) {
+                            %>
+                            <option value="<%= bank.getBankName() %>"><%= bank.getBankName() %></option>
+                            <% 
+                                }
+                            } else {
+                            %>
+                            <option value="" disabled>No banks available</option>
+                            <% } %>
                         </select>
                     </div>
 
@@ -501,10 +618,14 @@
                         <label>Status</label>
                         <select id="status">
                             <option value="">Select Status</option>
-                            <option value="Pending">Pending</option>
-                            <option value="Ongoing">Ongoing</option>
-                            <option value="Matured">Matured</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="ONGOING">Ongoing</option>
+                            <option value="MATURED">Matured</option>
                         </select>
+                    </div>
+
+                    <div class="validation-message" id="validationMessage">
+                        Please fill in at least 1 field
                     </div>
 
                     <div class="button-container">
@@ -515,8 +636,19 @@
         </div>
 
         <div class="page-content" id="resultsView" style="display: none;">
+        <a href="GenerateReportServlet" class="back-button">
+                    <span class="back-icon">←</span>
+                    <span>Back</span>
+                </a>
             <div class="results-header">
                 <button class="btn-print" onclick="window.print()">Print Report</button>
+            </div>
+
+            <div class="filter-criteria-display" id="filterCriteriaDisplay">
+                <div class="filter-criteria-title">Filter Criteria:</div>
+                <div class="filter-criteria-items" id="filterCriteriaItems">
+                    <!-- Filter items will be inserted here by JavaScript -->
+                </div>
             </div>
 
             <div class="table-container">
@@ -536,7 +668,6 @@
                 </table>
             </div>
 
-            <!-- Print Report Format -->
             <div class="print-report">
                 <div class="print-header">
                     <img src="images/logo.png" alt="Logo" class="print-logo" onerror="this.style.display='none'">
@@ -568,14 +699,39 @@
     </div>
 
     <script>
+        // Real FD data from database
         const data = [
-            { id: 'FD2465', accountNo: '9876543210123', amount: 25000, bank: 'Maybank', tenure: 17, status: 'Pending', month: '01' },
-            { id: 'FD7895', accountNo: '5032918476201', amount: 60000, bank: 'MBSB', tenure: 6, status: 'Ongoing', month: '02' },
-            { id: 'FD1024', accountNo: '7648391205784', amount: 50500, bank: 'CIMB', tenure: 17, status: 'Ongoing', month: '03' },
-            { id: 'FD7230', accountNo: '1928374650192', amount: 35000, bank: 'Maybank', tenure: 17, status: 'Ongoing', month: '01' },
-            { id: 'FD1126', accountNo: '6482039174520', amount: 25000, bank: 'Maybank', tenure: 12, status: 'Matured', month: '12' },
-            { id: 'FD4052', accountNo: '3857204916837', amount: 18000, bank: 'MBSB', tenure: 11, status: 'Pending', month: '04' },
-            { id: 'FD8163', accountNo: '2179845301629', amount: 47000, bank: 'CIMB', tenure: 8, status: 'Matured', month: '08' }
+            <% 
+            if (fdList != null && !fdList.isEmpty()) {
+                for (int i = 0; i < fdList.size(); i++) {
+                    FixedDepositRecord fd = fdList.get(i);
+                    
+                    // Extract month from start date
+                    String month = "";
+                    if (fd.getStartDate() != null) {
+                        month = dateFormat.format(fd.getStartDate()).substring(5); // Get MM part
+                    }
+                    
+                    // Convert status to match JavaScript expectations
+                    String jsStatus = fd.getStatus();
+                    
+                    // Output JavaScript object
+            %>
+            {
+                id: 'FD<%= fd.getFdID() %>',
+                accountNo: '<%= fd.getAccNumber() %>',
+                amount: <%= fd.getDepositAmount() %>,
+                bank: '<%= fd.getBankName() != null ? fd.getBankName().replace("'", "\\'") : "" %>',
+                tenure: <%= fd.getTenure() %>,
+                status: '<%= fd.getStatus() %>',
+                month: '<%= month %>'
+            }<%= i < fdList.size() - 1 ? "," : "" %>
+            <% 
+                }
+            } else {
+            %>
+            // No FD records found
+            <% } %>
         ];
 
         let currentFilters = {};
@@ -587,14 +743,22 @@
             const month = document.getElementById('month').value;
             const bank = document.getElementById('bank').value;
             const status = document.getElementById('status').value;
+            const validationMessage = document.getElementById('validationMessage');
 
             if (!amount && !month && !bank && !status) {
-                alert('Please select at least one filter criteria.');
+                validationMessage.classList.add('show');
                 return;
             }
 
+            // Hide validation message if it was showing
+            validationMessage.classList.remove('show');
+
             // Store current filters
             currentFilters = { amount, month, bank, status };
+
+            // Debug logging
+            console.log('Applied Filters:', currentFilters);
+            console.log('Total records:', data.length);
 
             let results = data.filter(item => {
                 if (amount && item.amount != parseFloat(amount)) return false;
@@ -603,6 +767,11 @@
                 if (status && item.status != status) return false;
                 return true;
             });
+
+            console.log('Filtered results:', results.length);
+            if (results.length === 0) {
+                console.log('Sample data status values:', data.slice(0, 3).map(d => d.status));
+            }
 
             showResults(results);
         }
@@ -624,7 +793,7 @@
                     const row = document.createElement('tr');
                     row.innerHTML = 
                         '<td>' + item.id + '</td>' +
-                        '<td><a href="#" class="account-link">' + item.accountNo + '</a></td>' +
+                        '<td><a href="ViewFD.jsp?account=' + item.accountNo + '" class="account-link">' + item.accountNo + '</a></td>' +
                         '<td>' + item.amount.toLocaleString() + '</td>' +
                         '<td>' + item.bank + '</td>' +
                         '<td>' + item.tenure + '</td>' +
@@ -634,10 +803,6 @@
                                 '<div class="action-btn" onclick="updateFD(\'' + item.id + '\')">' +
                                     '<div class="action-icon update">✏️</div>' +
                                     '<div class="action-label">Update</div>' +
-                                '</div>' +
-                                '<div class="action-btn" onclick="deleteFD(\'' + item.id + '\')">' +
-                                    '<div class="action-icon delete">🗑️</div>' +
-                                    '<div class="action-label">Delete</div>' +
                                 '</div>' +
                             '</div>' +
                         '</td>';
@@ -670,6 +835,38 @@
             const filterText = 'Filter Criteria: ' + (filterParts.length > 0 ? filterParts.join(' | ') : 'All Records');
             document.getElementById('printFilters').textContent = filterText;
 
+            // Update filter criteria display above the table
+            const filterCriteriaItems = document.getElementById('filterCriteriaItems');
+            filterCriteriaItems.innerHTML = '';
+            
+            if (currentFilters.amount) {
+                const item = document.createElement('div');
+                item.className = 'filter-item';
+                item.innerHTML = '<strong>Amount:</strong> RM ' + parseFloat(currentFilters.amount).toLocaleString();
+                filterCriteriaItems.appendChild(item);
+            }
+            
+            if (currentFilters.month) {
+                const item = document.createElement('div');
+                item.className = 'filter-item';
+                item.innerHTML = '<strong>Month:</strong> ' + monthNames[parseInt(currentFilters.month)];
+                filterCriteriaItems.appendChild(item);
+            }
+            
+            if (currentFilters.bank) {
+                const item = document.createElement('div');
+                item.className = 'filter-item';
+                item.innerHTML = '<strong>Bank:</strong> ' + currentFilters.bank;
+                filterCriteriaItems.appendChild(item);
+            }
+            
+            if (currentFilters.status) {
+                const item = document.createElement('div');
+                item.className = 'filter-item';
+                item.innerHTML = '<strong>Status:</strong> ' + currentFilters.status;
+                filterCriteriaItems.appendChild(item);
+            }
+
             // Update print date
             const today = new Date();
             const months = ['January', 'February', 'March', 'April', 'May', 'June', 
@@ -682,13 +879,7 @@
         }
 
         function updateFD(id) {
-            alert('Update FD: ' + id);
-        }
-
-        function deleteFD(id) {
-            if (confirm('Delete ' + id + '?')) {
-                alert('Deleted: ' + id);
-            }
+            window.location.href = 'UpdateFD.jsp?id=' + id;
         }
 
         // Auto-expand Fixed Deposits menu
@@ -699,6 +890,22 @@
                 fdDropdown.classList.add('show');
                 fdNavItem.classList.add('open');
             }
+
+            // Hide validation message when user interacts with any field
+            const fields = ['amount', 'month', 'bank', 'status'];
+            const validationMessage = document.getElementById('validationMessage');
+            
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('input', function() {
+                        validationMessage.classList.remove('show');
+                    });
+                    field.addEventListener('change', function() {
+                        validationMessage.classList.remove('show');
+                    });
+                }
+            });
         });
     </script>
 </body>

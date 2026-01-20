@@ -1,30 +1,34 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="Bean.Staff" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-
+<%@ page import="com.fd.model.Bank" %>
 <%
-    Staff loggedStaff = (Staff) session.getAttribute("loggedStaff");
-    if (loggedStaff == null) {
+    // Session check
+    String userName = (String) session.getAttribute("staffName");
+    String userRole = (String) session.getAttribute("staffRole");
+    
+    if (userName == null) {
         response.sendRedirect("Login.jsp");
         return;
     }
-
-    String staffName = loggedStaff.getStaffName();
-    String staffRole = loggedStaff.getStaffRole();
+    
+    // Get bank from request attribute (set by BankServlet)
+    Bank bank = (Bank) request.getAttribute("bank");
+    if (bank == null) {
+        response.sendRedirect("BankList.jsp");
+        return;
+    }
+    
+    String error = (String) request.getAttribute("error");
 %>
-
-<c:if test="${bank == null}">
-    <c:redirect url="BankController?action=list"/>
-</c:if>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Bank - Fixed Deposit Tracking System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <style>
+     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
@@ -85,6 +89,7 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            position: relative;
             overflow: hidden;
         }
 
@@ -144,10 +149,27 @@
             outline: none;
         }
 
-        .readonly-field {
-            background-color: #f0f0f0;
-            cursor: not-allowed;
+        .form-group input:disabled {
+            background: #f5f5f5;
             color: #7f8c8d;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: #ffe5e5;
+            color: #c0392b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            display: <%= error != null ? "block" : "none" %>;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
         }
 
         .submit-btn {
@@ -155,80 +177,271 @@
             color: white;
             border: none;
             padding: 15px;
-            width: 100%;
+            flex: 1;
             border-radius: 8px;
             font-weight: 700;
             cursor: pointer;
             font-size: 16px;
-            margin-top: 10px;
         }
 
         .submit-btn:hover { background: #002d42; }
 
-        .cancel-link {
-            display: block;
-            text-align: center;
-            margin-top: 15px;
-            text-decoration: none;
-            color: #7f8c8d;
-            font-size: 14px;
+        .cancel-btn {
+            background: #95a5a6;
+            color: white;
+            border: none;
+            padding: 15px;
+            flex: 1;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 16px;
         }
 
-        .cancel-link:hover { text-decoration: underline; }
+        .cancel-btn:hover { background: #7f8c8d; }
+
+        .success-message {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #80cbc4;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 10000;
+            opacity: 0;
+            display: block;
+        }
+        
+        .success-message.show {
+            animation: slideDown 0.4s ease forwards;
+        }
+        
+        .success-message.hide {
+            animation: slideUpFade 0.4s ease forwards;
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideUpFade {
+            from {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(-50%) translateY(-20px);
+                opacity: 0;
+            }
+        }
+
+        .confirmation-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .confirmation-modal.active {
+            display: flex;
+        }
+        
+        .confirmation-content {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            min-width: 400px;
+        }
+        
+        .confirmation-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        
+        .confirmation-message {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .confirmation-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .confirmation-btn {
+            padding: 12px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .confirmation-btn-no {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .confirmation-btn-no:hover {
+            background: #7f8c8d;
+        }
+        
+        .confirmation-btn-yes {
+            background: #003f5c;
+            color: white;
+        }
+
+        .confirmation-btn-yes:hover {
+            background: #002d42;
+        }
     </style>
 </head>
-
 <body>
     <%@ include file="includes/sidebar.jsp" %>
 
     <div class="main-content">
         <div class="header">
-            <h1>Update Bank</h1>
-
+            <h1>Edit Bank</h1>
             <div class="user-profile">
                 <div class="user-info">
-                    <div class="user-name"><%= staffName %></div>
-                    <div class="user-role"><%= staffRole %></div>
+                    <div class="user-name"><%= userName %></div>
+                    <div class="user-role"><%= userRole %></div>
                 </div>
-                <div class="user-avatar">
-                    <img src="ProfileImagesServlet" alt="User Avatar"
-                         onerror="this.src='images/icons/user.jpg'">
+                <div class="user-avatar" onclick="window.location.href='Profile.jsp'" style="cursor: pointer;">
+                    <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
                 </div>
             </div>
         </div>
 
-        <div class="page-content">
+         <div class="page-content">
             <div class="form-card">
-                <h2>Update Bank Details</h2>
+                <h2>Edit Bank Information</h2>
 
-                <form action="BankController" method="post" onsubmit="return confirm('Update bank details?')">
+                <% if (error != null) { %>
+                    <div class="error-message">
+                        <%= error %>
+                    </div>
+                <% } %>
+
+                <form id="editBankForm" action="BankServlet" method="post">
                     <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="bankId" value="<%= bank.getBankId() %>">
 
                     <div class="form-group">
-                        <label>Bank ID</label>
-                        <input type="text" name="bankId" value="${bank.bankId}" class="readonly-field" readonly>
+                        <label for="bankName">Bank Name</label>
+                        <input type="text" id="bankName" name="bankName" 
+                               value="<%= bank.getBankName() %>" 
+                               disabled>
+                        <small style="color: #7f8c8d; font-size: 12px; display: block; margin-top: 5px;">
+                            * Bank name cannot be changed
+                        </small>
                     </div>
 
                     <div class="form-group">
-                        <label>Bank Name</label>
-                        <input type="text" name="bankName" value="${bank.bankName}" class="readonly-field" readonly>
+                        <label for="bankPhone">Bank Phone Number</label>
+                        <input type="text" id="bankPhone" name="bankPhone" 
+                               placeholder="Enter head office contact number" 
+                               value="<%= bank.getBankPhone() %>" 
+                               required>
                     </div>
 
                     <div class="form-group">
-                        <label for="bankPhone">Update Phone Number</label>
-                        <input type="text" id="bankPhone" name="bankPhone" value="${bank.bankPhone}" required>
+                        <label for="bankAddress">Bank Address</label>
+                        <textarea id="bankAddress" name="bankAddress" rows="4" 
+                                  placeholder="Enter office branch address" 
+                                  required><%= bank.getBankAddress() %></textarea>
                     </div>
 
-                    <div class="form-group">
-                        <label for="bankAddress">Update Address</label>
-                        <textarea id="bankAddress" name="bankAddress" rows="4" required>${bank.bankAddress}</textarea>
+                    <div class="button-group">
+                        <button type="button" class="cancel-btn" onclick="window.location.href='BankList.jsp'">Cancel</button>
+                        <button type="button" class="submit-btn" onclick="showConfirmation()">Update Bank</button>
                     </div>
-
-                    <button type="submit" class="submit-btn">Save Changes</button>
-                    <a href="BankController?action=list" class="cancel-link">Cancel and Go Back</a>
                 </form>
             </div>
         </div>
     </div>
+
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage"></div>
+
+    <!-- Confirmation Modal -->
+    <div class="confirmation-modal" id="confirmationModal">
+        <div class="confirmation-content">
+            <div class="confirmation-icon">⚠️</div>
+            <div class="confirmation-message">
+                Are you sure you want to update this bank information?
+            </div>
+            <div class="confirmation-buttons">
+                <button class="confirmation-btn confirmation-btn-no" onclick="closeConfirmation()">No</button>
+                <button class="confirmation-btn confirmation-btn-yes" onclick="confirmUpdate()">Yes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-expand Bank dropdown in sidebar
+        document.addEventListener('DOMContentLoaded', function() {
+            const bankDropdown = document.getElementById('bankDropdown');
+            const bankNavItem = document.getElementById('bankNavItem');
+            
+            if (bankDropdown && bankNavItem) {
+                bankDropdown.classList.add('show');
+                bankNavItem.classList.add('open');
+            }
+        });
+
+        function showConfirmation() {
+            // Validate form first
+            const bankPhone = document.getElementById('bankPhone').value.trim();
+            const bankAddress = document.getElementById('bankAddress').value.trim();
+
+            if (!bankPhone || !bankAddress) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            document.getElementById('confirmationModal').classList.add('active');
+        }
+
+        function closeConfirmation() {
+            document.getElementById('confirmationModal').classList.remove('active');
+        }
+
+        function confirmUpdate() {
+            closeConfirmation();
+            document.getElementById('editBankForm').submit();
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('confirmationModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeConfirmation();
+            }
+        });
+    </script>
 </body>
 </html>

@@ -1,9 +1,7 @@
-package Controller;
+package com.fd.servlet;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import com.fd.dao.StaffDAO;
+import com.fd.util.EmailUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -12,84 +10,92 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import Util.DBConn;
-import Util.EmailUtil;
+import java.io.IOException;
 
+/**
+ * ForgotPasswordServlet - Step 1: Send OTP to email
+ * ALIGNED with YOUR Oracle database (STAFFEMAIL, STAFFSTATUS, STAFFID)
+ */
 @WebServlet("/ForgotPasswordServlet")
 public class ForgotPasswordServlet extends HttpServlet {
-
+    private static final long serialVersionUID = 1L;
+    
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+        
+        request.setCharacterEncoding("UTF-8");
+        
+        System.out.println("========================================");
+        System.out.println("🔐 ForgotPasswordServlet - Password Reset Request");
+        System.out.println("========================================");
+        
         String email = request.getParameter("email");
 
         if (email == null || email.trim().isEmpty()) {
+            System.err.println("❌ Email is empty");
             request.setAttribute("error", "Email is required.");
             request.getRequestDispatcher("ForgotPassword.jsp").forward(request, response);
             return;
         }
 
         email = email.trim().toLowerCase();
+        System.out.println("📧 Email: " + email);
 
-        // 1) Check staff email exists & ACTIVE
-        Integer staffId = getActiveStaffIdByEmail(email);
+        // Check if email exists and staff is Active
+        StaffDAO staffDAO = new StaffDAO();
+        Integer staffId = staffDAO.getStaffIdByEmailAndStatus(email, "Active");
 
         if (staffId == null) {
-            request.setAttribute("error", "Email not found or staff inactive.");
+            System.err.println("❌ Email not found or staff not active");
+            System.out.println("========================================");
+            request.setAttribute("error", "Email not found or account is not active.");
             request.getRequestDispatcher("ForgotPassword.jsp").forward(request, response);
             return;
         }
 
-        // 2) Generate OTP (6 digits)
-        String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
+        System.out.println("✅ Staff found - ID: " + staffId);
 
-        // 3) Store OTP in session (5 minutes expiry)
+        // Generate 6-digit OTP
+        String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
+        System.out.println("🔑 OTP Generated: " + otp);
+
+        // Store OTP in session (5 minutes expiry)
         HttpSession session = request.getSession();
         session.setAttribute("fp_staffId", staffId);
         session.setAttribute("fp_email", email);
         session.setAttribute("fp_otp", otp);
-        session.setAttribute("fp_expiry", System.currentTimeMillis() + (5 * 60 * 1000));
+        session.setAttribute("fp_expiry", System.currentTimeMillis() + (5 * 60 * 1000)); // 5 minutes
         session.setAttribute("fp_verified", false);
 
-        // 4) Send OTP email
+        System.out.println("💾 Session data stored");
+        System.out.println("   Expiry: 5 minutes from now");
+
+        // Send OTP email
         try {
+            System.out.println("📧 Sending OTP email...");
             EmailUtil.sendEmail(
                     email,
                     "Fixed Deposit Tracking System - Password Reset OTP",
-                    "Your verification code is: " + otp
-                            + "\n\nThis code will expire in 5 minutes."
+                    "Your verification code is: " + otp + "\n\n" +
+                    "This code will expire in 5 minutes.\n\n" +
+                    "If you did not request this, please ignore this email."
             );
+            System.out.println("✅ Email sent successfully");
         } catch (Exception e) {
+            System.err.println("❌ Failed to send email");
             e.printStackTrace();
+            System.out.println("========================================");
             request.setAttribute("error", "Unable to send verification email. Please try again.");
             request.getRequestDispatcher("ForgotPassword.jsp").forward(request, response);
             return;
         }
 
-        // 5) Redirect to verify page + show message on VerifyCode.jsp
+        System.out.println("✅ PASSWORD RESET REQUEST SUCCESSFUL");
+        System.out.println("   Redirecting to VerifyCode.jsp");
+        System.out.println("========================================");
+
+        // Redirect to verify page
         response.sendRedirect("VerifyCode.jsp?sent=true");
-    }
-
-    private Integer getActiveStaffIdByEmail(String email) {
-        // PostgreSQL default: lowercase table/columns (unless created with "Quotes")
-        String sql = "SELECT staffid FROM staff WHERE staffemail = ? AND staffstatus = 'ACTIVE'";
-
-        try (Connection conn = DBConn.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setString(1, email);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("staffid");
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return null;
     }
 }

@@ -1,9 +1,55 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+    // Get data from session
+    String accountNumber = session.getAttribute("accountNumber") != null ? (String) session.getAttribute("accountNumber") : "";
+    String bankName = session.getAttribute("bankName") != null ? (String) session.getAttribute("bankName") : "";
+    String depositAmount = session.getAttribute("depositAmount") != null ? session.getAttribute("depositAmount").toString() : "";
+    String interestRate = session.getAttribute("interestRate") != null ? session.getAttribute("interestRate").toString() : "";
+    String tenure = session.getAttribute("tenure") != null ? session.getAttribute("tenure").toString() : "";
+    String startDate = session.getAttribute("startDate") != null ? session.getAttribute("startDate").toString() : "";
+    String maturityDate = session.getAttribute("maturityDate") != null ? session.getAttribute("maturityDate").toString() : "";
+    
+    
+    // Check if this is view mode (opened from ViewFD) or create mode (from CreateFD)
+    Boolean viewMode = (Boolean) session.getAttribute("viewMode");
+    boolean isViewMode = viewMode != null && viewMode;
+    
+    // Get FD ID if in view mode (for back button)
+    Integer viewFdID = (Integer) session.getAttribute("viewFdID");
+    String backUrl = isViewMode && viewFdID != null ? "ViewFDServlet?id=" + viewFdID : "CreateFD.jsp";
+    
+    // Check if data exists
+    Boolean pendingSubmit = (Boolean) session.getAttribute("fdPendingSubmit");
+    if (pendingSubmit == null || !pendingSubmit) {
+        // No data in session, redirect to CreateFD
+        response.sendRedirect("CreateFD.jsp");
+        return;
+    }
+    
+    // Check for error message
+    String errorMsg = (String) session.getAttribute("error");
+    if (errorMsg != null) {
+        session.removeAttribute("error");
+    }
+%>
+<%
+    // Simple session check - No includes needed!
+    String userName = (String) session.getAttribute("staffName");
+    String userRole = (String) session.getAttribute("staffRole");
+    
+    if (userName == null) {
+        response.sendRedirect("Login.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Fixed Deposit Application Form</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,19 +58,18 @@
         }
 
         body {
-		    font-family: 'Inter', sans-serif;  /* ✅ Same as other pages */
-		    font-size: 14px;
-		    line-height: 1.5;
-		}
-		
-		/* Document specific styles - only for the printed document */
-		.document-container {
-		    font-family: Calibri, Arial, sans-serif;  /* Calibri only for the document itself */
-		    font-size: 11pt;
-		    line-height: 1.4;
-		}
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
+            background: #f5f5f5;
+        }
+        
+        .document-container {
+            font-family: Calibri, Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+        }
 
-        /* Screen Layout */
         .screen-wrapper {
             display: flex;
             min-height: 100vh;
@@ -92,15 +137,52 @@
             justify-content: center;
         }
 
-        .document-container {
+        .back-button {
+            position: absolute;
+            top: 120px;
+            left: 290px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #7f8c8d;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            width: fit-content;
+        }
+
+        .back-button:hover {
+            color: #2c3e50;
+        }
+
+        .back-icon {
+            font-size: 24px;
+        }
+
+        /* Error Message */
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .document-wrapper {
             background: white;
             width: 100%;
             max-width: 21cm;
-            padding: 3cm 2.5cm;
+            padding: 40px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
         }
 
-        /* Document Styles */
+        .document-container {
+            padding: 2cm 1.5cm;
+            border: 1px solid #e0e0e0;
+        }
+
         .doc-section {
             margin-bottom: 1.5em;
         }
@@ -115,11 +197,6 @@
 
         .red {
             color: #C00000;
-            font-weight: 700;
-        }
-
-        .underline {
-            text-decoration: underline;
             font-weight: 700;
         }
 
@@ -184,6 +261,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
         }
 
         .btn-print {
@@ -204,15 +282,6 @@
         .btn-submit:hover {
             background: #2c3e50;
             color: white;
-        }
-
-        .btn-back {
-            background: #e0e0e0;
-            color: #2c3e50;
-        }
-
-        .btn-back:hover {
-            background: #d0d0d0;
         }
 
         /* Confirmation Modal */
@@ -264,6 +333,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
         }
 
         .modal-btn-no {
@@ -285,39 +355,6 @@
             background: #002d42;
         }
 
-        /* Success Message */
-        .success-message {
-            position: fixed;
-            top: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #7dd3c0;
-            color: #2c3e50;
-            padding: 15px 40px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 10000;
-            display: none;
-            animation: slideDown 0.3s ease;
-        }
-
-        .success-message.show {
-            display: block;
-        }
-
-        @keyframes slideDown {
-            from {
-                transform: translateX(-50%) translateY(-20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(-50%) translateY(0);
-                opacity: 1;
-            }
-        }
-
         /* Print Styles */
         @media print {
             @page {
@@ -330,28 +367,30 @@
             }
 
             .screen-wrapper {
-                display: none !important;
+                display: block;
             }
 
             .sidebar,
             .header,
             .form-actions,
-            .page-content,
-            .main-content {
+            .back-button,
+            .alert-error {
                 display: none !important;
             }
 
-            .print-only {
-                display: block !important;
+            .main-content {
+                margin-left: 0;
+            }
+
+            .document-wrapper {
+                box-shadow: none;
+                padding: 0;
+                max-width: 100%;
             }
 
             .document-container {
-                box-shadow: none;
-                padding: 0.5cm;
-                max-width: 100%;
-                width: 100%;
-                display: block !important;
-                page-break-before: avoid;
+                border: none;
+                padding: 0;
             }
 
             * {
@@ -359,195 +398,198 @@
                 print-color-adjust: exact;
             }
         }
-
-        @media screen {
-            .print-only {
-                display: none;
-            }
-        }
     </style>
 </head>
 <body>
     <div class="screen-wrapper">
-    <%@ include file="includes/sidebar.jsp" %>
+        <%@ include file="includes/sidebar.jsp" %>
         <div class="main-content">
-            <div class="header screen-only">
+            <div class="header">
                 <h1>Fixed Deposit Application Form</h1>
                 <div class="user-profile">
-                    <div class="user-info">
-                        <div class="user-name">Nor Azlina</div>
-                        <div class="user-role">Administrator</div>
-                    </div>
-                    <div class="user-avatar">
-                        <img src="images/icons/user.jpg" alt="User" onerror="this.style.display='none'">
-                    </div>
+                <div class="user-info">
+                    <div class="user-name"><%= userName %></div>
+                    <div class="user-role"><%= userRole %></div>
+                </div>
+                <div class="user-avatar" onclick="window.location.href='Profile.jsp'" style="cursor: pointer;">
+                    <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
                 </div>
             </div>
+        </div>
+            <div class="page-content">
+                <a href="<%= backUrl %>" class="back-button">
+                    <span class="back-icon">←</span>
+                    <span>Back</span>
+                </a>
 
-            <div class="page-content screen-only">
-                <div class="document-container">
-                    <div id="printable-content">
-                        <!-- Content -->
+                <div class="document-wrapper">
+                    <% if (errorMsg != null) { %>
+                        <div class="alert-error"><%= errorMsg %></div>
+                    <% } %>
+                    
+                    <div class="document-container" id="printable-content">
+                        <div class="ref-line">Our Ref.<span style="margin-left: 2em;">:</span><span style="margin-left: 1.5em;">IDJSB/HO/FCA/L-FD/2025</span></div>
+                        <div class="ref-line">Date<span style="margin-left: 3.2em;">:</span><span style="margin-left: 1.5em;" id="docDate"></span></div>
+
+                        <div class="doc-section">
+                            <div class="bold">The Manager</div>
+                            <div class="bold"><%= bankName %></div>
+                            <div id="bankAddress1"></div>
+                            <div id="bankAddress2"></div>
+                        </div>
+
+                        <div class="doc-section">Dear Sir/Madam,</div>
+
+                        <div class="doc-section">
+                            <div class="bold">FIXED DEPOSIT (ISLAMIC) PLACEMENT</div>
+                            <div class="title-line"></div>
+                        </div>
+
+                        <div class="doc-section">The above matters refers.</div>
+
+                        <div class="doc-section">Kindly arrange for placement of Fixed Deposit as per details given below:</div>
+
+                        <table class="info-table">
+                            <tr>
+                                <td class="label">Amount</td>
+                                <td class="colon">:</td>
+                                <td id="fdAmount"></td>
+                            </tr>
+                            <tr>
+                                <td class="label">Duration</td>
+                                <td class="colon">:</td>
+                                <td id="fdDuration"></td>
+                            </tr>
+                            <tr>
+                                <td class="label">Profit Rate</td>
+                                <td class="colon">:</td>
+                                <td id="fdProfitRate"></td>
+                            </tr>
+                        </table>
+
+                        <div class="doc-section">Please debit our accounts as per mention below:</div>
+
+                        <table class="info-table">
+                            <tr>
+                                <td class="label">Name</td>
+                                <td class="colon">:</td>
+                                <td>INFRA DESA (JOHOR) SDN BHD</td>
+                            </tr>
+                            <tr>
+                                <td class="label">Bank</td>
+                                <td class="colon">:</td>
+                                <td><%= bankName %></td>
+                            </tr>
+                            <tr>
+                                <td class="label">Account Number</td>
+                                <td class="colon">:</td>
+                                <td id="accountNumberDisplay"></td>
+                            </tr>
+                        </table>
+
+                        <div class="doc-section">Your cooperation on this matter is highly appreciated.</div>
+
+                        <div class="doc-section">Thank you.</div>
+
+                        <div class="signature-area">
+                            <div>Yours faithfully,</div>
+                            <div class="bold">INFRA DESA (JOHOR) SDN. BHD.</div>
+                        </div>
+
+                        <div class="signature-lines">
+                            <div class="sig-line red">Authorised Signatory</div>
+                            <div class="sig-line red">Authorised Signatory</div>
+                        </div>
                     </div>
                     
                     <div class="form-actions">
-                        <button class="btn btn-back" onclick="window.history.back()">Back</button>
                         <button class="btn btn-print" onclick="window.print()">Print</button>
-                        <button class="btn btn-submit" onclick="submitForm()">Submit</button>
+                        <% if (!isViewMode) { %>
+                        <button class="btn btn-submit" onclick="showConfirmModal()">Submit</button>
+                        <% } %>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Print Version -->
-    <div class="print-only document-container">
-        <div id="print-content">
-            <!-- Content will be duplicated here -->
-        </div>
-    </div>
 
+    <% if (!isViewMode) { %>
     <!-- Confirmation Modal -->
     <div class="modal-overlay" id="confirmModal">
         <div class="modal-content">
-            <div class="modal-message">Are you sure want to submit this information?</div>
+            <div class="modal-message">Are you sure you want to submit this Fixed Deposit?</div>
             <div class="modal-buttons">
                 <button class="modal-btn modal-btn-no" onclick="closeConfirmModal()">No</button>
-                <button class="modal-btn modal-btn-yes" onclick="confirmSubmit()">Yes</button>
+                <button class="modal-btn modal-btn-yes" onclick="submitToDatabase()">Yes</button>
             </div>
         </div>
     </div>
 
-    <!-- Success Message -->
-    <div class="success-message" id="successMessage">
-        New Fixed Deposit added successfully!
-    </div>
+    <!-- Hidden form to submit to SubmitFDServlet -->
+    <form id="submitForm" action="${pageContext.request.contextPath}/SubmitFDServlet" method="POST" style="display: none;">
+	</form>
+    <% } %>
 
     <script>
-        const contentHTML = `
-            <div class="ref-line">Our Ref.<span style="margin-left: 2em;">:</span><span style="margin-left: 1.5em;" id="refNumber">IDJSB/HO/FCA/L-FDMBB/2022 ( )</span></div>
-            <div class="ref-line">Date<span style="margin-left: 3.2em;">:</span><span style="margin-left: 1.5em;" id="docDate"></span></div>
+        // Data from session
+        const fdData = {
+            accountNumber: '<%= accountNumber %>',
+            bankName: '<%= bankName %>',
+            depositAmount: '<%= depositAmount %>',
+            interestRate: '<%= interestRate %>',
+            tenure: '<%= tenure %>'
+        };
 
-            <div class="doc-section">
-                <div class="bold">The Manager</div>
-                <div class="bold" id="bankName">Maybank Islamic Berhad</div>
-                <div id="bankAddress1">Cawangan Jalan Gombak,</div>
-                <div id="bankAddress2">Selangor.</div>
-                <div class="red" id="attentionLine"></div>
-            </div>
+        // Bank addresses
+        const bankAddresses = {
+            'Maybank': { line1: 'Cawangan Jalan Gombak,', line2: 'Selangor.' },
+            'CIMB': { line1: 'Menara CIMB, Jalan Stesen Sentral 2,', line2: 'Kuala Lumpur Sentral, 50470 Kuala Lumpur.' },
+            'MBSB': { line1: 'Menara MBSB, Jalan Kia Peng,', line2: '50450 Kuala Lumpur.' },
+            'Public Bank': { line1: 'Menara Public Bank, Jalan Raja Chulan,', line2: '50200 Kuala Lumpur.' },
+            'RHB Bank': { line1: 'RHB Centre, Jalan Tun Razak,', line2: '50400 Kuala Lumpur.' },
+            'Hong Leong Bank': { line1: 'Menara Hong Leong, Damansara City,', line2: '50490 Kuala Lumpur.' },
+            'AmBank': { line1: 'Menara AmBank, Jalan Yap Kwan Seng,', line2: '50450 Kuala Lumpur.' }
+        };
 
-            <div class="doc-section">Dear Sir/Madam,</div>
-
-            <div class="doc-section">
-                <div class="bold">FIXED DEPOSIT (ISLAMIC) PLACEMENT</div>
-                <div class="title-line"></div>
-            </div>
-
-            <div class="doc-section">The above matters refers.</div>
-
-            <div class="doc-section">Kindly arrange for placement of Fixed Deposit as per details given below:</div>
-
-            <table class="info-table">
-                <tr>
-                    <td class="label">Amount</td>
-                    <td class="colon">:</td>
-                    <td id="fdAmount">RM</td>
-                </tr>
-                <tr>
-                    <td class="label">Duration</td>
-                    <td class="colon">:</td>
-                    <td id="fdDuration">months</td>
-                </tr>
-                <tr>
-                    <td class="label">Profit Rate</td>
-                    <td class="colon">:</td>
-                    <td id="fdProfitRate">%</td>
-                </tr>
-            </table>
-
-            <div class="doc-section">Please debit our accounts as per mention below:</div>
-
-            <table class="info-table">
-                <tr>
-                    <td class="label">Name</td>
-                    <td class="colon">:</td>
-                    <td>INFRA DESA (JOHOR) SDN BHD</td>
-                </tr>
-                <tr>
-                    <td class="label">Bank</td>
-                    <td class="colon">:</td>
-                    <td id="accountBank">Maybank Islamic Bank Berhad</td>
-                </tr>
-                <tr>
-                    <td class="label">Account Number</td>
-                    <td class="colon">:</td>
-                    <td id="accountNumber">5513 4210 3048</td>
-                </tr>
-            </table>
-
-            <div class="doc-section">Your cooperation on this matter is highly appreciated.</div>
-
-            <div class="doc-section">Thank you.</div>
-
-            <div class="signature-area">
-                <div>Yours faithfully,</div>
-                <div class="bold">INFRA DESA (JOHOR) SDN. BHD.</div>
-            </div>
-
-            <div class="signature-lines">
-                <div class="sig-line red">Authorised Signatory</div>
-                <div class="sig-line red">Authorised Signatory</div>
-            </div>
-        `;
-
-        document.getElementById('printable-content').innerHTML = contentHTML;
-        document.getElementById('print-content').innerHTML = contentHTML;
-
+        // Initialize page
         window.addEventListener('DOMContentLoaded', function() {
-            const fdData = sessionStorage.getItem('fdData');
-            if (fdData) {
-                const data = JSON.parse(fdData);
-                populateForm(data);
-            }
+            populateForm();
             setDocumentDate();
         });
 
-        function populateForm(data) {
-            const elements = ['fdAmount', 'fdDuration', 'fdProfitRate', 'bankName', 'accountBank', 'accountNumber', 'bankAddress1', 'bankAddress2', 'attentionLine'];
-            
-            if (data.depositAmount) {
-                const amount = parseFloat(data.depositAmount).toLocaleString('en-MY', {
+        function populateForm() {
+            // Format deposit amount
+            if (fdData.depositAmount) {
+                const amount = parseFloat(fdData.depositAmount).toLocaleString('en-MY', {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2
                 });
-                setElements('fdAmount', 'RM ' + amount);
+                document.getElementById('fdAmount').textContent = 'RM ' + amount;
             }
             
-            if (data.tenure) {
-                const monthText = parseInt(data.tenure) === 1 ? 'month' : 'months';
-                setElements('fdDuration', data.tenure + ' ' + monthText);
+            // Display tenure
+            if (fdData.tenure) {
+                const monthText = parseInt(fdData.tenure) === 1 ? 'month' : 'months';
+                document.getElementById('fdDuration').textContent = fdData.tenure + ' ' + monthText;
             }
             
-            if (data.interestRate) {
-                setElements('fdProfitRate', data.interestRate + '%');
+            // Display interest rate
+            if (fdData.interestRate) {
+                document.getElementById('fdProfitRate').textContent = fdData.interestRate + '%';
             }
             
-            if (data.bankName) {
-                setElements('bankName', data.bankName);
-                setElements('accountBank', data.bankName);
-                updateBankAddress(data.bankName);
+            // Display account number
+            if (fdData.accountNumber) {
+                document.getElementById('accountNumberDisplay').textContent = formatAccountNumber(fdData.accountNumber);
             }
             
-            if (data.accountNumber) {
-                setElements('accountNumber', formatAccountNumber(data.accountNumber));
+            // Set bank address
+            if (fdData.bankName) {
+                const address = bankAddresses[fdData.bankName] || { line1: '', line2: '' };
+                document.getElementById('bankAddress1').textContent = address.line1;
+                document.getElementById('bankAddress2').textContent = address.line2;
             }
-        }
-
-        function setElements(id, value) {
-            const screenEl = document.querySelector('#printable-content #' + id);
-            const printEl = document.querySelector('#print-content #' + id);
-            if (screenEl) screenEl.textContent = value;
-            if (printEl) printEl.textContent = value;
         }
 
         function formatAccountNumber(accountNumber) {
@@ -559,40 +601,15 @@
             return parts.join(' ');
         }
 
-        function updateBankAddress(bankName) {
-            const addresses = {
-                'Maybank': {
-                    line1: 'Cawangan Jalan Gombak,',
-                    line2: 'Selangor.',
-                    attention: ''
-                },
-                'CIMB': {
-                    line1: 'Menara CIMB, Jalan Stesen Sentral 2,',
-                    line2: 'Kuala Lumpur Sentral,',
-                    line3: '50470 Kuala Lumpur.',
-                    attention: ''
-                }
-            };
-
-            const address = addresses[bankName] || addresses['Maybank'];
-            setElements('bankAddress1', address.line1);
-            setElements('bankAddress2', address.line2);
-            
-            if (address.attention) {
-                setElements('attentionLine', address.attention);
-            }
-        }
-
         function setDocumentDate() {
             const today = new Date();
             const day = String(today.getDate()).padStart(2, '0');
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const year = today.getFullYear();
-            setElements('docDate', day + '/' + month + '/' + year);
+            document.getElementById('docDate').textContent = day + '/' + month + '/' + year;
         }
 
-        function submitForm() {
-            // Show confirmation modal
+        function showConfirmModal() {
             document.getElementById('confirmModal').classList.add('show');
         }
 
@@ -600,18 +617,10 @@
             document.getElementById('confirmModal').classList.remove('show');
         }
 
-        function confirmSubmit() {
-            // Close modal
+        function submitToDatabase() {
             closeConfirmModal();
-            
-            // Clear session storage
-            sessionStorage.removeItem('fdData');
-            
-            // Set success flag in sessionStorage
-            sessionStorage.setItem('fdSuccess', 'true');
-            
-            // Redirect to FD List
-            window.location.href = 'FDList.jsp';
+            // Submit to SubmitFDServlet which saves to database
+            document.getElementById('submitForm').submit();
         }
     </script>
 </body>

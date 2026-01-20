@@ -1,24 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="Bean.Staff" %>
+<%@ page import="com.fd.model.Staff" %>
 <%@ page import="java.sql.*" %>
 <%@ page import="java.util.*" %>
 <%@ page import="java.util.Arrays" %>
 <%@ page import="java.text.DecimalFormat" %>
-<%@ page import="Util.DBConn" %>
-
+<%@ page import="com.fd.util.DBConnection" %>
 <%
-    // =========================
-    // SESSION PROTECTION
-    // =========================
-    Staff loggedStaff = (Staff) session.getAttribute("loggedStaff");
-    if (loggedStaff == null) {
-        response.sendRedirect("Login.jsp");
-        return;
-    }
-
-    String staffName = loggedStaff.getStaffName();
-    String staffRole = loggedStaff.getStaffRole();
-
     // =========================
     // SELECT YEAR (default current year)
     // =========================
@@ -96,7 +83,7 @@
     String sqlTotalStaff =
         "SELECT COUNT(*) AS total_staff FROM staff";
 
-    try (Connection con = DBConn.getConnection()) {
+    try (Connection con = DBConnection.getConnection()) {
 
         // --- Bank dropdown list ---
         try (PreparedStatement ps = con.prepareStatement(sqlBankList);
@@ -289,42 +276,289 @@
     boolean showLastYear  = lastYearTotal > 0;
     boolean showTotalStaff = totalStaff > 0;
 %>
-
+<%
+    // Simple session check - No includes needed!
+    String userName = (String) session.getAttribute("staffName");
+    String userRole = (String) session.getAttribute("staffRole");
+    
+    if (userName == null) {
+        response.sendRedirect("Login.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Fixed Deposit Tracking System</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <link rel="stylesheet" href="css/Dashbord.css">
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 250px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .user-role {
+            font-size: 13px;
+            color: #7f8c8d;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #d0d0d0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .dropdown-arrow {
+            font-size: 12px;
+            margin-left: 5px;
+        }
+
+        /* Dashboard Content */
+        .dashboard-content {
+            padding: 40px;
+            flex: 1;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        /* Report Section */
+        .report-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .report-header h2 {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .sort-dropdown {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .sort-dropdown select {
+            padding: 8px 15px;
+            border: 1px solid #d0d0d0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .chart-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .legend {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .legend-item {
+            padding: 15px 25px;
+            border-radius: 15px;
+            font-weight: 500;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-item::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+        }
+
+        .legend-item.project-a {
+            background: #7dd3c0;
+            color: #0c373f;
+        }
+
+        .legend-item.project-b {
+            background: #0c373f;
+            color: white;
+        }
+
+        .legend-item.project-c {
+            background: #ff9a5a;
+            color: white;
+        }
+
+        /* Stats Cards */
+        .stats-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid #e0e0e0;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 1.1rem;
+            color: #2c3e50;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .stat-card .amount {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+            }
+
+            .header {
+                padding: 15px 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .dashboard-content {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
-
 <body>
+    <!-- Sidebar -->
+	<%@ include file="includes/sidebar.jsp" %>
 
-    <%@ include file="includes/sidebar.jsp" %>
-
+    <!-- Main Content -->
     <div class="main-content">
+        <!-- Header -->
         <div class="header">
             <h1>Dashboard</h1>
-
             <div class="user-profile">
                 <div class="user-info">
-                    <div class="user-name"><%= staffName %></div>
-                    <div class="user-role"><%= staffRole %></div>
+                    <div class="user-name"><%= userName %></div>
+                    <div class="user-role"><%= userRole %></div>
                 </div>
-
-                <div class="user-avatar">
-                    <img src="ProfileImagesServlet" alt="User Avatar"
-                         onerror="this.src='images/icons/user.jpg'">
+                <div class="user-avatar" onclick="window.location.href='Profile.jsp'" style="cursor: pointer;">
+                    <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
                 </div>
             </div>
         </div>
 
+        <!-- Dashboard Content -->
         <div class="dashboard-content">
             <div class="content-grid">
 

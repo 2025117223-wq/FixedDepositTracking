@@ -50,9 +50,45 @@
         flex: 1;
         padding: 0;
     }
-
+	
+	.fd-icon{
+		width: 46px;
+		height: 47px;
+		margin-left: 2px;
+	}
+	
+	.dashboard-icon {
+		width: 50px;
+		height: 55px;
+		margin-left: -4px;
+	}
+	
+	.bank-icon{
+		width: 50px;
+		height: 55px;
+		margin-left: -2px;
+	}
+	
+	.user-icon{
+		width: 50px;
+		height: 55px;
+		margin-left: -2px;
+	}
+	
+	.profile-icon{
+		width: 50px;
+		height: 55px;
+		margin-left: -2px;
+	}
+	
+	.logout-icon{
+		width: 50px;
+		height: 50px;
+		margin-left: -2px;
+	}
+	
     .nav-item {
-        padding: 12px 20px;
+        padding: 1px 20px;
         display: flex;
         align-items: center;
         gap: 12px;
@@ -79,7 +115,7 @@
 
     .dropdown-icon {
         margin-left: auto;
-        font-size: 12px;
+        font-size: 8px;
         transition: transform 0.3s ease;
     }
 
@@ -121,8 +157,8 @@
     }
 
     .sub-item::before {
-        content: '●';
-        font-size: 8px;
+        content: '>';
+        font-size: 12.5px;
     }
 
     .divider {
@@ -145,45 +181,45 @@
 
     <nav class="nav-menu">
         <a href="${pageContext.request.contextPath}/Dashboard.jsp" class="nav-item <%= request.getRequestURI().contains("Dashboard") ? "active" : "" %>">
-            <span class="nav-icon">📊</span>
+        	<img src="images/icons/dashboard-icon.png" alt="Home" class="dashboard-icon">
             <span>Dashboard</span>
         </a>
 
         <div class="nav-item" id="fdNavItem" onclick="toggleDropdown('fdDropdown', this)">
-            <span class="nav-icon">📁</span>
+            <img src="images/icons/fd-icon.png" alt="Home" class="fd-icon">
             <span>Fixed Deposits</span>
             <span class="dropdown-icon">▼</span>
         </div>
         <div class="sub-menu" id="fdDropdown">
-            <a href="${pageContext.request.contextPath}/FDList.jsp" class="sub-item <%= request.getRequestURI().contains("FDList") ? "active" : "" %>">Fixed Deposit Lists</a>
-            <a href="${pageContext.request.contextPath}/CreateFD.jsp" class="sub-item <%= request.getRequestURI().contains("CreateFD") ? "active" : "" %>">Create New FD</a>
-            <a href="${pageContext.request.contextPath}/GenerateReport.jsp" class="sub-item <%= request.getRequestURI().contains("GenerateReport") ? "active" : "" %>">Generate Report</a>
+            <a href="${pageContext.request.contextPath}/FDListServlet" class="sub-item <%= request.getRequestURI().contains("FDList") ? "active" : "" %>">Fixed Deposit Lists</a>
+            <a href="${pageContext.request.contextPath}/CreateFDServlet" class="sub-item <%= request.getRequestURI().contains("CreateFD") ? "active" : "" %>">Create New FD</a>
+            <a href="${pageContext.request.contextPath}/GenerateReportServlet" class="sub-item <%= request.getRequestURI().contains("GenerateReport") ? "active" : "" %>">Generate Report</a>
         </div>
 
         <div class="nav-item" id="bankNavItem" onclick="toggleDropdown('bankDropdown', this)">
-            <span class="nav-icon">🏦</span>
+            <img src="images/icons/bank-icon.png" alt="Home" class="bank-icon">
             <span>Bank</span>
             <span class="dropdown-icon">▼</span>
         </div>
         <div class="sub-menu" id="bankDropdown">
             <a href="${pageContext.request.contextPath}/BankList.jsp" class="sub-item <%= request.getRequestURI().contains("BankList") ? "active" : "" %>">Bank Lists</a>
-            <a href="${pageContext.request.contextPath}/CreateBank.jsp" class="sub-item <%= request.getRequestURI().contains("CreateBank") ? "active" : "" %>">Create New Bank</a>
+            <a href="${pageContext.request.contextPath}/CreateBank.jsp" class="sub-item <%= request.getRequestURI().contains("CreateBank") ? "active" : "" %>">Register Bank</a>
         </div>
 
         <a href="${pageContext.request.contextPath}/UserList.jsp" class="nav-item <%= request.getRequestURI().contains("UserList") ? "active" : "" %>">
-            <span class="nav-icon">👥</span>
+            <img src="images/icons/user-icon.png" alt="Home" class="user-icon">
             <span>Users</span>
         </a>
 
         <div class="divider"></div>
 
         <a href="${pageContext.request.contextPath}/Profile.jsp" class="nav-item <%= request.getRequestURI().contains("Profile") ? "active" : "" %>">
-            <span class="nav-icon">👤</span>
+            <img src="images/icons/profile-icon.png" alt="Home" class="profile-icon">
             <span>Profile</span>
         </a>
 
         <a href="${pageContext.request.contextPath}/Login.jsp" class="nav-item">
-            <span class="nav-icon">🚪</span>
+            <img src="images/icons/logout-icon.png" alt="Home" class="logout-icon">
             <span>Log Out</span>
         </a>
     </nav>

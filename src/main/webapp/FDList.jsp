@@ -1,4 +1,16 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+    // Simple session check - No includes needed!
+    String userName = (String) session.getAttribute("staffName");
+    String userRole = (String) session.getAttribute("staffRole");
+    
+    if (userName == null) {
+        response.sendRedirect("Login.jsp");
+        return;
+    }
+%>
+<%@ page import="java.util.List" %>
+<%@ page import="com.fd.model.FixedDepositRecord" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -90,6 +102,20 @@
         .page-content {
             padding: 40px;
             flex: 1;
+        }
+
+        /* Error Message */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         /* Search Bar */
@@ -198,19 +224,13 @@
             color: #0c7a5a;
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            justify-content: center;
-        }
-
         .action-btn {
-            display: flex;
+            display: inline-flex;
             flex-direction: column;
             align-items: center;
             gap: 5px;
             cursor: pointer;
+            margin-top: 10px;
             transition: all 0.3s ease;
         }
 
@@ -231,14 +251,38 @@
             color: #3498db;
         }
 
-        .action-icon.delete {
-            color: #e74c3c;
-        }
-
         .action-label {
             font-size: 11px;
             color: #7f8c8d;
             font-weight: 500;
+        }
+        
+        .action-icon img {
+		    width: 100%;
+		    height: 100%;
+		    object-fit: contain;
+		    display: block; /* removes default inline gap */
+		}
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .empty-state-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-text {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .empty-state-subtext {
+            font-size: 14px;
         }
 
         @media (max-width: 768px) {
@@ -267,57 +311,60 @@
             }
         }
         
-		/* Success Message */
-		.success-message {
-		    position: fixed;
-		    top: 100px;
-		    left: 50%;
-		    transform: translateX(-50%);
-		    background: #80cbc4;
-		    color: white;
-		    padding: 15px 40px;
-		    border-radius: 8px;
-		    font-size: 16px;
-		    font-weight: 500;
-		    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-		    z-index: 10000;
-		    margin-left: 100px;
-		    margin-top: -50px;
-		    opacity: 0;
-		    pointer-events: none;
-		}
-		
-		/* Show animation */
-		.success-message.show {
-		    animation: slideDown 0.4s ease forwards;
-		}
-		
-		/* Hide animation */
-		.success-message.hide {
-		    animation: slideUpFade 0.4s ease forwards;
-		}
-		
-		@keyframes slideDown {
-		    from {
-		        transform: translateX(-50%) translateY(-20px);
-		        opacity: 0;
-		    }
-		    to {
-		        transform: translateX(-50%) translateY(0);
-		        opacity: 1;
-		    }
-		}
-		
-		@keyframes slideUpFade {
-		    from {
-		        transform: translateX(-50%) translateY(0);
-		        opacity: 1;
-		    }
-		    to {
-		        transform: translateX(-50%) translateY(-20px);
-		        opacity: 0;
-		    }
-		}
+        /* Notification Message */
+        .notification {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 10000;
+            color: white;
+            min-width: 300px;
+            text-align: center;
+            margin-left: 100px;
+            margin-top: -50px;
+            opacity: 0;
+            display: block;
+        }
+
+        .notification.show {
+            animation: slideDown 0.4s ease forwards;
+        }
+
+        .notification.hide {
+            animation: slideUpFade 0.4s ease forwards;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUpFade {
+            from {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(-50%) translateY(-20px);
+                opacity: 0;
+            }
+        }
+
+        .notification.success {
+            background: #80cbc4;
+        }
     </style>
 </head>
 <body>
@@ -331,10 +378,10 @@
             <h1>Fixed Deposits Lists</h1>
             <div class="user-profile">
                 <div class="user-info">
-                    <div class="user-name">Nor Azlina</div>
-                    <div class="user-role">Administrator</div>
+                    <div class="user-name"><%= userName %></div>
+                    <div class="user-role"><%= userRole %></div>
                 </div>
-                <div class="user-avatar">
+                <div class="user-avatar" onclick="window.location.href='Profile.jsp'" style="cursor: pointer;">
                     <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
                 </div>
             </div>
@@ -342,6 +389,13 @@
 
         <!-- Page Content -->
         <div class="page-content">
+            <!-- Error Message -->
+            <% if (request.getAttribute("error") != null) { %>
+                <div class="alert alert-error">
+                    <%= request.getAttribute("error") %>
+                </div>
+            <% } %>
+
             <!-- Search Bar -->
             <div class="search-section">
                 <div class="search-bar">
@@ -365,146 +419,52 @@
                         </tr>
                     </thead>
                     <tbody>
+                        <%
+                            List<FixedDepositRecord> fdList = (List<FixedDepositRecord>) request.getAttribute("fdList");
+                            
+                            if (fdList != null && !fdList.isEmpty()) {
+                                for (FixedDepositRecord fd : fdList) {
+                        %>
                         <tr>
-                            <td>FD2465</td>
-                            <td><a href="#" class="account-link">9876543210123</a></td>
-                            <td>25,000</td>
-                            <td>Maybank</td>
-                            <td>17</td>
-                            <td><span class="status pending">Pending</span></td>
+                            <td>FD<%= fd.getFdID() %></td>
                             <td>
-                                <div class="action-buttons">
-                                    <div class="action-btn" onclick="updateFD('FD2465')">
-                                        <div class="action-icon update">✏️</div>
-                                        <div class="action-label">Update</div>
-                                    </div>
-                                    <div class="action-btn" onclick="deleteFD('FD2465')">
-                                        <div class="action-icon delete">🗑️</div>
-                                        <div class="action-label">Delete</div>
-                                    </div>
+                                <a href="ViewFDServlet?id=<%= fd.getFdID() %>" class="account-link">
+                                    <%= fd.getAccNumber() %>
+                                </a>
+                            </td>
+                            <td><%= fd.getFormattedDepositAmount() %></td>
+                            <td><%= fd.getBankName() != null ? fd.getBankName() : "-" %></td>
+                            <td><%= fd.getTenure() %></td>
+                            <td>
+                                <span class="status <%= fd.getStatusClass() %>">
+                                    <%= fd.getDisplayStatus() %>
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-btn" onclick="updateFD(<%= fd.getFdID() %>)">
+								    <div class="action-icon update">
+								        <img src="images/icons/update-icon.png" alt="Update" style="width:100px; height:90px;">
+								    </div>
+								    	<div class="action-label">Update</div>
+								</div>
+                            </td>
+                        </tr>
+                        <%
+                                }
+                            } else {
+                        %>
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">📋</div>
+                                    <div class="empty-state-text">No Fixed Deposits Found</div>
+                                    <div class="empty-state-subtext">Create a new Fixed Deposit to get started</div>
                                 </div>
                             </td>
                         </tr>
-                        <tr>
-                            <td>FD7895</td>
-                            <td><a href="#" class="account-link">5032918476201</a></td>
-                            <td>60,000</td>
-                            <td>MBSB</td>
-                            <td>6</td>
-                            <td><span class="status ongoing">Ongoing</span></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <div class="action-btn" onclick="updateFD('FD7895')">
-                                        <div class="action-icon update">✏️</div>
-                                        <div class="action-label">Update</div>
-                                    </div>
-                                    <div class="action-btn" onclick="deleteFD('FD7895')">
-                                        <div class="action-icon delete">🗑️</div>
-                                        <div class="action-label">Delete</div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>FD1024</td>
-                            <td><a href="#" class="account-link">7648391205784</a></td>
-                            <td>50,500</td>
-                            <td>CIMB</td>
-                            <td>17</td>
-                            <td><span class="status ongoing">Ongoing</span></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <div class="action-btn" onclick="updateFD('FD1024')">
-                                        <div class="action-icon update">✏️</div>
-                                        <div class="action-label">Update</div>
-                                    </div>
-                                    <div class="action-btn" onclick="deleteFD('FD1024')">
-                                        <div class="action-icon delete">🗑️</div>
-                                        <div class="action-label">Delete</div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>FD7230</td>
-                            <td><a href="#" class="account-link">1928374650192</a></td>
-                            <td>35,000</td>
-                            <td>Maybank</td>
-                            <td>17</td>
-                            <td><span class="status ongoing">Ongoing</span></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <div class="action-btn" onclick="updateFD('FD7230')">
-                                        <div class="action-icon update">✏️</div>
-                                        <div class="action-label">Update</div>
-                                    </div>
-                                    <div class="action-btn" onclick="deleteFD('FD7230')">
-                                        <div class="action-icon delete">🗑️</div>
-                                        <div class="action-label">Delete</div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>FD1126</td>
-                            <td><a href="#" class="account-link">6482039174520</a></td>
-                            <td>25,000</td>
-                            <td>Maybank</td>
-                            <td>12</td>
-                            <td><span class="status matured">Matured</span></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <div class="action-btn" onclick="updateFD('FD1126')">
-                                        <div class="action-icon update">✏️</div>
-                                        <div class="action-label">Update</div>
-                                    </div>
-                                    <div class="action-btn" onclick="deleteFD('FD1126')">
-                                        <div class="action-icon delete">🗑️</div>
-                                        <div class="action-label">Delete</div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>FD4052</td>
-                            <td><a href="#" class="account-link">3857204916837</a></td>
-                            <td>18,000</td>
-                            <td>MBSB</td>
-                            <td>11</td>
-                            <td><span class="status pending">Pending</span></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <div class="action-btn" onclick="updateFD('FD4052')">
-                                        <div class="action-icon update">✏️</div>
-                                        <div class="action-label">Update</div>
-                                    </div>
-                                    <div class="action-btn" onclick="deleteFD('FD4052')">
-                                        <div class="action-icon delete">🗑️</div>
-                                        <div class="action-label">Delete</div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>FD8163</td>
-                            <td><a href="#" class="account-link">2179845301629</a></td>
-                            <td>47,000</td>
-                            <td>CIMB</td>
-                            <td>8</td>
-                            <td><span class="status matured">Matured</span></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <div class="action-btn" onclick="updateFD('FD8163')">
-                                        <div class="action-icon update">✏️</div>
-                                        <div class="action-label">Update</div>
-                                    </div>
-                                    <div class="action-btn" onclick="deleteFD('FD8163')">
-                                        <div class="action-icon delete">🗑️</div>
-                                        <div class="action-label">Delete</div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
+                        <%
+                            }
+                        %>
                     </tbody>
                 </table>
             </div>
@@ -512,6 +472,34 @@
     </div>
 
     <script>
+        // Show notification function
+        function showNotification(message, type) {
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            
+            if (type === 'success') {
+                notification.classList.add('success');
+            }
+            
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+                notification.classList.add('hide');
+                setTimeout(() => notification.remove(), 400);
+            }, 3000);
+        }
+
         // Search function
         function searchTable() {
             const input = document.getElementById('searchInput');
@@ -537,23 +525,12 @@
             }
         }
 
-        // Update FD function
+        // Update FD function - go through servlet to load data from database
         function updateFD(fdId) {
-            alert('Update FD: ' + fdId);
-            // Redirect to update page or open modal
-            // window.location.href = 'UpdateFD.jsp?id=' + fdId;
+            window.location.href = 'UpdateFDServlet?id=' + fdId;
         }
 
-        // Delete FD function
-        function deleteFD(fdId) {
-            if (confirm('Are you sure you want to delete ' + fdId + '?')) {
-                alert('Deleted: ' + fdId);
-                // Call delete servlet or API
-                // Then reload the page or remove the row
-            }
-        }
-
-        // Auto-open Fixed Deposits dropdown on FDList page
+        // Auto-open Fixed Deposits dropdown
         document.addEventListener('DOMContentLoaded', function() {
             const fdDropdown = document.getElementById('fdDropdown');
             const fdNavItem = document.getElementById('fdNavItem');
@@ -563,39 +540,22 @@
                 fdNavItem.classList.add('open');
             }
             
-         // Check for success message
-            const fdSuccess = sessionStorage.getItem('fdSuccess');
-
-            if (fdSuccess === 'true') {
-                const successMsg = document.getElementById('successMessage');
-
-                if (successMsg) {
-                    // Show
-                    successMsg.classList.add('show');
-                    sessionStorage.removeItem('fdSuccess');
-
-                    // Hide after 3 seconds
-                    setTimeout(() => {
-                        successMsg.classList.remove('show');
-                        successMsg.classList.add('hide');
-
-                        // Clean up after animation ends
-                        successMsg.addEventListener('animationend', () => {
-                            successMsg.classList.remove('hide');
-                        }, { once: true });
-
-                    }, 3000);
-                }
-            }
+            // **FIX: Check for success messages from request attributes (set by servlet)**
+            <% 
+            String fdSuccess = (String) request.getAttribute("fdSuccess");
+            Integer newFdID = (Integer) request.getAttribute("newFdID");
+            String fdUpdateSuccess = (String) request.getAttribute("fdUpdateSuccess");
+            String updatedFdId = (String) request.getAttribute("updatedFdId");
+            
+            if ("true".equals(fdSuccess)) { 
+            %>
+                showNotification('New Fixed Deposit <%= newFdID != null ? "FD" + newFdID : "" %> added successfully!', 'success');
+            <% } %>
+            
+            <% if ("true".equals(fdUpdateSuccess)) { %>
+                showNotification('Fixed Deposit <%= updatedFdId != null ? updatedFdId : "" %> has been updated!', 'success');
+            <% } %>
         });
-        
-        
     </script>
-    <script src="fdData.js"></script>
-    
-    <!-- Success Message -->
-    <div class="success-message" id="successMessage">
-        New Fixed Deposit added successfully!
-    </div>
 </body>
 </html>

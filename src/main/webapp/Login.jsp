@@ -8,9 +8,356 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/Login.css">
-</head>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-image: 
+                linear-gradient(rgba(12, 55, 63, 0.7), rgba(12, 55, 63, 0.8)),
+                url('images/signupBG.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            max-height: 100vh;
+            display: flex;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .left-panel {
+            flex: 0 0 50%;
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 60px 80px;
+            color: white;
+            position: relative;
+        }
+
+        .logo {
+            width: 240px;
+            height: 240px;
+            position: relative;
+            margin-top: -150px;
+            margin-bottom: -30px;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .system-title {
+            text-align: left;
+            margin-bottom: -20px;
+        }
+
+        .system-title h1 {
+            font-size: 4.5rem;
+            font-weight: 700;
+            color: #ff914d;
+            line-height: 1.1;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.2);
+            font-family: 'Libre Baskerville', serif;
+        }
+
+        .system-description {
+            max-width: 600px;
+            margin-top: 35px;
+        }
+
+        .system-description p {
+            font-size: 1.4rem;
+            line-height: 1.6;
+            color: #e0e0e0;
+            font-weight: medium;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .right-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            background: transparent;
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+
+        .right-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 130%;
+            height: 100%;
+            background-image: url('images/lineP.png');
+            background-size: cover;
+            background-position: 100% center;
+            background-repeat: no-repeat;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .login-form {
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .form-header h2 {
+            font-size: 3rem;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .divider {
+            border-top: 3px dashed #ffffff;
+            margin-top: 15px;
+        }
+
+        /* ================= FORM ================= */
+        .form-group {
+            margin-bottom: 30px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        /* ================= ICONS ================= */
+        .input-icon,
+        .password-icon {
+            position: absolute;
+            left: 25px;
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            z-index: 2;
+        }
+
+        /* ================= INPUTS ================= */
+        input[type="email"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 20px 25px 20px 70px;
+            border: 2px solid #d0d0d0;
+            border-radius: 50px;
+            font-size: 16px;
+            background: #fafafa;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #1a4d5e;
+            background: #fff;
+        }
+
+        input::placeholder {
+            color: #a8a8a8;
+        }
+
+        /* ================= FORGOT PASSWORD ================= */
+        .forgot-password-link {
+            text-align: right;
+            margin-top: 10px;
+        }
+
+        .forgot-password-link a {
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-decoration: underline !important;
+            text-underline-offset: 3px;
+        }
+
+        .forgot-password-link a:hover {
+            text-decoration: none;
+        }
+
+        /* ================= BUTTON ================= */
+        .submit-btn {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #ff9a5a, #ff8547);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* ================= SIGN UP LINK ================= */
+        .signup-link {
+            text-align: center;
+            margin-top: 25px;
+            color: #ffffff;
+            font-size: 16px;
+        }
+
+        .signup-link a {
+            color: #ffffff;
+            font-weight: 700;
+            text-decoration: underline !important;
+            text-underline-offset: 3px;
+        }
+
+        .signup-link a:hover {
+            text-decoration: none;
+        }
+
+        /* ================= ERROR ================= */
+        .error-message {
+            color: #e74c3c;
+            font-size: 13px;
+            margin-top: 5px;
+            margin-left: 25px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        input.error {
+            border-color: #e74c3c;
+        }
+
+        /* ================= SERVER ERROR (from servlet) ================= */
+        .server-error {
+            background: rgba(231, 76, 60, 0.18);
+            border: 1px solid rgba(231, 76, 60, 0.7);
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        /* ================= SUCCESS MESSAGE ================= */
+        .success-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #7dd3c0;
+            color: #0c373f;
+            padding: 15px 40px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+            display: none;
+            animation: slideDown 0.5s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .success-message.hide {
+            animation: fadeOut 0.5s ease forwards;
+        }
+
+        @keyframes slideDown {
+            from {
+                top: -100px;
+                opacity: 0;
+            }
+            to {
+                top: 20px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                top: 20px;
+            }
+            to {
+                opacity: 0;
+                top: -100px;
+            }
+        }
+
+        /* ================= RESPONSIVE ================= */
+        @media (max-width: 1200px) {
+            .left-panel {
+                padding: 40px 50px;
+            }
+
+            .system-title h1 {
+                font-size: 3.5rem;
+            }
+
+            .form-header h2 {
+                font-size: 2.5rem;
+            }
+        }
+
+        @media (max-width: 968px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .left-panel {
+                flex: 0 0 auto;
+                padding: 40px 20px;
+            }
+
+            .logo {
+                width: 120px;
+                height: 120px;
+            }
+
+            .system-title h1 {
+                font-size: 2.5rem;
+            }
+
+            .right-panel {
+                padding: 40px 20px;
+            }
+
+            .submit-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
 <body>
 <%
     String error = (String) request.getAttribute("error");
@@ -61,7 +408,7 @@
                     }
                 %>
 
-                <form id="loginForm">
+                <form id="loginForm" action="<%= request.getContextPath() %>/LoginServlet" method="POST">
                     <div class="form-group">
                         <div class="input-wrapper">
                             <img src="images/icons/user.jpg" alt="Email" class="input-icon">
@@ -77,7 +424,7 @@
                             <input type="password" id="password" name="password" placeholder="Your Password" required>
                             <button type="button" id="togglePassword"
                                     style="position: absolute; right: 25px; background: none; border: none; cursor: pointer; z-index: 2;">
-                                <img id="passwordIcon" src="images/icons/showpass.png" alt="Show Password" style="width: 25px; height: 25px;">
+                                <img id="passwordIcon" src="images/icons/eyeDisable.png" alt="Show Password" style="width: 25px; height: 25px;">
                             </button>
                         </div>
 
@@ -137,14 +484,18 @@
     const togglePasswordButton = document.getElementById("togglePassword");
     const passwordIcon = document.getElementById("passwordIcon");
 
-    // Toggle password visibility
+    // Toggle password visibility - FIXED ICON NAMES
     togglePasswordButton.addEventListener("click", () => {
         if (passwordField.type === "password") {
+            // Show password
             passwordField.type = "text";
-            passwordIcon.src = "images/icons/hidepass.png";
+            passwordIcon.src = "images/icons/eyeEnable.png";  // CHANGED: Hide icon when password is visible
+            passwordIcon.alt = "Show Password";
         } else {
+            // Hide password
             passwordField.type = "password";
-            passwordIcon.src = "images/icons/showpass.png";
+            passwordIcon.src = "images/icons/eyeDisable.png";   // CHANGED: Show icon when password is hidden
+            passwordIcon.alt = "Hide Password";
         }
     });
 
@@ -167,36 +518,6 @@
         }
 
         if (!isValid) e.preventDefault();
-        else {
-            e.preventDefault(); // prevent form submission and call the login API
-            const loginData = {
-                username: email.value,
-                password: passwordField.value
-            };
-
-            fetch('http://localhost:8080/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(loginData),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.token) {
-                    // Store token in session storage
-                    sessionStorage.setItem('jwtToken', data.token);
-                    window.location.href = "Dashboard.jsp"; // Redirect to dashboard upon successful login
-                } else {
-                    // Show error message if login fails
-                    alert('Login failed');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Login failed');
-            });
-        }
     });
 
     function showError(inputId, errorId, message) {
