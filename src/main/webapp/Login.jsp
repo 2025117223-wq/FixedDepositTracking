@@ -61,7 +61,7 @@
                     }
                 %>
 
-                <form id="loginForm" action="<%= request.getContextPath() %>/LoginServlet" method="POST">
+                <form id="loginForm">
                     <div class="form-group">
                         <div class="input-wrapper">
                             <img src="images/icons/user.jpg" alt="Email" class="input-icon">
@@ -167,6 +167,36 @@
         }
 
         if (!isValid) e.preventDefault();
+        else {
+            e.preventDefault(); // prevent form submission and call the login API
+            const loginData = {
+                username: email.value,
+                password: passwordField.value
+            };
+
+            fetch('http://localhost:8080/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(loginData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.token) {
+                    // Store token in session storage
+                    sessionStorage.setItem('jwtToken', data.token);
+                    window.location.href = "Dashboard.jsp"; // Redirect to dashboard upon successful login
+                } else {
+                    // Show error message if login fails
+                    alert('Login failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Login failed');
+            });
+        }
     });
 
     function showError(inputId, errorId, message) {
