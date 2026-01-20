@@ -39,9 +39,9 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-tomcat</artifactId>
-            <scope>provided</scope>
-        </dependency>
+            <artifactId>spring-boot-starter-jsp</artifactId>
+            <version>2.7.10</version>  
+        </dependency
 
         <dependency>
             <groupId>org.postgresql</groupId>
