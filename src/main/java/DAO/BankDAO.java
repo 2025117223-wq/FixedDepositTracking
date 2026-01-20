@@ -19,7 +19,7 @@ public class BankDAO {
             ps.setString(2, bank.getBankAddress());  // Set bank address
             ps.setString(3, bank.getBankPhone());  // Set bank phone number
 
-            return ps.executeUpdate() > 0; // Returns true if the row is inserted
+            return ps.executeUpdate() > 0;  // Returns true if the row is inserted
         }
     }
 
@@ -35,7 +35,7 @@ public class BankDAO {
             // Iterate over the result set and create Bank objects
             while (rs.next()) {
                 banks.add(new Bank(
-                        rs.getLong("bankid"),  // Retrieve bankId using getLong() for BIGINT
+                        rs.getLong("bankid"),  // Retrieve bankId using getLong for BIGINT
                         rs.getString("bankname"),
                         rs.getString("bankaddress"),
                         rs.getString("bankphone")
@@ -77,9 +77,9 @@ public class BankDAO {
 
             ps.setString(1, bank.getBankAddress());  // Set bank address
             ps.setString(2, bank.getBankPhone());  // Set bank phone number
-            ps.setLong(3, bank.getBankId());  // Use setLong() for BIGINT bankId
+            ps.setLong(3, bank.getBankId());  // Use setLong() for BANKID
 
-            return ps.executeUpdate() > 0; // Returns true if the row is updated
+            return ps.executeUpdate() > 0;  // Returns true if the row is updated
         }
     }
 }
