@@ -15,9 +15,9 @@ public class BankDAO {
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, bank.getBankName());
-            ps.setString(2, bank.getBankAddress());
-            ps.setString(3, bank.getBankPhone());
+            ps.setString(1, bank.getBankName());  // Set bank name
+            ps.setString(2, bank.getBankAddress());  // Set bank address
+            ps.setString(3, bank.getBankPhone());  // Set bank phone number
 
             return ps.executeUpdate() > 0; // Returns true if the row is inserted
         }
@@ -32,9 +32,10 @@ public class BankDAO {
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
+            // Iterate over the result set and create Bank objects
             while (rs.next()) {
                 banks.add(new Bank(
-                        rs.getLong("bankid"),        // Change to getLong for BIGINT
+                        rs.getLong("bankid"),  // Retrieve bankId using getLong() for BIGINT
                         rs.getString("bankname"),
                         rs.getString("bankaddress"),
                         rs.getString("bankphone")
@@ -51,12 +52,12 @@ public class BankDAO {
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setLong(1, id);  // Change to setLong for BIGINT
+            ps.setLong(1, id);  // Use setLong() to set the bankId parameter (BIGINT)
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return new Bank(
-                            rs.getLong("bankid"),    // Change to getLong for BIGINT
+                            rs.getLong("bankid"),    // Use getLong() to retrieve the bankId as LONG
                             rs.getString("bankname"),
                             rs.getString("bankaddress"),
                             rs.getString("bankphone")
@@ -74,9 +75,9 @@ public class BankDAO {
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setString(1, bank.getBankAddress());
-            ps.setString(2, bank.getBankPhone());
-            ps.setLong(3, bank.getBankId());  // Change to setLong for BIGINT
+            ps.setString(1, bank.getBankAddress());  // Set bank address
+            ps.setString(2, bank.getBankPhone());  // Set bank phone number
+            ps.setLong(3, bank.getBankId());  // Use setLong() for BIGINT bankId
 
             return ps.executeUpdate() > 0; // Returns true if the row is updated
         }
