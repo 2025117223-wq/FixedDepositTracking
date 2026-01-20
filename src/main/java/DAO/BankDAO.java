@@ -82,4 +82,17 @@ public class BankDAO {
             return ps.executeUpdate() > 0;  // Returns true if the row is updated
         }
     }
+
+    // Delete a bank by its ID
+    public boolean deleteBank(long bankId) throws SQLException {
+        String sql = "DELETE FROM bank WHERE bankid = ?";
+
+        try (Connection conn = DBConn.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, bankId);  // Use setLong() for BANKID
+
+            return ps.executeUpdate() > 0;  // Returns true if the row is deleted
+        }
+    }
 }

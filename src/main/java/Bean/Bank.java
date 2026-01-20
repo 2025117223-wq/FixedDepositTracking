@@ -9,7 +9,7 @@ public class Bank {
 
     // Constructor
     public Bank(Long bankId, String bankName, String bankAddress, String bankPhone) {
-        this.bankId = bankId;  // BANKID (auto-generated)
+        this.bankId = bankId;
         this.bankName = bankName;
         this.bankAddress = bankAddress;
         this.bankPhone = bankPhone;

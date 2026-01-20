@@ -78,15 +78,15 @@ public class BankController extends HttpServlet {
             return;
         }
 
-        int id;
+        Long id;  // Use Long instead of int
         try {
-            id = Integer.parseInt(idStr);
+            id = Long.parseLong(idStr);  // Parse the ID as Long
         } catch (NumberFormatException e) {
             response.sendRedirect("BankController?action=list");
             return;
         }
 
-        Bank bank = bankDAO.getBankById(id);
+        Bank bank = bankDAO.getBankById(id);  // Get Bank by Long bankId
         if (bank == null) {
             // bank not found
             response.sendRedirect("BankController?action=list");
@@ -110,11 +110,12 @@ public class BankController extends HttpServlet {
             return;
         }
 
-        Bank bank = new Bank(name.trim(), address.trim(), phone.trim());
+        // Creating Bank without bankId since it's auto-generated
+        Bank bank = new Bank(null, name.trim(), address.trim(), phone.trim());
 
         if (bankDAO.insertBank(bank)) {
-            response.sendRedirect("BankController?action=list&msg=created&bn="
-                    + URLEncoder.encode(name.trim(), StandardCharsets.UTF_8));
+            response.sendRedirect("BankController?action=list&msg=created&bn=" + 
+                    URLEncoder.encode(name.trim(), StandardCharsets.UTF_8));
         } else {
             request.setAttribute("error", "Failed to create bank.");
             request.getRequestDispatcher("CreateBank.jsp").forward(request, response);
@@ -135,23 +136,24 @@ public class BankController extends HttpServlet {
             return;
         }
 
-        int id;
+        Long id;  // Use Long for bankId
         try {
-            id = Integer.parseInt(idStr);
+            id = Long.parseLong(idStr);  // Parse the ID as Long
         } catch (NumberFormatException e) {
             request.setAttribute("error", "Invalid bank ID.");
             request.getRequestDispatcher("EditBank.jsp").forward(request, response);
             return;
         }
 
+        // Creating the Bank object with Long for bankId
         Bank bank = new Bank(id, name.trim(), address.trim(), phone.trim());
 
         if (bankDAO.updateBank(bank)) {
-            response.sendRedirect("BankController?action=list&msg=updated&bn="
-                    + URLEncoder.encode(name.trim(), StandardCharsets.UTF_8));
+            response.sendRedirect("BankController?action=list&msg=updated&bn=" + 
+                    URLEncoder.encode(name.trim(), StandardCharsets.UTF_8));
         } else {
             request.setAttribute("error", "Failed to update bank.");
-            request.setAttribute("bank", bank); // so fields still show
+            request.setAttribute("bank", bank);  // so fields still show
             request.getRequestDispatcher("EditBank.jsp").forward(request, response);
         }
     }
