@@ -16,41 +16,45 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.10</version> 
-        <relativePath/> 
+        <version>2.7.10</version> <!-- Make sure you are using a compatible version -->
+        <relativePath/> <!-- Lookup parent from repository -->
     </parent>
 
     <properties>
-        <maven.compiler.release>21</maven.compiler.release>
+        <maven.compiler.release>21</maven.compiler.release> <!-- Using Java 21 -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <!-- Dependencies -->
     <dependencies>
+        <!-- Spring Boot Web Dependency -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Spring Boot JSP Starter -->
+        <!-- JSP Dependency for Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jsp</artifactId>
-            <version>2.7.10</version>  <!-- Correct version, ensure it's valid -->
+            <version>2.7.10</version> <!-- Ensure the version is correct and available -->
         </dependency>
 
+        <!-- PostgreSQL JDBC Driver -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.7.4</version>
         </dependency>
 
+        <!-- BCrypt Dependency for Password Hashing -->
         <dependency>
             <groupId>org.mindrot</groupId>
             <artifactId>jbcrypt</artifactId>
             <version>0.4</version>
         </dependency>
 
+        <!-- Jakarta JSTL (for JSP support) -->
         <dependency>
             <groupId>jakarta.servlet.jsp.jstl</groupId>
             <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
@@ -62,6 +66,7 @@
             <version>3.0.1</version>
         </dependency>
 
+        <!-- Jakarta Mail for Email functionality -->
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
@@ -72,6 +77,7 @@
     <!-- Build Plugins -->
     <build>
         <plugins>
+            <!-- Compiler Plugin to set the Java version -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -81,6 +87,7 @@
                 </configuration>
             </plugin>
 
+            <!-- WAR Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -90,6 +97,7 @@
                 </configuration>
             </plugin>
 
+            <!-- Dependency Plugin to handle WebApp Runner for Heroku deployment -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
