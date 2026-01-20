@@ -6,30 +6,27 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- ===== Project Info ===== -->
+    <!-- Project Info -->
     <groupId>com.fixeddeposit</groupId>
     <artifactId>fd-tracking</artifactId>
     <version>1.0.0</version>
     <packaging>war</packaging>
 
-    <!-- ===== Spring Boot Parent ===== -->
+    <!-- Spring Boot Parent -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.10</version> <!-- Updated Spring Boot version -->
-        <relativePath/> <!-- Lookup parent from repository -->
+        <version>2.7.10</version> 
+        <relativePath/> 
     </parent>
 
-    <!-- ===== Java Version (Heroku-24 uses Java 21) ===== -->
     <properties>
-        <maven.compiler.release>21</maven.compiler.release> <!-- Make sure you are using compatible Java version -->
+        <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <!-- ===== Dependencies ===== -->
+    <!-- Dependencies -->
     <dependencies>
-
-        <!-- Spring Boot Web, Security, and JPA Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -37,36 +34,27 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
+            <artifactId>spring-boot-starter-jsp</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <scope>provided</scope>
         </dependency>
 
-        <!-- PostgreSQL JDBC Driver -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.7.4</version>
         </dependency>
 
-        <!-- JSP Engine (Tomcat Jasper) -->
         <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-jasper</artifactId>
-            <version>10.1.18</version> <!-- Make sure you're using a version compatible with Jakarta -->
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
         </dependency>
 
-        <!-- Updated Tomcat Dependencies for Jakarta -->
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-websocket</artifactId>
-            <version>10.1.18</version> <!-- Ensure Tomcat WebSocket dependency is aligned with Jakarta -->
-        </dependency>
-
-        <!-- JSTL for JSP -->
         <dependency>
             <groupId>jakarta.servlet.jsp.jstl</groupId>
             <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
@@ -78,36 +66,16 @@
             <version>3.0.1</version>
         </dependency>
 
-        <!-- Jakarta Mail Implementation (for sending emails, optional) -->
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
             <version>2.0.1</version>
         </dependency>
-
-        <!-- Heroku Webapp Runner (If using WAR deployment) -->
-        <dependency>
-            <groupId>com.heroku</groupId>
-            <artifactId>webapp-runner</artifactId>
-            <version>10.1.18.0</version>
-            <scope>provided</scope>
-        </dependency>
-
     </dependencies>
 
-    <!-- ===== Repositories ===== -->
-    <repositories>
-        <repository>
-            <id>central</id>
-            <url>https://repo.maven.apache.org/maven2</url>
-        </repository>
-    </repositories>
-
-    <!-- ===== Build Plugins ===== -->
+    <!-- Build Plugins -->
     <build>
         <plugins>
-
-            <!-- Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -117,7 +85,6 @@
                 </configuration>
             </plugin>
 
-            <!-- WAR Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -127,7 +94,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Dependency Plugin (for Webapp Runner) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -152,8 +118,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
-
 </project>

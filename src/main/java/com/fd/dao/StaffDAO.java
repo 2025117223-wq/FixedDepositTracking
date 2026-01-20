@@ -1,17 +1,27 @@
 package com.fd.dao;
-
-import com.fd.model.Staff;
-import com.fd.util.DBConnection;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-
 public class StaffDAO {
+
+        public boolean emailExists(String email) {
+        String query = "SELECT COUNT(*) FROM STAFF WHERE STAFFEMAIL = ?";
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(query)) {
+            
+            pstmt.setString(1, email);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     public List<Staff> getAllStaff() {
         List<Staff> staffList = new ArrayList<>();
         
-        // Add STAFFID_PREFIX to the query
+        // Query to get all staff along with manager names
         String query = "SELECT s.STAFFID, s.STAFFID_PREFIX, s.STAFFNAME, s.STAFFPHONE, " +
                        "s.STAFFADDRESS, s.STAFFEMAIL, s.STAFFROLE, s.STAFFSTATUS, " +
                        "s.REASON, s.MANAGERID, m.STAFFNAME AS MANAGER_NAME " +
@@ -24,7 +34,7 @@ public class StaffDAO {
             
             while (rs.next()) {
                 Staff staff = new Staff();
-                staff.setStaffId(rs.getLong("STAFFID"));  // Use long here
+                staff.setStaffId(rs.getLong("STAFFID"));  // Use long for staffId (BIGINT in DB)
                 staff.setStaffIdPrefix(rs.getString("STAFFID_PREFIX"));
                 staff.setName(rs.getString("STAFFNAME"));
                 staff.setPhone(rs.getString("STAFFPHONE"));
@@ -33,7 +43,7 @@ public class StaffDAO {
                 staff.setRole(rs.getString("STAFFROLE"));
                 staff.setStatus(rs.getString("STAFFSTATUS"));
                 staff.setReason(rs.getString("REASON"));
-                staff.setManagerId(rs.getLong("MANAGERID"));  // Use long for managerId
+                staff.setManagerId(rs.getLong("MANAGERID"));  // Use long for managerId (BIGINT in DB)
                 staff.setManagerName(rs.getString("MANAGER_NAME"));
                 
                 staffList.add(staff);
@@ -55,13 +65,14 @@ public class StaffDAO {
             ps.setString(1, staff.getRole());
             ps.setString(2, staff.getStatus());
             
+            // Set the reason only if status is 'Inactive'
             if ("Inactive".equalsIgnoreCase(staff.getStatus())) {
                 ps.setString(3, staff.getReason());
             } else {
                 ps.setString(3, null);
             }
             
-            ps.setLong(4, staff.getStaffId());  // Use long for staffId
+            ps.setLong(4, staff.getStaffId());  // Use long for staffId (BIGINT in DB)
 
             int rows = ps.executeUpdate();
             
@@ -80,7 +91,7 @@ public class StaffDAO {
         }
     }
     
-    public Staff getStaffById(long staffId) {  // Use long for staffId
+    public Staff getStaffById(long staffId) {  // Use long for staffId (BIGINT in DB)
         Staff staff = null;
         String query = "SELECT STAFFID, STAFFID_PREFIX, STAFFNAME, STAFFEMAIL, STAFFPHONE, " +
                        "STAFFADDRESS, PASSWORD, STAFFROLE, STAFFSTATUS, REASON, MANAGERID " +
@@ -92,7 +103,7 @@ public class StaffDAO {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
             
-            pstmt.setLong(1, staffId);  // Use long for staffId
+            pstmt.setLong(1, staffId);  // Use long for staffId (BIGINT in DB)
             
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -107,7 +118,7 @@ public class StaffDAO {
                     staff.setRole(rs.getString("STAFFROLE"));
                     staff.setStatus(rs.getString("STAFFSTATUS"));
                     staff.setReason(rs.getString("REASON"));
-                    staff.setManagerId(rs.getLong("MANAGERID"));  // Use long for managerId
+                    staff.setManagerId(rs.getLong("MANAGERID"));  // Use long for managerId (BIGINT in DB)
                 } else {
                     System.out.println("❌ No staff found with ID: " + staffId);
                 }
@@ -177,4 +188,55 @@ public class StaffDAO {
             return false;
         }
     }
+        public boolean updateStaffProfile(Staff staff) {
+        String query = "UPDATE STAFF SET STAFFNAME = ?, STAFFPHONE = ?, STAFFADDRESS = ?, PASSWORD = ? WHERE STAFFID = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(query)) {
+            
+            pstmt.setString(1, staff.getName());
+            pstmt.setString(2, staff.getPhone());
+            pstmt.setString(3, staff.getAddress());
+            pstmt.setString(4, staff.getPassword());
+            pstmt.setLong(5, staff.getStaffId());  // Assuming staffId is of type long
+            
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.err.println("❌ Error updating staff profile: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+        public String getPasswordByStaffId(int staffId) {
+        String query = "SELECT PASSWORD FROM STAFF WHERE STAFFID = ?";
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(query)) {
+            
+            pstmt.setInt(1, staffId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("PASSWORD");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+        public boolean updatePasswordByStaffId(int staffId, String newPassword) {
+        String query = "UPDATE STAFF SET PASSWORD = ? WHERE STAFFID = ?";
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(query)) {
+            
+            pstmt.setString(1, newPassword);
+            pstmt.setInt(2, staffId);
+            
+            int rowsUpdated = pstmt.executeUpdate();
+            return rowsUpdated > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+ }
 }
