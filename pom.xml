@@ -55,7 +55,7 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
-            <version>0.11.5</version> <!-- Update to the required version -->
+            <version>0.11.4</version> <!-- Updated version to 0.11.4 -->
         </dependency>
 
         <!-- JSP Engine (Tomcat Jasper) -->
@@ -93,6 +93,14 @@
         </dependency>
 
     </dependencies>
+
+    <!-- ===== Repositories ===== -->
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+    </repositories>
 
     <!-- ===== Build Plugins ===== -->
     <build>
