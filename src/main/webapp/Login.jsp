@@ -424,7 +424,7 @@
                             <input type="password" id="password" name="password" placeholder="Your Password" required>
                             <button type="button" id="togglePassword"
                                     style="position: absolute; right: 25px; background: none; border: none; cursor: pointer; z-index: 2;">
-                                <img id="passwordIcon" src="images/icons/eyeDisable.png" alt="Show Password" style="width: 25px; height: 25px;">
+                                <img id="passwordIcon" src="images/icons/hidepass.png" alt="Show Password" style="width: 25px; height: 25px;">
                             </button>
                         </div>
 

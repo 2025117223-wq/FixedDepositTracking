@@ -41,7 +41,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jsp</artifactId>
             <version>2.7.10</version>  
-        </dependency
+        </dependency> <!-- Fixed closing tag -->
 
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -120,4 +120,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
