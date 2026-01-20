@@ -29,11 +29,36 @@ public class StaffDAO {
         return false;
     }
 
+    // Login method to validate email and return staff details
+    public Staff login(String email) {  // 'Public' changed to 'public'
+        String query = "SELECT * FROM STAFF WHERE STAFFEMAIL = ?";
+        Staff staff = null;
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setString(1, email);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    staff = new Staff();
+                    staff.setStaffId(rs.getLong("STAFFID"));
+                    staff.setName(rs.getString("STAFFNAME"));
+                    staff.setEmail(rs.getString("STAFFEMAIL"));
+                    staff.setPassword(rs.getString("PASSWORD"));
+                    staff.setRole(rs.getString("STAFFROLE"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return staff;
+    }
+
     // Get all staff members along with their manager details
     public List<Staff> getAllStaff() {
         List<Staff> staffList = new ArrayList<>();
 
-        // Query to get all staff along with manager names
         String query = "SELECT s.STAFFID, s.STAFFID_PREFIX, s.STAFFNAME, s.STAFFPHONE, " +
                        "s.STAFFADDRESS, s.STAFFEMAIL, s.STAFFROLE, s.STAFFSTATUS, " +
                        "s.REASON, s.MANAGERID, m.STAFFNAME AS MANAGER_NAME " +
@@ -78,7 +103,6 @@ public class StaffDAO {
             ps.setString(1, staff.getRole());
             ps.setString(2, staff.getStatus());
 
-            // Set the reason only if status is 'Inactive'
             if ("Inactive".equalsIgnoreCase(staff.getStatus())) {
                 ps.setString(3, staff.getReason());
             } else {
@@ -143,6 +167,28 @@ public class StaffDAO {
         }
 
         return staff;
+    }
+
+    // Get staff ID by email and status
+    public int getStaffIdByEmailAndStatus(String email, String status) {
+        String query = "SELECT STAFFID FROM STAFF WHERE STAFFEMAIL = ? AND STAFFSTATUS = ?";
+        int staffId = -1;
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            pstmt.setString(1, email);
+            pstmt.setString(2, status);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    staffId = rs.getInt("STAFFID");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return staffId;
     }
 
     // Register a new staff member
