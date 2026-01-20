@@ -12,32 +12,24 @@
     <version>1.0.0</version>
     <packaging>war</packaging>
 
-    <!-- Spring Boot Parent -->
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.10</version> <!-- Make sure you are using a compatible version -->
-        <relativePath/> <!-- Lookup parent from repository -->
-    </parent>
-
+    <!-- Properties -->
     <properties>
-        <maven.compiler.release>21</maven.compiler.release> <!-- Using Java 21 -->
+        <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <!-- Dependencies -->
     <dependencies>
-        <!-- Spring Boot Web Dependency -->
+        <!-- JSP Dependency for Jakarta (for JSP support) -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <groupId>jakarta.servlet.jsp.jstl</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+            <version>3.0.1</version>
         </dependency>
-
-        <!-- JSP Dependency for Spring Boot -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jsp</artifactId>
-            <version>2.7.10</version> <!-- Ensure the version is correct and available -->
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+            <version>3.0.1</version>
         </dependency>
 
         <!-- PostgreSQL JDBC Driver -->
@@ -52,18 +44,6 @@
             <groupId>org.mindrot</groupId>
             <artifactId>jbcrypt</artifactId>
             <version>0.4</version>
-        </dependency>
-
-        <!-- Jakarta JSTL (for JSP support) -->
-        <dependency>
-            <groupId>jakarta.servlet.jsp.jstl</groupId>
-            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
-            <version>3.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.web</groupId>
-            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
-            <version>3.0.1</version>
         </dependency>
 
         <!-- Jakarta Mail for Email functionality -->
