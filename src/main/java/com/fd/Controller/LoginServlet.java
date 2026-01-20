@@ -1,142 +1,70 @@
-package com.fd.servlet;
+package com.fd.controller;
 
 import com.fd.dao.StaffDAO;
 import com.fd.model.Staff;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import javax.servlet.http.HttpSession;
 
-import java.io.IOException;
+@Controller
+public class LoginController {
 
-/**
- * LoginServlet - ALIGNED with YOUR Staff model and DAO
- * For Tomcat 10+ (Jakarta EE)
- */
-@WebServlet("/LoginServlet")
-public class LoginServlet extends HttpServlet {
-    private static final long serialVersionUID = 1L;
+    @Autowired
     private StaffDAO staffDAO;
 
-    @Override
-    public void init() {
-        staffDAO = new StaffDAO();
-        System.out.println("========================================");
-        System.out.println("✅ LoginServlet INITIALIZED");
-        System.out.println("========================================");
+    // Show login form (GET request)
+    @GetMapping("/login")
+    public String showLoginForm() {
+        return "login"; // This returns login.jsp
     }
 
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
-        
-        System.out.println("========================================");
-        System.out.println("🔐 LoginServlet - Login Attempt");
-        System.out.println("========================================");
-
-        // Get form parameters
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-
-        // Keep email in form (for user convenience)
-        if (email != null) {
-            request.setAttribute("emailValue", email.trim());
-        }
-
-        System.out.println("📧 Email: " + (email != null ? email.trim() : "null"));
-
+    // Handle login attempt (POST request)
+    @PostMapping("/login")
+    public String handleLogin(@RequestParam String email, @RequestParam String password, Model model, HttpSession session) {
         // Basic validation
-        if (isBlank(email) || isBlank(password)) {
-            System.err.println("❌ Validation failed: Email or password is blank");
-            request.setAttribute("error", "Please enter email and password.");
-            request.getRequestDispatcher("Login.jsp").forward(request, response);
-            return;
+        if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            model.addAttribute("error", "Please enter email and password.");
+            return "login";  // Return to the login page if validation fails
         }
 
         String emailClean = email.trim().toLowerCase();
         String passwordClean = password.trim();
 
         try {
-            // Login using YOUR DAO (which expects email and password)
-            System.out.println("🔍 Attempting login...");
+            // Attempt to login using the DAO
             Staff staff = staffDAO.login(emailClean, passwordClean);
 
             if (staff == null) {
-                System.err.println("❌ Login failed: Invalid credentials");
-                System.out.println("========================================");
-                request.setAttribute("error", "Invalid email or password.");
-                request.getRequestDispatcher("Login.jsp").forward(request, response);
-                return;
+                model.addAttribute("error", "Invalid email or password.");
+                return "login";  // Return to the login page if login fails
             }
 
-            // Check if account is active (YOUR model uses getStatus())
+            // Check if account is active
             if (staff.getStatus() != null && !"Active".equalsIgnoreCase(staff.getStatus())) {
-                System.err.println("❌ Login blocked: Account is not active");
-                System.out.println("   Staff ID: " + staff.getStaffId());
-                System.out.println("   Status: " + staff.getStatus());
-                System.out.println("========================================");
-                
-                request.setAttribute("error", "Your account is not active. Please contact admin.");
-                request.getRequestDispatcher("Login.jsp").forward(request, response);
-                return;
+                model.addAttribute("error", "Your account is not active. Please contact admin.");
+                return "login";  // Return to login page if account is not active
             }
 
-            // Create session - USING YOUR MODEL FIELD NAMES
-            HttpSession session = request.getSession(true);
-            
-            // Set session timeout to 30 minutes (1800 seconds)
-            session.setMaxInactiveInterval(1800);
-            
-            session.setAttribute("loggedStaff", staff);                    // Full staff object
-            session.setAttribute("staffId", staff.getStaffId());           // YOUR MODEL: getStaffId()
-            session.setAttribute("staffName", staff.getName());            // YOUR MODEL: getName()
-            session.setAttribute("staffEmail", staff.getEmail());          // YOUR MODEL: getEmail()
-            session.setAttribute("staffRole", staff.getRole());            // YOUR MODEL: getRole()
-            session.setAttribute("staffStatus", staff.getStatus());        // YOUR MODEL: getStatus()
-            session.setAttribute("managerId", staff.getManagerId());       // YOUR MODEL: getManagerId()
+            // Create session and store staff information
+            session.setAttribute("loggedStaff", staff);
+            session.setAttribute("staffId", staff.getStaffId());
+            session.setAttribute("staffName", staff.getName());
+            session.setAttribute("staffEmail", staff.getEmail());
+            session.setAttribute("staffRole", staff.getRole());
+            session.setAttribute("staffStatus", staff.getStatus());
+            session.setAttribute("managerId", staff.getManagerId());
 
-            System.out.println("✅ LOGIN SUCCESSFUL");
-            System.out.println("   Staff ID: " + staff.getStaffId());
-            System.out.println("   Name: " + staff.getName());
-            System.out.println("   Email: " + staff.getEmail());
-            System.out.println("   Role: " + staff.getRole());
-            System.out.println("   Status: " + staff.getStatus());
-            System.out.println("   Manager ID: " + staff.getManagerId());
-            System.out.println("========================================");
-            System.out.println("🔑 SESSION DETAILS:");
-            System.out.println("   Session ID: " + session.getId());
-            System.out.println("   Session is new: " + session.isNew());
-            System.out.println("   Session timeout: " + session.getMaxInactiveInterval() + " seconds");
-            System.out.println("========================================");
-            System.out.println("🔑 SESSION ATTRIBUTES VERIFIED:");
-            System.out.println("   staffId = " + session.getAttribute("staffId"));
-            System.out.println("   staffName = " + session.getAttribute("staffName"));
-            System.out.println("   staffRole = " + session.getAttribute("staffRole"));
-            System.out.println("========================================");
-
-            // Redirect to Dashboard
-            response.sendRedirect("Dashboard.jsp");
+            // Redirect to the Dashboard after successful login
+            return "redirect:/dashboard";  // Redirect to the dashboard page
 
         } catch (Exception e) {
-            System.err.println("❌ Exception during login: " + e.getMessage());
-            e.printStackTrace();
-            System.out.println("========================================");
-            
-            request.setAttribute("error", "An error occurred: " + e.getMessage());
-            request.getRequestDispatcher("Login.jsp").forward(request, response);
+            model.addAttribute("error", "An error occurred: " + e.getMessage());
+            return "login";  // Return to login page if an exception occurs
         }
-    }
-
-    /**
-     * Check if string is blank (null or empty)
-     */
-    private boolean isBlank(String s) {
-        return s == null || s.trim().isEmpty();
     }
 }
