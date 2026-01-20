@@ -2,6 +2,7 @@ package com.fd.servlet;
 
 import com.fd.dao.StaffDAO;
 import com.fd.model.Staff;
+import org.mindrot.jbcrypt.BCrypt;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -137,6 +138,9 @@ public class SignUpServlet extends HttpServlet {
                 System.out.println("📷 Profile picture size: " + pictureBytes.length + " bytes");
             }
 
+            // Hash the password before saving
+            String hashedPassword = BCrypt.hashpw(password.trim(), BCrypt.gensalt());
+
             // Create Staff object - FINAL VERSION using YOUR model
             Staff staff = new Staff();
             staff.setName(fullName.trim());              // ✅ YOUR MODEL
@@ -144,7 +148,7 @@ public class SignUpServlet extends HttpServlet {
             staff.setAddress(homeAddress.trim());        // ✅ YOUR MODEL
             staff.setEmail(email.trim().toLowerCase());  // ✅ YOUR MODEL
             staff.setRole(staffRole.trim());             // ✅ YOUR MODEL
-            staff.setPassword(password.trim());          // ✅ YOUR MODEL (hash in production!)
+            staff.setPassword(hashedPassword);           // ✅ Hash the password
             staff.setStatus("Active");                   // ✅ YOUR MODEL
             staff.setManagerId(managerId);               // ✅ YOUR MODEL
             staff.setProfilePicture(pictureBytes);       // ✅ YOUR MODEL
@@ -163,8 +167,6 @@ public class SignUpServlet extends HttpServlet {
                 response.sendRedirect("Login.jsp?signup=success");
             } else {
                 System.err.println("❌ REGISTRATION FAILED - Database insert failed");
-                System.out.println("========================================");
-                
                 request.setAttribute("error", "Sign up failed. Please try again.");
                 request.getRequestDispatcher("SignUp.jsp").forward(request, response);
             }
@@ -172,8 +174,6 @@ public class SignUpServlet extends HttpServlet {
         } catch (Exception e) {
             System.err.println("❌ Exception during registration: " + e.getMessage());
             e.printStackTrace();
-            System.out.println("========================================");
-            
             request.setAttribute("error", "An error occurred: " + e.getMessage());
             request.getRequestDispatcher("SignUp.jsp").forward(request, response);
         }

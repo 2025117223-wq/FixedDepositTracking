@@ -121,8 +121,7 @@ public class BankServlet extends HttpServlet {
         }
         
         try {
-            int bankId = Integer.parseInt(idStr);
-            
+            long bankId = Long.parseLong(idStr);  // Use long for bankId
             System.out.println("🔍 Fetching bank for edit: ID " + bankId);
             
             Bank bank = bankDAO.getBankById(bankId);
@@ -186,11 +185,9 @@ public class BankServlet extends HttpServlet {
         
         if (success) {
             System.out.println("✅ Bank created successfully");
-            System.out.println("========================================");
             response.sendRedirect("BankList.jsp?msg=created");
         } else {
             System.err.println("❌ Failed to create bank");
-            System.out.println("========================================");
             request.setAttribute("error", "Failed to create bank. Please try again.");
             request.getRequestDispatcher("CreateBank.jsp").forward(request, response);
         }
@@ -219,7 +216,7 @@ public class BankServlet extends HttpServlet {
             
             // Load bank for re-display
             try {
-                int bankId = Integer.parseInt(idStr);
+                long bankId = Long.parseLong(idStr);  // Use long for bankId
                 Bank bank = bankDAO.getBankById(bankId);
                 request.setAttribute("bank", bank);
             } catch (Exception e) {
@@ -232,7 +229,7 @@ public class BankServlet extends HttpServlet {
         }
         
         try {
-            int bankId = Integer.parseInt(idStr);
+            long bankId = Long.parseLong(idStr);
             
             // Get existing bank to preserve name
             Bank existingBank = bankDAO.getBankById(bankId);
@@ -256,11 +253,9 @@ public class BankServlet extends HttpServlet {
             
             if (success) {
                 System.out.println("✅ Bank updated successfully");
-                System.out.println("========================================");
                 response.sendRedirect("BankList.jsp?msg=updated");
             } else {
                 System.err.println("❌ Failed to update bank");
-                System.out.println("========================================");
                 request.setAttribute("error", "Failed to update bank. Please try again.");
                 request.setAttribute("bank", bank);
                 request.getRequestDispatcher("EditBank.jsp").forward(request, response);

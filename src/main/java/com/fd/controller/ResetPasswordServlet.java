@@ -1,6 +1,7 @@
 package com.fd.servlet;
 
 import com.fd.dao.StaffDAO;
+import com.fd.util.PasswordUtil;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -98,16 +99,19 @@ public class ResetPasswordServlet extends HttpServlet {
         }
 
         // Check if new password is same as old password
-        if (newPassword.equals(oldPassword)) {
+        if (PasswordUtil.checkPassword(newPassword, oldPassword)) {
             System.err.println("❌ Same as old password");
             request.setAttribute("error", "New password cannot be the same as the old password.");
             request.getRequestDispatcher("ResetPassword.jsp?verified=true").forward(request, response);
             return;
         }
 
+        // Hash the new password before saving it
+        String hashedPassword = PasswordUtil.processPassword(newPassword);
+
         // Update password
         System.out.println("💾 Updating password...");
-        boolean updated = staffDAO.updatePasswordByStaffId(staffId, newPassword);
+        boolean updated = staffDAO.updatePasswordByStaffId(staffId, hashedPassword);
 
         if (!updated) {
             System.err.println("❌ Failed to update password");

@@ -2,13 +2,15 @@ package com.fd.servlet;
 
 import com.fd.dao.StaffDAO;
 import com.fd.model.Staff;
-import java.io.IOException;
+import com.fd.util.PasswordUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
+import java.io.IOException;
 
 /**
  * UpdateProfileServlet - Updates user profile information
@@ -79,7 +81,9 @@ public class UpdateProfileServlet extends HttpServlet {
             
             // Only update password if provided
             if (password != null && !password.isEmpty()) {
-                staff.setPassword(password);
+                // Hash the new password before saving
+                String hashedPassword = PasswordUtil.processPassword(password);
+                staff.setPassword(hashedPassword);
                 System.out.println("   🔒 Password will be updated");
             } else {
                 System.out.println("   🔒 Password unchanged");

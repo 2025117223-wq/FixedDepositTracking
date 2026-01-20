@@ -2,7 +2,7 @@ package com.fd.servlet;
 
 import com.fd.dao.StaffDAO;
 import com.fd.model.Staff;
-import java.io.IOException;
+import com.fd.util.PasswordUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,6 +11,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 @WebServlet("/UpdateUserServlet")
 @MultipartConfig(
@@ -24,22 +27,7 @@ public class UpdateUserServlet extends HttpServlet {
     @Override
     public void init() {
         staffDAO = new StaffDAO();
-        System.out.println("========================================");
-        System.out.println("✅ UpdateUserServlet INITIALIZED (Tomcat 10+)");
-        System.out.println("========================================");
-    }
-
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException {
-        
-        response.setContentType("text/html; charset=UTF-8");
-        response.getWriter().println("<html><body>");
-        response.getWriter().println("<h1>✅ UpdateUserServlet is WORKING!</h1>");
-        response.getWriter().println("<p>Servlet is properly deployed (Tomcat 10+)</p>");
-        response.getWriter().println("<p>Jakarta EE namespace: CORRECT</p>");
-        response.getWriter().println("<p><a href='UserList.jsp'>Go to User List</a></p>");
-        response.getWriter().println("</body></html>");
+        System.out.println("✅ UpdateUserServlet initialized");
     }
 
     @Override
@@ -59,20 +47,41 @@ public class UpdateUserServlet extends HttpServlet {
             String role = request.getParameter("editRole");
             String status = request.getParameter("editStatus");
             String reasonText = request.getParameter("editReason");
+            String password = request.getParameter("editPassword");  // Password update (if provided)
             
             System.out.println("📝 Parameters:");
             System.out.println("   Staff ID: " + staffIdStr);
             System.out.println("   Role: " + role);
             System.out.println("   Status: " + status);
             System.out.println("   Reason: " + reasonText);
+            System.out.println("   Password: " + (password != null && !password.isEmpty() ? "***" : "(not changing)"));
             
             // Handle file upload if present
+            String uploadedFilePath = null;
             try {
                 Part filePart = request.getPart("editReasonFile");
                 if (filePart != null && filePart.getSize() > 0) {
                     String fileName = getFileName(filePart);
                     System.out.println("   File: " + fileName + " (" + filePart.getSize() + " bytes)");
-                    reasonText = fileName;
+
+                    // Validate file type (only accept certain file types, e.g., .txt, .pdf, etc.)
+                    String contentType = filePart.getContentType();
+                    if (!contentType.equals("application/pdf") && !contentType.startsWith("image/")) {
+                        System.err.println("❌ Invalid file type: " + contentType);
+                        response.sendRedirect("UserList.jsp?error=invalid_file_type");
+                        return;
+                    }
+
+                    // Save the file to a directory
+                    String uploadDir = getServletContext().getRealPath("/uploads");
+                    File uploadDirectory = new File(uploadDir);
+                    if (!uploadDirectory.exists()) {
+                        uploadDirectory.mkdir();
+                    }
+                    
+                    uploadedFilePath = uploadDir + File.separator + fileName;
+                    filePart.write(uploadedFilePath);  // Save file to disk
+                    reasonText = uploadedFilePath;  // Save file path to reason field
                 }
             } catch (Exception e) {
                 System.out.println("   No file uploaded");
@@ -93,11 +102,33 @@ public class UpdateUserServlet extends HttpServlet {
             staff.setRole(role);
             staff.setStatus(status);
             
-            // Handle reason
+            // Handle reason (use uploaded file path if the status is inactive)
             if ("Inactive".equalsIgnoreCase(status)) {
                 staff.setReason(reasonText != null && !reasonText.isEmpty() ? reasonText : "No reason provided");
             } else {
                 staff.setReason(null);
+            }
+            
+            // If a new password is provided, hash it before saving
+            if (password != null && !password.isEmpty()) {
+                String hashedPassword = PasswordUtil.processPassword(password);  // Hash the new password
+                staff.setPassword(hashedPassword);  // Set the hashed password
+                System.out.println("   🔒 Password will be updated");
+            }
+            
+            // Handle profile picture upload
+            try {
+                Part picturePart = request.getPart("editPicture");
+                if (picturePart != null && picturePart.getSize() > 0) {
+                    try (InputStream pictureInputStream = picturePart.getInputStream()) {
+                        byte[] pictureBytes = new byte[pictureInputStream.available()];
+                        pictureInputStream.read(pictureBytes);  // Read the picture into a byte array
+                        staff.setProfilePicture(pictureBytes);  // Set the profile picture as byte array
+                        System.out.println("   📷 Profile picture uploaded (" + pictureBytes.length + " bytes)");
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("   No profile picture uploaded");
             }
             
             // Update database

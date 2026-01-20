@@ -56,7 +56,14 @@
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
             <artifactId>tomcat-embed-jasper</artifactId>
-            <version>10.1.18</version>
+            <version>10.1.18</version> <!-- Make sure you're using a version compatible with Jakarta -->
+        </dependency>
+
+        <!-- Updated Tomcat Dependencies for Jakarta -->
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-websocket</artifactId>
+            <version>10.1.18</version> <!-- Ensure Tomcat WebSocket dependency is aligned with Jakarta -->
         </dependency>
 
         <!-- JSTL for JSP -->

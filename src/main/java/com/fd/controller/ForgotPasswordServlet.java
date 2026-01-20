@@ -11,11 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 
-/**
- * ForgotPasswordServlet - Step 1: Send OTP to email
- * ALIGNED with YOUR Oracle database (STAFFEMAIL, STAFFSTATUS, STAFFID)
- */
 @WebServlet("/ForgotPasswordServlet")
 public class ForgotPasswordServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -56,8 +53,9 @@ public class ForgotPasswordServlet extends HttpServlet {
 
         System.out.println("✅ Staff found - ID: " + staffId);
 
-        // Generate 6-digit OTP
-        String otp = String.valueOf((int) (Math.random() * 900000) + 100000);
+        // Generate 6-digit OTP using SecureRandom (for better security)
+        SecureRandom random = new SecureRandom();
+        String otp = String.format("%06d", random.nextInt(999999));  // 6-digit OTP
         System.out.println("🔑 OTP Generated: " + otp);
 
         // Store OTP in session (5 minutes expiry)
