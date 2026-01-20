@@ -58,6 +58,7 @@ public class StaffDAO {
     // Get all staff members along with their manager details
     public List<Staff> getAllStaff() {
         List<Staff> staffList = new ArrayList<>();
+
         String query = "SELECT s.STAFFID, s.STAFFID_PREFIX, s.STAFFNAME, s.STAFFPHONE, " +
                        "s.STAFFADDRESS, s.STAFFEMAIL, s.STAFFROLE, s.STAFFSTATUS, " +
                        "s.REASON, s.MANAGERID, m.STAFFNAME AS MANAGER_NAME " +
@@ -92,23 +93,53 @@ public class StaffDAO {
         return staffList;
     }
 
-    // Get staff by ID
-    public Staff getStaffById(long staffId) { // Use long for staffId
+    // Update staff details
+    public boolean updateStaff(Staff staff) {
+        String sql = "UPDATE FD.STAFF SET STAFFNAME = ?, STAFFPHONE = ?, STAFFADDRESS = ?, STAFFEMAIL = ?, STAFFROLE = ?, STAFFSTATUS = ? WHERE STAFFID = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, staff.getName());
+            ps.setString(2, staff.getPhone());
+            ps.setString(3, staff.getAddress());
+            ps.setString(4, staff.getEmail());
+            ps.setString(5, staff.getRole());
+            ps.setString(6, staff.getStatus());
+            ps.setLong(7, staff.getStaffId());  // Using Long type for staffId
+
+            int rows = ps.executeUpdate();
+
+            if (rows > 0) {
+                System.out.println("✅ Updated staff ID " + staff.getStaffId());
+            } else {
+                System.err.println("⚠️ No rows updated for staff ID " + staff.getStaffId());
+            }
+
+            return rows > 0;
+
+        } catch (SQLException e) {
+            System.err.println("❌ Update Error: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // Get a staff member by their ID
+    public Staff getStaffById(long staffId) {
         Staff staff = null;
-        String query = "SELECT STAFFID, STAFFID_PREFIX, STAFFNAME, STAFFEMAIL, STAFFPHONE, " +
-                       "STAFFADDRESS, PASSWORD, STAFFROLE, STAFFSTATUS, REASON, MANAGERID " +
+        String query = "SELECT STAFFID, STAFFNAME, STAFFEMAIL, STAFFPHONE, STAFFADDRESS, PASSWORD, STAFFROLE, STAFFSTATUS, REASON, MANAGERID " +
                        "FROM STAFF WHERE STAFFID = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-            pstmt.setLong(1, staffId); // Corrected to match DAO method signature
+            pstmt.setLong(1, staffId);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     staff = new Staff();
                     staff.setStaffId(rs.getLong("STAFFID"));
-                    staff.setStaffIdPrefix(rs.getString("STAFFID_PREFIX"));
                     staff.setName(rs.getString("STAFFNAME"));
                     staff.setEmail(rs.getString("STAFFEMAIL"));
                     staff.setPhone(rs.getString("STAFFPHONE"));
@@ -131,14 +162,13 @@ public class StaffDAO {
     // Get staff ID by email and status
     public int getStaffIdByEmailAndStatus(String email, String status) {
         String query = "SELECT STAFFID FROM STAFF WHERE STAFFEMAIL = ? AND STAFFSTATUS = ?";
-        int staffId = -1;  // Default value
+        int staffId = -1;
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
             pstmt.setString(1, email);
             pstmt.setString(2, status);
-
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     staffId = rs.getInt("STAFFID");
