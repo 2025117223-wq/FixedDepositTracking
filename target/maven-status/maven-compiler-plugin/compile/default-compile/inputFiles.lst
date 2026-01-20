@@ -1,0 +1,16 @@
+/workspaces/FixedDepositTracking/src/main/java/Controller/LoginServlet.java
+/workspaces/FixedDepositTracking/src/main/java/Util/DBConn.java
+/workspaces/FixedDepositTracking/src/main/java/Controller/ProfilePictureServlet.java
+/workspaces/FixedDepositTracking/src/main/java/Controller/AuthController.java
+/workspaces/FixedDepositTracking/src/main/java/DAO/StaffDAO.java
+/workspaces/FixedDepositTracking/src/main/java/Bean/Staff.java
+/workspaces/FixedDepositTracking/src/main/java/Util/EmailUtil.java
+/workspaces/FixedDepositTracking/src/main/java/Controller/SignUpServlet.java
+/workspaces/FixedDepositTracking/src/main/java/Controller/ResetPasswordServlet.java
+/workspaces/FixedDepositTracking/src/main/java/Controller/ForgotPasswordServlet.java
+/workspaces/FixedDepositTracking/src/main/java/Util/PasswordUtil.java
+/workspaces/FixedDepositTracking/src/main/java/DAO/BankDAO.java
+/workspaces/FixedDepositTracking/src/main/java/Bean/Bank.java
+/workspaces/FixedDepositTracking/src/main/java/Controller/VerifyCodeServlet.java
+/workspaces/FixedDepositTracking/src/main/java/Util/Jwtutil.java
+/workspaces/FixedDepositTracking/src/main/java/Controller/BankController.java
