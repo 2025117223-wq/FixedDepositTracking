@@ -76,3 +76,4 @@ public class LoginServlet extends HttpServlet {
     private boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
     }
+}  // <-- Added missing closing brace for the class
