@@ -1,4 +1,14 @@
 package com.fd.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List; 
+import java.util.ArrayList; 
+import com.fd.model.Staff;
+import com.fd.util.DBConnection;
+
 public class StaffDAO {
 
         public boolean emailExists(String email) {
