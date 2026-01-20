@@ -8,6 +8,7 @@ import java.util.List;
 
 public class BankDAO {
 
+    // Insert a new bank record
     public boolean insertBank(Bank bank) throws SQLException {
         String sql = "INSERT INTO bank (bankname, bankaddress, bankphone) VALUES (?, ?, ?)";
 
@@ -18,10 +19,11 @@ public class BankDAO {
             ps.setString(2, bank.getBankAddress());
             ps.setString(3, bank.getBankPhone());
 
-            return ps.executeUpdate() > 0;
+            return ps.executeUpdate() > 0; // Returns true if the row is inserted
         }
     }
 
+    // Retrieve all bank records
     public List<Bank> getAllBanks() throws SQLException {
         List<Bank> banks = new ArrayList<>();
         String sql = "SELECT bankid, bankname, bankaddress, bankphone FROM bank ORDER BY bankid DESC";
@@ -32,7 +34,7 @@ public class BankDAO {
 
             while (rs.next()) {
                 banks.add(new Bank(
-                        rs.getInt("bankid"),        // boleh tukar ke getLong
+                        rs.getLong("bankid"),        // Change to getLong for BIGINT
                         rs.getString("bankname"),
                         rs.getString("bankaddress"),
                         rs.getString("bankphone")
@@ -42,18 +44,19 @@ public class BankDAO {
         return banks;
     }
 
-    public Bank getBankById(int id) throws SQLException {
+    // Retrieve a bank by its ID
+    public Bank getBankById(long id) throws SQLException {
         String sql = "SELECT bankid, bankname, bankaddress, bankphone FROM bank WHERE bankid = ?";
 
         try (Connection conn = DBConn.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            ps.setInt(1, id);
+            ps.setLong(1, id);  // Change to setLong for BIGINT
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return new Bank(
-                            rs.getInt("bankid"),
+                            rs.getLong("bankid"),    // Change to getLong for BIGINT
                             rs.getString("bankname"),
                             rs.getString("bankaddress"),
                             rs.getString("bankphone")
@@ -61,9 +64,10 @@ public class BankDAO {
                 }
             }
         }
-        return null;
+        return null; // Return null if no bank is found with the given ID
     }
 
+    // Update an existing bank record
     public boolean updateBank(Bank bank) throws SQLException {
         String sql = "UPDATE bank SET bankaddress = ?, bankphone = ? WHERE bankid = ?";
 
@@ -72,9 +76,9 @@ public class BankDAO {
 
             ps.setString(1, bank.getBankAddress());
             ps.setString(2, bank.getBankPhone());
-            ps.setInt(3, bank.getBankId());
+            ps.setLong(3, bank.getBankId());  // Change to setLong for BIGINT
 
-            return ps.executeUpdate() > 0;
+            return ps.executeUpdate() > 0; // Returns true if the row is updated
         }
     }
 }
