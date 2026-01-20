@@ -11,6 +11,14 @@
     <version>1.0.0</version>
     <packaging>war</packaging>
 
+    <!-- ===== Spring Boot Parent ===== -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.5.6</version> <!-- Ensure this version is up to date -->
+        <relativePath/> <!-- Lookup parent from repository -->
+    </parent>
+
     <!-- ===== Java Version (Heroku-24 uses Java 21) ===== -->
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
@@ -20,54 +28,20 @@
     <!-- ===== Dependencies ===== -->
     <dependencies>
 
-        <!-- Jakarta Servlet API -->
+        <!-- Spring Boot Web, Security, and JPA Dependencies -->
         <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-            <version>6.0.0</version>
-            <scope>provided</scope>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- JSP Engine (Tomcat Jasper) -->
         <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-jasper</artifactId>
-            <version>10.1.18</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
-        <!-- Tomcat Core (recommended) -->
         <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-core</artifactId>
-            <version>10.1.18</version>
-        </dependency>
-
-        <!-- Tomcat EL (recommended for JSP/JSTL) -->
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-el</artifactId>
-            <version>10.1.18</version>
-        </dependency>
-
-        <!-- JSTL API -->
-        <dependency>
-            <groupId>jakarta.servlet.jsp.jstl</groupId>
-            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
-            <version>3.0.1</version>
-        </dependency>
-
-        <!-- JSTL Implementation -->
-        <dependency>
-            <groupId>org.glassfish.web</groupId>
-            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
-            <version>3.0.1</version>
-        </dependency>
-
-        <!-- Jakarta Mail Implementation (includes API) -->
-        <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>jakarta.mail</artifactId>
-            <version>2.0.1</version>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
         <!-- PostgreSQL JDBC Driver -->
@@ -77,9 +51,38 @@
             <version>42.7.4</version>
         </dependency>
 
+        <!-- JSP Engine (Tomcat Jasper) -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-jasper</artifactId>
+            <version>10.1.18</version>
+        </dependency>
+
+        <!-- JSTL for JSP -->
+        <dependency>
+            <groupId>jakarta.servlet.jsp.jstl</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
+        <!-- Jakarta Mail Implementation (for sending emails, optional) -->
+        <dependency>
+            <groupId>com.sun.mail</groupId>
+            <artifactId>jakarta.mail</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+
+        <!-- Heroku Webapp Runner (If using WAR deployment) -->
+        <dependency>
+            <groupId>com.heroku</groupId>
+            <artifactId>webapp-runner</artifactId>
+            <version>10.1.18.0</version>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>
@@ -88,11 +91,11 @@
     <build>
         <plugins>
 
-            <!-- Compiler -->
+            <!-- Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
+                <version>3.8.1</version>
                 <configuration>
                     <release>${maven.compiler.release}</release>
                 </configuration>
@@ -108,7 +111,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Webapp Runner for Heroku (Runs WAR files on Heroku) -->
+            <!-- Dependency Plugin (for Webapp Runner) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
