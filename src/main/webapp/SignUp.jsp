@@ -556,7 +556,7 @@
 
                             <button type="button" id="togglePassword"
                                     style="position:absolute; right:25px; background:none; border:none; cursor:pointer; z-index:2;">
-                                <img id="passwordIcon" src="images/icons/eyeDisable.png" alt="Show Password" style="width:25px; height:25px;">
+                                <img id="passwordIcon" src="images/icons/hidepass.png" alt="Show Password" style="width:25px; height:25px;">
                             </button>
                         </div>
                         <div class="error-message" id="passwordError">Password must be at least 6 characters</div>
