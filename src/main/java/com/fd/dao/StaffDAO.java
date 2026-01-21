@@ -469,9 +469,30 @@ public class StaffDAO {
             }
             
         } catch (SQLException e) {
-            System.err.println("❌ Error getting next staff ID: " + e.getMessage());}
+            System.err.println("❌ Error getting next staff ID: " + e.getMessage());
             e.printStackTrace();
         }
         
-       
+        System.out.println("📋 Next STAFF ID for prefix '" + prefix + "': " + nextNumber);
+        return nextNumber;
     }
+
+    /**
+     * Get staff ID prefix based on role
+     * Updated prefix format without "0" suffix
+     */
+    public String getStaffIdPrefix(String role) {
+        if (role == null) return "STAFF";
+        
+        if (role.equals("Finance Executive")) {
+            return "FinanceE";
+        } else if (role.equals("Senior Finance Manager")) {
+            return "FinanceM";
+        } else if (role.equals("Finance Manager")) {
+            return "FinanceM";
+        }
+        
+        return "STAFF"; // Default prefix
+    }
+
+}
