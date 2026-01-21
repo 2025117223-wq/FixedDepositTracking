@@ -9,11 +9,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import jakarta.mail.MessagingException;
 
 import java.io.IOException;
 import java.security.SecureRandom;
-import jakarta.mail.MessagingException;  // Import added for MessagingException
 
 @WebServlet("/ForgotPasswordServlet")
 public class ForgotPasswordServlet extends HttpServlet {
@@ -42,7 +40,7 @@ public class ForgotPasswordServlet extends HttpServlet {
         System.out.println("📧 Email: " + email);
 
         // Check if email exists and staff is Active
-       StaffDAO staffDAO = new StaffDAO();
+        StaffDAO staffDAO = new StaffDAO();
         Long staffId = staffDAO.getStaffIdByEmailAndStatus(email, "Active");  // Gunakan Long di sini
 
         if (staffId == null) {
@@ -81,7 +79,7 @@ public class ForgotPasswordServlet extends HttpServlet {
                     "If you did not request this, please ignore this email."
             );
             System.out.println("✅ Email sent successfully");
-        } catch (MessagingException e) {  // Catch MessagingException
+        } catch (Exception e) {  // Catch general Exception instead of MessagingException
             System.err.println("❌ Failed to send email");
             e.printStackTrace();
             System.out.println("========================================");
