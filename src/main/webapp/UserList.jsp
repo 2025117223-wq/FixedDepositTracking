@@ -66,16 +66,7 @@
     System.out.println("✅ JSON data prepared for " + filteredStaffList.size() + " users");
     System.out.println("========================================");
 %>
-<%
-    // Simple session check - No includes needed!
-    String userName = (String) session.getAttribute("staffName");
-    String userRole = (String) session.getAttribute("staffRole");
-    
-    if (userName == null) {
-        response.sendRedirect("Login.jsp");
-        return;
-    }
-%>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -717,18 +708,8 @@
     <%@ include file="includes/sidebar.jsp" %>
 
     <div class="main-content">
-        <div class="header">
-            <h1>Users Lists</h1>
-            <div class="user-profile">
-                <div class="user-info">
-                    <div class="user-name"><%= userName %></div>
-                    <div class="user-role"><%= userRole %></div>
-                </div>
-                <div class="user-avatar" onclick="window.location.href='Profile.jsp'" style="cursor: pointer;">
-                    <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
-                </div>
-            </div>
-        </div>
+        <% request.setAttribute("pageTitle", "User List"); %>
+		<%@ include file="includes/HeaderInclude.jsp" %>
 
         <div class="page-content">
 		    <div class="search-and-filter">

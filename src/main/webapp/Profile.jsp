@@ -38,24 +38,31 @@
     String userEmail = currentUser.getEmail() != null ? currentUser.getEmail() : "";
     String userPhone = currentUser.getPhone() != null ? currentUser.getPhone() : "";
     String userAddress = currentUser.getAddress() != null ? currentUser.getAddress() : "";
-    String userRole = currentUser.getRole() != null ? currentUser.getRole() : "";
+    String role = currentUser.getRole();
+    boolean isManager = role != null && role.contains("Manager");
     String userPassword = currentUser.getPassword() != null ? currentUser.getPassword() : "";
     
     // Load manager information
     String managerName = "No Manager";
     boolean showManagerField = false; // Only show for non-managers
     
-    // Check if user has a manager (is not a manager themselves)
-    if (!userRole.contains("Manager") && currentUser.getManagerId() > 0) {
-        Staff manager = staffDAO.getStaffById(currentUser.getManagerId());
-        if (manager != null) {
-            managerName = manager.getName();
-        }
-        showManagerField = true;
-    } else if (!userRole.contains("Manager")) {
-        // Finance Executive with no manager
-        showManagerField = true;
+ // Prepare profile picture
+    String profilePictureData = "";
+    if (currentUser.getProfilePicture() != null && currentUser.getProfilePicture().length > 0) {
+        // Convert byte array to Base64 string
+        profilePictureData = "data:image/jpeg;base64," + java.util.Base64.getEncoder().encodeToString(currentUser.getProfilePicture());
     }
+    
+    // Check if user has a manager (is not a manager themselves)
+	    if (!isManager && currentUser.getManagerId() > 0) {
+	    Staff manager = staffDAO.getStaffById(currentUser.getManagerId());
+	    if (manager != null) {
+	        managerName = manager.getName();
+	    }
+	    showManagerField = true;
+	} else if (!isManager) {
+	    showManagerField = true;
+	}
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -97,7 +104,7 @@
         }
 
         .header h1 {
-            font-size: 2rem;
+            font-size: 1.8rem;
             color: #2c3e50;
             font-weight: 600;
         }
@@ -108,30 +115,18 @@
             gap: 15px;
         }
 
-        .user-info {
-            text-align: right;
-        }
+        .user-info { text-align: right; }
+        .user-name { font-weight: 600; color: #2c3e50; font-size: 16px; }
+        .user-role { font-size: 13px; color: #7f8c8d; }
 
-        .user-name {
-            font-weight: 600;
-            color: #2c3e50;
-            font-size: 16px;
-        }
-
-        .user-role {
-            font-size: 13px;
-            color: #7f8c8d;
-        }
-
-        .user-avatar-small {
+        .user-avatar {
             width: 50px;
             height: 50px;
             border-radius: 50%;
             background: #d0d0d0;
-            cursor: pointer;
         }
 
-        .user-avatar-small img {
+        .user-avatar img {
             width: 100%;
             height: 100%;
             border-radius: 50%;
@@ -571,23 +566,17 @@
     <%@ include file="includes/sidebar.jsp" %>
 
     <div class="main-content">
-        <div class="header">
-            <h1>Profile</h1>
-            <div class="user-profile">
-                <div class="user-info">
-                    <div class="user-name"><%= userName %></div>
-                    <div class="user-role"><%= userRole %></div>
-                </div>
-                <div class="user-avatar-small" onclick="window.location.href='Profile.jsp'" style="cursor: pointer;">
-                    <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
-                </div>
-            </div>
-        </div>
+   		<% request.setAttribute("pageTitle", "Profile"); %>
+        <%@ include file="includes/HeaderInclude.jsp" %>
 
         <div class="page-content">
             <div class="profile-left">
                 <div class="profile-avatar" id="profileAvatar">
-                    <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
+                    <% if (!profilePictureData.isEmpty()) { %>
+                        <img src="<%= profilePictureData %>" alt="User Avatar">
+                    <% } else { %>
+                        <img src="images/icons/user.jpg" alt="User Avatar">
+                    <% } %>
                 </div>
                 <div class="profile-greeting">Hi, <%= userName %> !</div>
             </div>
@@ -597,7 +586,7 @@
                     <h2 class="info-title">Your Information Details</h2>
 
                     <!-- FORM SUBMITS TO UpdateProfileServlet -->
-                    <form id="profileForm" action="UpdateProfileServlet" method="post">
+                    <form id="profileForm" action="UpdateProfileServlet" method="post" enctype="multipart/form-data">
                         <!-- Hidden field for Staff ID -->
                         <input type="hidden" name="staffId" value="<%= userStaffId %>">
                         
@@ -633,8 +622,8 @@
                             <!-- ADD THIS: Role field -->
 							<div class="info-group">
 							    <label class="info-label">Role</label>
-							    <input type="text" class="info-value" id="role" 
-							           value="<%= userRole %>" readonly style="cursor: not-allowed;">
+							    <input type="text" class="info-value" id="role"
+       								name="role" value="<%= role %>" readonly>
 							</div>
                             
                             <div class="info-group">

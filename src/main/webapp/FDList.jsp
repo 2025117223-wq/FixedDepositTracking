@@ -1,14 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%
-    // Simple session check - No includes needed!
-    String userName = (String) session.getAttribute("staffName");
-    String userRole = (String) session.getAttribute("staffRole");
-    
-    if (userName == null) {
-        response.sendRedirect("Login.jsp");
-        return;
-    }
-%>
+
 <%@ page import="java.util.List" %>
 <%@ page import="com.fd.model.FixedDepositRecord" %>
 <!DOCTYPE html>
@@ -365,6 +356,87 @@
         .notification.success {
             background: #80cbc4;
         }
+        
+        /* ========================================
+           PAGINATION STYLES
+           ======================================== */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding: 20px 0;
+        }
+        
+        .pagination-info {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .pagination {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .pagination-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .pagination-btn:hover:not(.disabled) {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .pagination-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .pagination-btn.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        
+        .pagination-btn.prev::before {
+            content: '←';
+        }
+        
+        .pagination-btn.next::after {
+            content: '→';
+        }
+        
+        .page-numbers {
+            display: flex;
+            gap: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .pagination-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .pagination {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -374,19 +446,8 @@
     <!-- Main Content -->
     <div class="main-content">
         <!-- Header -->
-        <div class="header">
-            <h1>Fixed Deposits Lists</h1>
-            <div class="user-profile">
-                <div class="user-info">
-                    <div class="user-name"><%= userName %></div>
-                    <div class="user-role"><%= userRole %></div>
-                </div>
-                <div class="user-avatar" onclick="window.location.href='Profile.jsp'" style="cursor: pointer;">
-                    <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
-                </div>
-            </div>
-        </div>
-
+        <% request.setAttribute("pageTitle", "Fixed Deposit List"); %>
+		<%@ include file="includes/HeaderInclude.jsp" %>
         <!-- Page Content -->
         <div class="page-content">
             <!-- Error Message -->
@@ -422,8 +483,39 @@
                         <%
                             List<FixedDepositRecord> fdList = (List<FixedDepositRecord>) request.getAttribute("fdList");
                             
+                            // ========================================
+                            // PAGINATION LOGIC
+                            // ========================================
+                            int itemsPerPage = 7;
+                            int currentPage = 1;
+                            
+                            // Get current page from request parameter
+                            String pageParam = request.getParameter("page");
+                            if (pageParam != null && !pageParam.isEmpty()) {
+                                try {
+                                    currentPage = Integer.parseInt(pageParam);
+                                } catch (NumberFormatException e) {
+                                    currentPage = 1;
+                                }
+                            }
+                            
+                            int totalItems = (fdList != null) ? fdList.size() : 0;
+                            int totalPages = (int) Math.ceil((double) totalItems / itemsPerPage);
+                            
+                            // Ensure current page is within bounds
+                            if (currentPage < 1) currentPage = 1;
+                            if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+                            
+                            // Calculate start and end index for current page
+                            int startIndex = (currentPage - 1) * itemsPerPage;
+                            int endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+                            // ========================================
+                            
                             if (fdList != null && !fdList.isEmpty()) {
-                                for (FixedDepositRecord fd : fdList) {
+                                // Get only the FDs for current page
+                                List<FixedDepositRecord> pageItems = fdList.subList(startIndex, endIndex);
+                                
+                                for (FixedDepositRecord fd : pageItems) {
                         %>
                         <tr>
                             <td>FD<%= fd.getFdID() %></td>
@@ -467,6 +559,80 @@
                         %>
                     </tbody>
                 </table>
+                
+                <!-- ========================================
+                     PAGINATION CONTROLS
+                     ======================================== -->
+                <%
+                    if (fdList != null && !fdList.isEmpty()) {
+                %>
+                <div class="pagination-container">
+                    <div class="pagination-info">
+                        Showing <%= startIndex + 1 %> to <%= endIndex %> of <%= totalItems %> FDs
+                    </div>
+                    
+                    <div class="pagination">
+                        <!-- Previous Button -->
+                        <a href="?page=<%= currentPage - 1 %>" 
+                           class="pagination-btn prev <%= currentPage <= 1 ? "disabled" : "" %>">
+                            Previous
+                        </a>
+                        
+                        <!-- Page Numbers -->
+                        <div class="page-numbers">
+                            <%
+                                // Show max 5 page numbers
+                                int maxVisible = 5;
+                                int startPage = Math.max(1, currentPage - 2);
+                                int endPage = Math.min(totalPages, startPage + maxVisible - 1);
+                                
+                                // Adjust start if we're near the end
+                                if (endPage - startPage < maxVisible - 1) {
+                                    startPage = Math.max(1, endPage - maxVisible + 1);
+                                }
+                                
+                                // First page
+                                if (startPage > 1) {
+                            %>
+                                <a href="?page=1" class="pagination-btn">1</a>
+                                <% if (startPage > 2) { %>
+                                    <span style="padding: 8px;">...</span>
+                                <% } %>
+                            <%
+                                }
+                                
+                                // Page numbers
+                                for (int i = startPage; i <= endPage; i++) {
+                            %>
+                                <a href="?page=<%= i %>" 
+                                   class="pagination-btn <%= i == currentPage ? "active" : "" %>">
+                                    <%= i %>
+                                </a>
+                            <%
+                                }
+                                
+                                // Last page
+                                if (endPage < totalPages) {
+                            %>
+                                <% if (endPage < totalPages - 1) { %>
+                                    <span style="padding: 8px;">...</span>
+                                <% } %>
+                                <a href="?page=<%= totalPages %>" class="pagination-btn"><%= totalPages %></a>
+                            <%
+                                }
+                            %>
+                        </div>
+                        
+                        <!-- Next Button -->
+                        <a href="?page=<%= currentPage + 1 %>" 
+                           class="pagination-btn next <%= currentPage >= totalPages ? "disabled" : "" %>">
+                            Next
+                        </a>
+                    </div>
+                </div>
+                <%
+                    }
+                %>
             </div>
         </div>
     </div>

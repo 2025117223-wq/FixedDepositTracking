@@ -1,0 +1,233 @@
+package com.fd.servlet;
+
+import com.fd.dao.StaffDAO;
+import com.fd.model.Staff;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+/**
+ * SignUpServlet - UPDATED VERSION WITH STAFFID_PREFIX SUPPORT
+ * Includes automatic prefix assignment based on role
+ * For Tomcat 10+ (Jakarta EE)
+ */
+@WebServlet("/SignUpServlet")
+@MultipartConfig(
+    fileSizeThreshold = 1024 * 1024,  // 1MB
+    maxFileSize = 5 * 1024 * 1024,    // 5MB
+    maxRequestSize = 10 * 1024 * 1024 // 10MB
+)
+public class SignUpServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    private StaffDAO staffDAO;
+
+    @Override
+    public void init() {
+        staffDAO = new StaffDAO();
+        System.out.println("========================================");
+        System.out.println("✅ SignUpServlet INITIALIZED");
+        System.out.println("========================================");
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        
+        System.out.println("========================================");
+        System.out.println("📝 SignUpServlet - New User Registration");
+        System.out.println("========================================");
+
+        try {
+            // Get form parameters
+            String fullName = request.getParameter("name");
+            String phoneNumber = request.getParameter("phone");
+            String email = request.getParameter("email");
+            String password = request.getParameter("password");
+            String confirmPassword = request.getParameter("confirmPassword");
+            String homeAddress = request.getParameter("address");
+            String staffRole = request.getParameter("role");
+            String managerIdStr = request.getParameter("managerId");
+
+            System.out.println("📋 Registration Details:");
+            System.out.println("   Name: " + fullName);
+            System.out.println("   Email: " + email);
+            System.out.println("   Role: " + staffRole);
+            System.out.println("   Manager: " + (managerIdStr != null && !managerIdStr.isEmpty() ? managerIdStr : "None"));
+
+            // Get profile picture
+            Part profilePart = request.getPart("profilePicture");
+
+            // Basic validation
+            if (isBlank(fullName) || isBlank(phoneNumber) || isBlank(email) ||
+                isBlank(password) || isBlank(confirmPassword) ||
+                isBlank(homeAddress) || isBlank(staffRole) ||
+                profilePart == null || profilePart.getSize() == 0) {
+                
+                System.err.println("❌ Validation failed: Missing required fields");
+                request.setAttribute("error", "Please fill in all required fields.");
+                request.getRequestDispatcher("SignUp.jsp").forward(request, response);
+                return;
+            }
+
+            // Password validation
+            if (password.trim().length() < 6) {
+                System.err.println("❌ Validation failed: Password too short");
+                request.setAttribute("error", "Password must be at least 6 characters.");
+                request.getRequestDispatcher("SignUp.jsp").forward(request, response);
+                return;
+            }
+
+            if (!password.equals(confirmPassword)) {
+                System.err.println("❌ Validation failed: Passwords don't match");
+                request.setAttribute("error", "Passwords do not match.");
+                request.getRequestDispatcher("SignUp.jsp").forward(request, response);
+                return;
+            }
+
+            // Manager ID parse (optional)
+            int managerId = 0; // 0 means no manager
+            if (!isBlank(managerIdStr)) {
+                try {
+                    managerId = Integer.parseInt(managerIdStr);
+                    if (managerId < 0) throw new NumberFormatException();
+                } catch (NumberFormatException ex) {
+                    System.err.println("❌ Validation failed: Invalid manager ID");
+                    request.setAttribute("error", "Invalid manager selected.");
+                    request.getRequestDispatcher("SignUp.jsp").forward(request, response);
+                    return;
+                }
+            }
+
+            // Profile picture validation
+            String contentType = profilePart.getContentType();
+            if (contentType == null ||
+                !(contentType.equalsIgnoreCase("image/jpeg") ||
+                  contentType.equalsIgnoreCase("image/jpg") ||
+                  contentType.equalsIgnoreCase("image/png"))) {
+                
+                System.err.println("❌ Validation failed: Invalid file type");
+                request.setAttribute("error", "Profile picture must be JPEG or PNG.");
+                request.getRequestDispatcher("SignUp.jsp").forward(request, response);
+                return;
+            }
+
+            // Check if email already exists
+            if (staffDAO.emailExists(email.trim())) {
+                System.err.println("❌ Registration failed: Email already exists");
+                request.setAttribute("error", "Email already registered. Please use a different email.");
+                request.getRequestDispatcher("SignUp.jsp").forward(request, response);
+                return;
+            }
+
+            // Read profile picture as bytes
+            byte[] pictureBytes = null;
+            try (InputStream inputStream = profilePart.getInputStream()) {
+                pictureBytes = inputStream.readAllBytes();
+                System.out.println("📷 Profile picture size: " + pictureBytes.length + " bytes");
+            }
+
+            // Determine staff ID prefix based on role
+            String staffIdPrefix = determineStaffPrefix(staffRole);
+            System.out.println("🏷️  Staff ID Prefix: " + staffIdPrefix);
+
+            // Create Staff object - UPDATED with STAFFID_PREFIX
+            Staff staff = new Staff();
+            staff.setName(fullName.trim());
+            staff.setPhone(phoneNumber.trim());
+            staff.setAddress(homeAddress.trim());
+            staff.setEmail(email.trim().toLowerCase());
+            staff.setRole(staffRole.trim());
+            staff.setPassword(password.trim());  // TODO: Hash in production!
+            staff.setStatus("Active");
+            staff.setManagerId(managerId);
+            staff.setProfilePicture(pictureBytes);
+            staff.setStaffIdPrefix(staffIdPrefix);  // ✅ NEW: Set the prefix
+
+            // Insert into database
+            System.out.println("💾 Inserting staff into database...");
+            boolean success = staffDAO.registerStaff(staff);
+
+            if (success) {
+                System.out.println("✅ REGISTRATION SUCCESSFUL");
+                System.out.println("   Email: " + email);
+                System.out.println("   Role: " + staffRole);
+                System.out.println("   Prefix: " + staffIdPrefix);
+                System.out.println("========================================");
+                
+                // Redirect to login with success message
+                response.sendRedirect("Login.jsp?signup=success");
+            } else {
+                System.err.println("❌ REGISTRATION FAILED - Database insert failed");
+                System.out.println("========================================");
+                
+                request.setAttribute("error", "Sign up failed. Please try again.");
+                request.getRequestDispatcher("SignUp.jsp").forward(request, response);
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Exception during registration: " + e.getMessage());
+            e.printStackTrace();
+            System.out.println("========================================");
+            
+            request.setAttribute("error", "An error occurred: " + e.getMessage());
+            request.getRequestDispatcher("SignUp.jsp").forward(request, response);
+        }
+    }
+
+    /**
+     * Determine staff ID prefix based on role
+     * Maps role names to appropriate prefixes
+     */
+    private String determineStaffPrefix(String role) {
+        if (role == null) return "STF";
+        
+        String upperRole = role.trim().toUpperCase();
+        
+        // Handle exact matches - updated prefix format without "0"
+        switch (upperRole) {
+            case "FINANCE EXECUTIVE":
+                return "FinanceE";
+            case "SENIOR FINANCE MANAGER":
+                return "FinanceM";
+            case "FINANCE MANAGER":
+                return "FinanceM";
+            case "SENIOR MANAGER":
+                return "SeniorM";
+            case "MANAGER":
+                return "Manager";
+            case "OFFICER":
+                return "Officer";
+            case "CLERK":
+                return "Clerk";
+            case "ADMIN":
+            case "ADMINISTRATOR":
+                return "Admin";
+            case "ASSISTANT":
+                return "Assistant";
+            case "SUPERVISOR":
+                return "Supervisor";
+            case "DIRECTOR":
+                return "Director";
+            default:
+                return "Staff"; // Default staff prefix
+        }
+    }
+
+    /**
+     * Check if string is blank (null or empty)
+     */
+    private boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
+}

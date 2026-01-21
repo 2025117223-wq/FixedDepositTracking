@@ -1,15 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="com.fd.model.Bank" %>
 <%
-    // Session check
-    String userName = (String) session.getAttribute("staffName");
-    String userRole = (String) session.getAttribute("staffRole");
-    
-    if (userName == null) {
-        response.sendRedirect("Login.jsp");
-        return;
-    }
-    
     // Get bank from request attribute (set by BankServlet)
     Bank bank = (Bank) request.getAttribute("bank");
     if (bank == null) {
@@ -324,19 +315,8 @@
     <%@ include file="includes/sidebar.jsp" %>
 
     <div class="main-content">
-        <div class="header">
-            <h1>Edit Bank</h1>
-            <div class="user-profile">
-                <div class="user-info">
-                    <div class="user-name"><%= userName %></div>
-                    <div class="user-role"><%= userRole %></div>
-                </div>
-                <div class="user-avatar" onclick="window.location.href='Profile.jsp'" style="cursor: pointer;">
-                    <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
-                </div>
-            </div>
-        </div>
-
+        <% request.setAttribute("pageTitle", "Edit Bank"); %>
+		<%@ include file="includes/HeaderInclude.jsp" %>
          <div class="page-content">
             <div class="form-card">
                 <h2>Edit Bank Information</h2>

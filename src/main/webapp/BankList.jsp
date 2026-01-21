@@ -5,7 +5,6 @@
 <%
     // Session check
     String userName = (String) session.getAttribute("staffName");
-    String userRole = (String) session.getAttribute("staffRole");
     
     if (userName == null) {
         response.sendRedirect("Login.jsp");
@@ -166,19 +165,13 @@
             background: #f8f9fa;
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .action-btn {
-            display: flex;
+         .action-btn {
+            display: inline-flex;
             flex-direction: column;
             align-items: center;
             gap: 5px;
             cursor: pointer;
+            margin-top: 10px;
             transition: all 0.3s ease;
         }
 
@@ -187,12 +180,12 @@
         }
 
         .action-icon {
-            width: 35px;
-            height: 35px;
+            width: 30px;
+            height: 30px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 20px;
         }
 
         .action-icon.update {
@@ -200,11 +193,18 @@
         }
 
         .action-label {
-            font-size: 12px;
+            font-size: 11px;
             color: #7f8c8d;
             font-weight: 500;
         }
-
+        
+        .action-icon img {
+		    width: 100%;
+		    height: 100%;
+		    object-fit: contain;
+		    display: block; /* removes default inline gap */
+		}
+		
         .no-data {
             text-align: center;
             padding: 60px 20px;
@@ -264,18 +264,8 @@
     <%@ include file="includes/sidebar.jsp" %>
 
     <div class="main-content">
-        <div class="header">
-            <h1>Bank Lists</h1>
-            <div class="user-profile">
-                <div class="user-info">
-                    <div class="user-name"><%= userName %></div>
-                    <div class="user-role"><%= userRole %></div>
-                </div>
-                <div class="user-avatar" onclick="window.location.href='Profile.jsp'">
-                    <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
-                </div>
-            </div>
-        </div>
+        <% request.setAttribute("pageTitle", "Bank List"); %>
+		<%@ include file="includes/HeaderInclude.jsp" %>
 
         <div class="page-content">
             <div class="table-container">
@@ -348,12 +338,14 @@
                     '<td>' + bank.phone + '</td>' +
                     '<td>' + bank.address + '</td>' +
                     '<td>' +
-                        '<div class="action-buttons">' +
-                            '<div class="action-btn" onclick="updateBank(' + bank.id + ')">' +
-                                '<div class="action-icon update">✏️</div>' +
-                                '<div class="action-label">Update</div>' +
-                            '</div>' +
+                    '<div class="action-buttons">' +
+                    '<div class="action-btn" onclick="updateBank(\'' + bank.id + '\')">' +
+                        '<div class="action-icon update">' +
+                            '<img src="images/icons/update-icon.png" alt="Update" style="width:100px; height:90px;">' +
                         '</div>' +
+                        '<div class="action-label">Update</div>' +
+                    '</div>' +
+            '</div>' +
                     '</td>';
                 tbody.appendChild(row);
             });

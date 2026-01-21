@@ -50,16 +50,7 @@
     }
     System.out.println("==============================");
 %>
-<%
-    // Simple session check - No includes needed!
-    String userName = (String) session.getAttribute("staffName");
-    String userRole = (String) session.getAttribute("staffRole");
-    
-    if (userName == null) {
-        response.sendRedirect("Login.jsp");
-        return;
-    }
-%>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -617,18 +608,8 @@
     <!-- Main Content -->
     <div class="main-content">
         <!-- Header -->
-        <div class="header">
-            <h1>Create Fixed Deposits</h1>
-		<div class="user-profile">
-                <div class="user-info">
-                    <div class="user-name"><%= userName %></div>
-                    <div class="user-role"><%= userRole %></div>
-                </div>
-                <div class="user-avatar" onclick="window.location.href='Profile.jsp'" style="cursor: pointer;">
-                    <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
-                </div>
-            </div>
-        </div>
+        <% request.setAttribute("pageTitle", "Create Fixed Deposit"); %>
+		<%@ include file="includes/HeaderInclude.jsp" %>
 
         <!-- Page Content -->
         <div class="page-content">

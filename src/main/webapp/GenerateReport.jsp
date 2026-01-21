@@ -6,15 +6,6 @@
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="java.math.BigDecimal" %>
 <%
-    // Simple session check
-    String userName = (String) session.getAttribute("staffName");
-    String userRole = (String) session.getAttribute("staffRole");
-    
-    if (userName == null) {
-        response.sendRedirect("Login.jsp");
-        return;
-    }
-    
     // Get FD list and bank list from request (set by GenerateReportServlet)
     @SuppressWarnings("unchecked")
     List<FixedDepositRecord> fdList = (List<FixedDepositRecord>) request.getAttribute("fdList");
@@ -549,18 +540,8 @@
     <%@ include file="includes/sidebar.jsp" %>
 
     <div class="main-content">
-        <div class="header">
-            <h1>Reports</h1>
-            <div class="user-profile">
-                <div class="user-info">
-                    <div class="user-name"><%= userName %></div>
-                    <div class="user-role"><%= userRole %></div>
-                </div>
-                <div class="user-avatar" onclick="window.location.href='Profile.jsp'" style="cursor: pointer;">
-                    <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
-                </div>
-            </div>
-        </div>
+        <% request.setAttribute("pageTitle", "Generate Report"); %>
+		<%@ include file="includes/HeaderInclude.jsp" %>
 
         <div class="page-content" id="filterView">
             <div class="filter-container">

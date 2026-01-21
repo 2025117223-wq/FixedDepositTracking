@@ -496,7 +496,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <div class="input-wrapper select-wrapper">
-                            <img src="images/icons/role.png" alt="Home" class="address-icon">
+                            <img src="images/icons/role.png" alt="Role" class="role-icon">
                             <select id="staffRole" name="role">
                                 <option value="" disabled selected>Select Role</option>
                                 <option value="Senior Finance Manager">Senior Finance Manager</option>
@@ -508,7 +508,7 @@
 
                     <div class="form-group">
                         <div class="input-wrapper select-wrapper">
-                            <img src="images/icons/role.png" alt="Home" class="address-icon">
+                            <img src="images/icons/manager.png" alt="Manager" class="manager-icon">
                             <!-- REMOVED required attribute -->
                             <select id="managerId" name="managerId">
                                 <option value="" disabled selected>Select Manager</option>
@@ -553,10 +553,10 @@
                         <div class="input-wrapper" style="position: relative;">
                             <img src="images/icons/password.png" alt="Password" class="password-icon">
                             <input type="password" id="password" name="password" placeholder="Password" minlength="6">
- 
+
                             <button type="button" id="togglePassword"
                                     style="position:absolute; right:25px; background:none; border:none; cursor:pointer; z-index:2;">
-                                <img id="passwordIcon" src="images/icons/hidepass.png" alt="Show Password" style="width:25px; height:25px;">
+                                <img id="passwordIcon" src="images/icons/eyeDisable.png" alt="Show Password" style="width:25px; height:25px;">
                             </button>
                         </div>
                         <div class="error-message" id="passwordError">Password must be at least 6 characters</div>
@@ -569,7 +569,7 @@
 
                             <button type="button" id="toggleConfirmPassword"
                                     style="position:absolute; right:25px; background:none; border:none; cursor:pointer; z-index:2;">
-                                <img id="confirmPasswordIcon" src="images/icons/hidepass.png" alt="Show Password" style="width:25px; height:25px;">
+                                <img id="confirmPasswordIcon" src="images/icons/eyeDisable.png" alt="Show Password" style="width:25px; height:25px;">
                             </button>
                         </div>
                         <div class="error-message" id="confirmPasswordError">Passwords do not match</div>

@@ -1351,4 +1351,214 @@ public class FixedDepositDAO {
             }
         }
     }
+    
+    // ========================================
+    // DUPLICATE CHECKING METHODS
+    // ========================================
+    
+    /**
+     * Check if account number already exists
+     */
+    public boolean accountNumberExists(String accountNumber) {
+        String query = "SELECT COUNT(*) FROM FIXEDDEPOSITRECORD WHERE ACCNUMBER = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            
+            pstmt.setString(1, accountNumber);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt(1);
+                    System.out.println("🔍 Account Number Check: " + accountNumber + " - " + (count > 0 ? "EXISTS" : "Available"));
+                    return count > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Error checking account number: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    /**
+     * Check if referral number already exists
+     */
+    public boolean referralNumberExists(String referralNumber) {
+        if (referralNumber == null || referralNumber.trim().isEmpty()) {
+            return false;
+        }
+        
+        String query = "SELECT COUNT(*) FROM FIXEDDEPOSITRECORD WHERE REFERRALNUMBER = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            
+            pstmt.setString(1, referralNumber);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt(1);
+                    System.out.println("🔍 Referral Number Check: " + referralNumber + " - " + (count > 0 ? "EXISTS" : "Available"));
+                    return count > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Error checking referral number: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    /**
+     * Check if certificate number already exists
+     */
+    public boolean certificateNumberExists(String certNo) {
+        if (certNo == null || certNo.trim().isEmpty()) {
+            return false;
+        }
+        
+        String query = "SELECT COUNT(*) FROM FIXEDDEPOSITRECORD WHERE CERTNO = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            
+            pstmt.setString(1, certNo);
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt(1);
+                    System.out.println("🔍 Certificate Number Check: " + certNo + " - " + (count > 0 ? "EXISTS" : "Available"));
+                    return count > 0;
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Error checking certificate number: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return false;
+    }
+    
+    /**
+     * Check all unique fields at once
+     * @return Error message if duplicates found, null if all are unique
+     */
+    public String checkForDuplicates(String accountNumber, String referralNumber, String certNo) {
+        System.out.println("========================================");
+        System.out.println("🔍 Checking for duplicates...");
+        System.out.println("   Account Number: " + accountNumber);
+        System.out.println("   Referral Number: " + referralNumber);
+        System.out.println("   Certificate Number: " + certNo);
+        
+        StringBuilder errors = new StringBuilder();
+        
+        if (accountNumberExists(accountNumber)) {
+            errors.append("Account Number ").append(accountNumber).append(" already exists. ");
+        }
+        
+        if (referralNumberExists(referralNumber)) {
+            errors.append("Referral Number ").append(referralNumber).append(" already exists. ");
+        }
+        
+        if (certificateNumberExists(certNo)) {
+            errors.append("Certificate Number ").append(certNo).append(" already exists. ");
+        }
+        
+        String result = errors.length() > 0 ? errors.toString().trim() : null;
+        System.out.println("   Result: " + (result != null ? "❌ DUPLICATES FOUND" : "✅ All unique"));
+        System.out.println("========================================");
+        
+        return result;
+    }
+    
+    public List<FixedDepositRecord> getAllFDsForReminders() {
+        List<FixedDepositRecord> fdList = new ArrayList<>();
+        
+        String query = "SELECT f.FDID, f.ACCNUMBER, f.DEPOSITAMOUNT, f.INTERESTRT, " +
+                       "f.STARTDATE, f.TENURE, f.MATURITYDATE, f.CERTNO, f.FDTYPE, " +
+                       "f.STATUS, f.REMINDERMATURITY, f.REMINDERINCOMPLETE, f.FDCERT, " +
+                       "f.REFERRALNUMBER, f.REMAININGBALANCE, f.TOTALWITHDRAWN, " +
+                       "b.BANKNAME, " +
+                       "t.STAFFID " +
+                       "FROM FIXEDDEPOSITRECORD f " +
+                       "LEFT JOIN BANK b ON f.BANKID = b.BANKID " +
+                       "LEFT JOIN FIXEDDEPOSITTRANSACTION t ON f.FDID = t.FDID " +
+                       "WHERE t.TRANSACTIONTYPE = 'CREATE' " +
+                       "ORDER BY f.FDID DESC";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            while (rs.next()) {
+                FixedDepositRecord fd = new FixedDepositRecord();
+                
+                // Set FD ID
+                fd.setFdID(rs.getInt("FDID"));
+                
+                // Set Account Number
+                fd.setAccNumber(rs.getString("ACCNUMBER"));
+                
+                // Set Deposit Amount (BigDecimal)
+                fd.setDepositAmount(rs.getBigDecimal("DEPOSITAMOUNT"));
+                
+                // Set Interest Rate (BigDecimal)
+                fd.setInterestRate(rs.getBigDecimal("INTERESTRT"));
+                
+                // Set Dates
+                fd.setStartDate(rs.getDate("STARTDATE"));
+                fd.setMaturityDate(rs.getDate("MATURITYDATE"));
+                
+                // Set Tenure
+                fd.setTenure(rs.getInt("TENURE"));
+                
+                // Set Certificate Number
+                fd.setCertNo(rs.getString("CERTNO"));
+                
+                // Set FD Type
+                fd.setFdType(rs.getString("FDTYPE"));
+                
+                // Set Status
+                fd.setStatus(rs.getString("STATUS"));
+                
+                // Set Reminder flags
+                fd.setReminderMaturity(rs.getString("REMINDERMATURITY"));
+                fd.setReminderIncomplete(rs.getString("REMINDERINCOMPLETE"));
+                
+                // Set Bank Name
+                fd.setBankName(rs.getString("BANKNAME"));
+                
+                // Set Staff ID from transaction
+                fd.setStaffID(rs.getInt("STAFFID"));
+                
+                // Set Balance tracking fields
+                fd.setRemainingBalance(rs.getBigDecimal("REMAININGBALANCE"));
+                fd.setTotalWithdrawn(rs.getBigDecimal("TOTALWITHDRAWN"));
+                
+                // Get Certificate File (BLOB)
+                Blob certBlob = rs.getBlob("FDCERT");
+                if (certBlob != null) {
+                    fd.setFdCert(certBlob.getBytes(1, (int) certBlob.length()));
+                }
+                
+                // Get Referral Number (NUMBER stored as BigDecimal)
+                BigDecimal refNum = rs.getBigDecimal("REFERRALNUMBER");
+                if (refNum != null) {
+                    fd.setReferralNumber(refNum);
+                }
+                
+                fdList.add(fd);
+            }
+            
+            System.out.println("✅ Loaded " + fdList.size() + " FD records for reminder checking");
+            
+        } catch (SQLException e) {
+            System.err.println("❌ Error getting FDs for reminders: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return fdList;
+    }
+    
 }
+

@@ -26,6 +26,7 @@ public class FixedDepositRecord {
     private String reminderMaturity;   // Stores 'Y' or 'N'
     private String reminderIncomplete; // Stores 'Y' or 'N'
     private Integer previousFDID;      // Links to previous FD if reinvested
+    private int staffID;
     
     // NEW: Balance tracking fields
     private BigDecimal remainingBalance;  // Current available balance
@@ -290,5 +291,13 @@ public class FixedDepositRecord {
                 ", status='" + status + '\'' +
                 ", previousFDID=" + previousFDID +
                 '}';
+    }
+    
+    public int getStaffID() {
+        return staffID;
+    }
+
+    public void setStaffID(int staffID) {
+        this.staffID = staffID;
     }
 }

@@ -78,16 +78,7 @@
     boolean showWithdrawOption = isFreeFD && (withdrawableFull || withdrawablePartial);
     boolean showWithdrawMessage = isFreeFD && withdrawableNo;
 %>
-<%
-    // Simple session check - No includes needed!
-    String userName = (String) session.getAttribute("staffName");
-    String userRole = (String) session.getAttribute("staffRole");
-    
-    if (userName == null) {
-        response.sendRedirect("Login.jsp");
-        return;
-    }
-%>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -493,29 +484,78 @@
         .notification.success { background: #80cbc4; }
         .notification.error { background: #e74c3c; }
 
+        /* Modal Styles */
         .modal-overlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 2000;
+            z-index: 9999;
             justify-content: center;
             align-items: center;
         }
 
+        .modal-overlay.active { display: flex; }
         .modal-overlay.show { display: flex; }
 
         .modal-content {
             background: white;
-            border-radius: 15px;
-            padding: 30px;
-            width: 90%;
-            max-width: 400px;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            min-width: 400px;
             position: relative;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .modal-message {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 12px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .modal-btn-no {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .modal-btn-no:hover {
+            background: #7f8c8d;
+        }
+
+        .modal-btn-yes {
+            background: #1a4d5e;
+            color: white;
+        }
+
+        .modal-btn-yes:hover {
+            background: #153d4a;
         }
 
         .modal-close {
@@ -608,18 +648,8 @@
     <%@ include file="includes/sidebar.jsp" %>
 
     <div class="main-content">
-        <div class="header">
-            <h1>Update Fixed Deposit FD<%= fd.getFdID() %></h1>
-            <div class="user-profile">
-                <div class="user-info">
-                    <div class="user-name"><%= userName %></div>
-                    <div class="user-role"><%= userRole %></div>
-                </div>
-                <div class="user-avatar" onclick="window.location.href='Profile.jsp'" style="cursor: pointer;">
-                    <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
-                </div>
-            </div>
-        </div>
+        <% request.setAttribute("pageTitle", "Update Fixed Deposit"); %>
+		<%@ include file="includes/HeaderInclude.jsp" %>
 
         <div class="page-content">
             <a href="FDListServlet" class="back-button">
@@ -840,11 +870,11 @@
                                     <div id="reinvestFields" class="reinvest-fields" style="display: none;">
                                         <div class="form-row">
                                             <label>Transaction Date</label>
-                                            <input type="date" id="reinvestTransactionDate" name="transactionDate">
+                                            <input type="date" id="reinvestTransactionDate" name="transactionDate" min="<%= maturityDateStr %>" onchange="validateTransactionDate(this)">
                                         </div>
                                         <div class="form-row">
                                             <label>New Start Date</label>
-                                            <input type="date" id="newStartDate" name="newStartDate" onchange="calculateNewMaturityDate()">
+                                            <input type="date" id="newStartDate" name="newStartDate" min="<%= maturityDateStr %>" onchange="validateTransactionDate(this); calculateNewMaturityDate()">
                                         </div>
                                         <div class="form-row">
                                             <label>New Tenure (Months)</label>
@@ -852,7 +882,7 @@
                                         </div>
                                         <div class="form-row">
                                             <label>New Maturity Date</label>
-                                            <input type="date" id="newMaturityDate" name="newMaturityDate">
+                                            <input type="date" id="newMaturityDate" name="newMaturityDate" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -882,7 +912,7 @@
                                     <div id="withdrawFields" style="display: none;">
                                         <div class="form-row">
                                             <label>Transaction Date</label>
-                                            <input type="date" id="transactionDate" name="transactionDate">
+                                            <input type="date" id="transactionDate" name="transactionDate" min="<%= maturityDateStr %>" onchange="validateTransactionDate(this)">
                                         </div>
                                         <div class="form-row">
                                             <label>Withdraw Amount (RM)</label>
@@ -934,7 +964,7 @@
                     </div>
 
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-update">Update</button>
+                        <button type="button" class="btn btn-update" onclick="showUpdateModal()">Update</button>
                     </div>
                 </form>
             </div>
@@ -957,7 +987,145 @@
         </div>
     </div>
 
+    <!-- Update Confirmation Modal -->
+    <div class="modal-overlay" id="updateModal">
+        <div class="modal-content">
+            <div class="modal-icon">⚠️</div>
+            <div class="modal-message">
+                Are you sure you want to update this Fixed Deposit?
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-no" onclick="closeUpdateModal()">No</button>
+                <button class="modal-btn modal-btn-yes" onclick="confirmUpdate()">Yes</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // ========== MATURITY DATE CONSTANT ==========
+        const MATURITY_DATE = '<%= maturityDateStr %>';
+        
+        // ========== TRANSACTION DATE VALIDATION ==========
+        function validateTransactionDate(field) {
+            const status = document.getElementById('fdStatus').value;
+            
+            // Only validate when status is Matured
+            if (status !== 'Matured') return true;
+            
+            const selectedDate = field.value;
+            if (!selectedDate) return true;
+            
+            if (selectedDate < MATURITY_DATE) {
+                showFieldError(field.id, '❌ Date cannot be before maturity date (' + formatDate(MATURITY_DATE) + ')');
+                field.value = ''; // Clear invalid date
+                return false;
+            }
+            
+            // Clear any existing error
+            field.classList.remove('field-error');
+            const existingError = field.parentElement.parentElement.querySelector('.error-message');
+            if (existingError) existingError.remove();
+            
+            return true;
+        }
+        
+        // Format date for display (yyyy-mm-dd to dd/mm/yyyy)
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                return parts[2] + '/' + parts[1] + '/' + parts[0];
+            }
+            return dateStr;
+        }
+        
+        // Validate all transaction dates before form submission
+        function validateAllTransactionDates() {
+            const status = document.getElementById('fdStatus').value;
+            if (status !== 'Matured') return true;
+            
+            const transactionType = document.querySelector('input[name="transactionType"]:checked')?.value;
+            
+            if (transactionType === 'Withdraw') {
+                const transDateField = document.getElementById('transactionDate');
+                if (transDateField && transDateField.value) {
+                    if (!validateTransactionDate(transDateField)) return false;
+                }
+            } else if (transactionType === 'Reinvest') {
+                const reinvestTransDateField = document.getElementById('reinvestTransactionDate');
+                const newStartDateField = document.getElementById('newStartDate');
+                
+                if (reinvestTransDateField && reinvestTransDateField.value) {
+                    if (!validateTransactionDate(reinvestTransDateField)) return false;
+                }
+                if (newStartDateField && newStartDateField.value) {
+                    if (!validateTransactionDate(newStartDateField)) return false;
+                }
+            }
+            
+            return true;
+        }
+
+        // ========== UPDATE CONFIRMATION MODAL FUNCTIONS ==========
+        function showUpdateModal() {
+            // Validate form before showing modal
+            const form = document.getElementById('updateFDForm');
+            
+            // Check basic form validation
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            // Run custom validations
+            clearFieldErrors();
+            
+            const fdType = document.querySelector('input[name="fdType"]:checked')?.value;
+            const transactionType = document.querySelector('input[name="transactionType"]:checked')?.value;
+            
+            // Validate transaction dates (must be >= maturity date when status is Matured)
+            if (!validateAllTransactionDates()) {
+                return;
+            }
+            
+            // Validate pledge value
+            if (fdType === 'Pledge') {
+                const pledgeValue = document.getElementById('pledgeValue')?.value;
+                if (pledgeValue && parseFloat(pledgeValue) > 0) {
+                    if (!validatePledgeValue()) {
+                        return;
+                    }
+                }
+            }
+            
+            // Validate withdrawal
+            if (transactionType === 'Withdraw') {
+                if (!validateWithdrawAmount()) {
+                    return;
+                }
+            }
+            
+            // Show the modal
+            document.getElementById('updateModal').classList.add('active');
+        }
+
+        function closeUpdateModal() {
+            document.getElementById('updateModal').classList.remove('active');
+        }
+
+        function confirmUpdate() {
+            closeUpdateModal();
+            document.getElementById('updateFDForm').submit();
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('updateModal').addEventListener('click', function(e) {
+                if (e.target === this) closeUpdateModal();
+            });
+        });
+
+        // ========== FD TYPE AND STATUS FUNCTIONS ==========
         // Handle FD Type change (Pledge/Free)
         function handleFDTypeChange() {
             const fdType = document.querySelector('input[name="fdType"]:checked')?.value;
@@ -1413,6 +1581,12 @@
                 
                 const fdType = document.querySelector('input[name="fdType"]:checked')?.value;
                 const transactionType = document.querySelector('input[name="transactionType"]:checked')?.value;
+                
+                // Validate transaction dates (must be >= maturity date when status is Matured)
+                if (!validateAllTransactionDates()) {
+                    e.preventDefault();
+                    return false;
+                }
                 
                 // Validate pledge value
                 if (fdType === 'Pledge') {

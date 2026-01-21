@@ -11,12 +11,12 @@
     
     
     // Check if this is view mode (opened from ViewFD) or create mode (from CreateFD)
-    Boolean viewMode = (Boolean) session.getAttribute("viewMode");
-    boolean isViewMode = viewMode != null && viewMode;
-    
-    // Get FD ID if in view mode (for back button)
+    // View mode ONLY if viewFdID exists (set by ViewFD servlet)
     Integer viewFdID = (Integer) session.getAttribute("viewFdID");
-    String backUrl = isViewMode && viewFdID != null ? "ViewFDServlet?id=" + viewFdID : "CreateFD.jsp";
+    boolean isViewMode = (viewFdID != null);
+    
+    // Get back URL
+    String backUrl = isViewMode ? "ViewFDServlet?id=" + viewFdID : "CreateFD.jsp";
     
     // Check if data exists
     Boolean pendingSubmit = (Boolean) session.getAttribute("fdPendingSubmit");
@@ -30,16 +30,6 @@
     String errorMsg = (String) session.getAttribute("error");
     if (errorMsg != null) {
         session.removeAttribute("error");
-    }
-%>
-<%
-    // Simple session check - No includes needed!
-    String userName = (String) session.getAttribute("staffName");
-    String userRole = (String) session.getAttribute("staffRole");
-    
-    if (userName == null) {
-        response.sendRedirect("Login.jsp");
-        return;
     }
 %>
 <!DOCTYPE html>
@@ -404,18 +394,8 @@
     <div class="screen-wrapper">
         <%@ include file="includes/sidebar.jsp" %>
         <div class="main-content">
-            <div class="header">
-                <h1>Fixed Deposit Application Form</h1>
-                <div class="user-profile">
-                <div class="user-info">
-                    <div class="user-name"><%= userName %></div>
-                    <div class="user-role"><%= userRole %></div>
-                </div>
-                <div class="user-avatar" onclick="window.location.href='Profile.jsp'" style="cursor: pointer;">
-                    <img src="images/icons/user.jpg" alt="User Avatar" onerror="this.style.display='none'">
-                </div>
-            </div>
-        </div>
+            <% request.setAttribute("pageTitle", "Application Form"); %>
+			<%@ include file="includes/HeaderInclude.jsp" %>
             <div class="page-content">
                 <a href="<%= backUrl %>" class="back-button">
                     <span class="back-icon">←</span>
