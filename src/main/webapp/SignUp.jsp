@@ -438,7 +438,7 @@
             <% } %>
 
             <!-- FORM SUBMITS TO SignUpServlet -->
-            <form id="signupForm" action="SignUpServlet" method="POST" enctype="multipart/form-data" novalidate>
+            <form id="signupForm" action="/SignUpServlet" method="POST" enctype="multipart/form-data" novalidate>
 
                 <!-- Full Name (Full Width) -->
                 <div class="form-row fullwidth">
