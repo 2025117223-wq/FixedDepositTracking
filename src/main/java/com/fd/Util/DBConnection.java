@@ -23,4 +23,16 @@ public class DBConnection {
         // Return the connection using the provided credentials
         return DriverManager.getConnection(URL, USER, PASS);
     }
+    
+     public static void closeConnection(Connection conn) {
+        if (conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException e) {
+                System.err.println("❌ Error closing connection: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

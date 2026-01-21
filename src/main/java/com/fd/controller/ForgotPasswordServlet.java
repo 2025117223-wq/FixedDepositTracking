@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.security.SecureRandom;
+import javax.mail.MessagingException;
 
 @WebServlet("/ForgotPasswordServlet")
 public class ForgotPasswordServlet extends HttpServlet {
@@ -80,10 +81,8 @@ public class ForgotPasswordServlet extends HttpServlet {
                     "If you did not request this, please ignore this email."
             );
             System.out.println("✅ Email sent successfully");
-        } catch (Exception e) {
-            System.err.println("❌ Failed to send email");
-            e.printStackTrace();
-            System.out.println("========================================");
+        } catch (MessagingException e) {
+            System.err.println("❌ Failed to send email: " + e.getMessage());
             request.setAttribute("error", "Unable to send verification email. Please try again.");
             request.getRequestDispatcher("ForgotPassword.jsp").forward(request, response);
             return;
