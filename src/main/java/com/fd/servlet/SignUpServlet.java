@@ -13,6 +13,7 @@ import jakarta.servlet.http.Part;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 @WebServlet("/SignUpServlet")
@@ -158,20 +159,20 @@ public class SignUpServlet extends HttpServlet {
         
         String upperRole = role.trim().toUpperCase();
         
-        Map<String, String> roleToPrefixMap = Map.of(
-            "FINANCE EXECUTIVE", "FinanceE",
-            "SENIOR FINANCE MANAGER", "FinanceM",
-            "FINANCE MANAGER", "FinanceM",
-            "SENIOR MANAGER", "SeniorM",
-            "MANAGER", "Manager",
-            "OFFICER", "Officer",
-            "CLERK", "Clerk",
-            "ADMIN", "Admin",
-            "ADMINISTRATOR", "Admin",
-            "ASSISTANT", "Assistant",
-            "SUPERVISOR", "Supervisor",
-            "DIRECTOR", "Director"
-        );
+        // Using HashMap to handle role to prefix mapping
+        Map<String, String> roleToPrefixMap = new HashMap<>();
+        roleToPrefixMap.put("FINANCE EXECUTIVE", "FinanceE");
+        roleToPrefixMap.put("SENIOR FINANCE MANAGER", "FinanceM");
+        roleToPrefixMap.put("FINANCE MANAGER", "FinanceM");
+        roleToPrefixMap.put("SENIOR MANAGER", "SeniorM");
+        roleToPrefixMap.put("MANAGER", "Manager");
+        roleToPrefixMap.put("OFFICER", "Officer");
+        roleToPrefixMap.put("CLERK", "Clerk");
+        roleToPrefixMap.put("ADMIN", "Admin");
+        roleToPrefixMap.put("ADMINISTRATOR", "Admin");
+        roleToPrefixMap.put("ASSISTANT", "Assistant");
+        roleToPrefixMap.put("SUPERVISOR", "Supervisor");
+        roleToPrefixMap.put("DIRECTOR", "Director");
 
         return roleToPrefixMap.getOrDefault(upperRole, "Staff");
     }
