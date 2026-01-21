@@ -8,6 +8,30 @@ import java.util.List;
 
 public class StaffDAO {
 
+    // Login method to verify staff credentials
+    public Staff login(String email, String password) {
+        String query = "SELECT * FROM STAFF WHERE LOWER(STAFFEMAIL) = LOWER(?) AND PASSWORD = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, email);
+            pstmt.setString(2, password);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                Staff staff = new Staff();
+                staff.setStaffId(rs.getInt("STAFFID"));
+                staff.setName(rs.getString("STAFFNAME"));
+                staff.setEmail(rs.getString("STAFFEMAIL"));
+                staff.setRole(rs.getString("STAFFROLE"));
+                staff.setStatus(rs.getString("STAFFSTATUS"));
+                staff.setManagerId(rs.getInt("MANAGERID"));
+                return staff;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     // Retrieve all staff
     public List<Staff> getAllStaff() {
         List<Staff> staffList = new ArrayList<>();

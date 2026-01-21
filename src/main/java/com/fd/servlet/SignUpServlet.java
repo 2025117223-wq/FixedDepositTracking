@@ -152,6 +152,7 @@ public class SignUpServlet extends HttpServlet {
         }
     }
 
+    // Determine staff ID prefix based on role
     private String determineStaffPrefix(String role) {
         if (role == null) return "STF";
         
@@ -175,6 +176,7 @@ public class SignUpServlet extends HttpServlet {
         return roleToPrefixMap.getOrDefault(upperRole, "Staff");
     }
 
+    // Check if string is blank (null or empty)
     private boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
     }
