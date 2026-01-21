@@ -52,6 +52,15 @@
             <artifactId>jakarta.mail-api</artifactId>
             <version>2.0.1</version>
         </dependency>
+
+        <!-- Jakarta Servlet API Dependency -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>5.0.0</version> <!-- Adjust version as needed -->
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
 
     <!-- Build Plugins -->
