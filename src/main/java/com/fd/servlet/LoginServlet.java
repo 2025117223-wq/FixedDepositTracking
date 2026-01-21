@@ -20,6 +20,9 @@ import java.io.IOException;
 public class LoginServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private StaffDAO staffDAO;
+    
+    // Constant for session timeout (30 minutes)
+    private static final int SESSION_TIMEOUT = 1800;
 
     @Override
     public void init() {
@@ -90,8 +93,8 @@ public class LoginServlet extends HttpServlet {
             // Create session - USING YOUR MODEL FIELD NAMES
             HttpSession session = request.getSession(true);
             
-            // Set session timeout to 30 minutes (1800 seconds)
-            session.setMaxInactiveInterval(1800);
+            // Set session timeout to 30 minutes (SESSION_TIMEOUT constant)
+            session.setMaxInactiveInterval(SESSION_TIMEOUT);
             
             session.setAttribute("loggedStaff", staff);                    // Full staff object
             session.setAttribute("staffId", staff.getStaffId());           // YOUR MODEL: getStaffId()

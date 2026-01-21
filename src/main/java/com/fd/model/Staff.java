@@ -11,7 +11,7 @@ public class Staff implements Serializable {
     private String password;
     private byte[] profilePicture; 
     private String role;
-    private String status;
+    private String status = "ACTIVE"; // Default to "ACTIVE"
     private String reason; // For inactive status
     private int managerId;
     private String staffIdPrefix;
@@ -57,20 +57,20 @@ public class Staff implements Serializable {
 
     public String getManagerName() { return managerName; }
     public void setManagerName(String managerName) { this.managerName = managerName; }
-    
+
     public String getStaffIdPrefix() {
         return staffIdPrefix;
     }
-    
+
     public void setStaffIdPrefix(String staffIdPrefix) {
         this.staffIdPrefix = staffIdPrefix;
     }
-    
-    // ADD THIS METHOD:
+
+    // Get formatted staff ID (with prefix and leading zeros)
     public String getFormattedStaffId() {
         if (staffIdPrefix != null && !staffIdPrefix.isEmpty()) {
-            return String.format("%s%02d", staffIdPrefix, staffId);
+            return String.format("%s%02d", staffIdPrefix, staffId);  // Ensure staffId is two digits
         }
-        return String.valueOf(staffId);
+        return String.valueOf(staffId); // If no prefix, just return the staff ID as is
     }
 }
