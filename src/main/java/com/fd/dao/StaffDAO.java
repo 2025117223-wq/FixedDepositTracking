@@ -161,28 +161,25 @@ public class StaffDAO {
 
     // Get staff ID by email and status
     public Long getStaffIdByEmailAndStatus(String email, String status) {
-    String query = "SELECT STAFFID FROM STAFF WHERE STAFFEMAIL = ? AND STAFFSTATUS = ?";
-    Long staffId = null;  // Change Integer to Long
+        String query = "SELECT STAFFID FROM STAFF WHERE STAFFEMAIL = ? AND STAFFSTATUS = ?";
+        Long staffId = null; // Gunakan Long bukan Integer
 
-    try (Connection conn = DBConnection.getConnection();
-         PreparedStatement pstmt = conn.prepareStatement(query)) {
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-        pstmt.setString(1, email);
-        pstmt.setString(2, status);
-        try (ResultSet rs = pstmt.executeQuery()) {
-            if (rs.next()) {
-                staffId = rs.getLong("STAFFID");  // Use getLong instead of getInt
+            pstmt.setString(1, email);
+            pstmt.setString(2, status);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    staffId = rs.getLong("STAFFID");  // Gunakan getLong() bukan getInt()
+                }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
+
+        return staffId;
     }
-
-    return staffId;  // Return Long
-
-
-    }
-
     // Register a new staff member
     public boolean registerStaff(Staff staff) {
         String query = "INSERT INTO STAFF " +

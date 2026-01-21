@@ -42,12 +42,11 @@ public class ForgotPasswordServlet extends HttpServlet {
         System.out.println("📧 Email: " + email);
 
         // Check if email exists and staff is Active
-        StaffDAO staffDAO = new StaffDAO();
-        Long staffId = staffDAO.getStaffIdByEmailAndStatus(email, "Active");  // Changed to Long
+       StaffDAO staffDAO = new StaffDAO();
+        Long staffId = staffDAO.getStaffIdByEmailAndStatus(email, "Active");  // Gunakan Long di sini
 
         if (staffId == null) {
             System.err.println("❌ Email not found or staff not active");
-            System.out.println("========================================");
             request.setAttribute("error", "Email not found or account is not active.");
             request.getRequestDispatcher("ForgotPassword.jsp").forward(request, response);
             return;
