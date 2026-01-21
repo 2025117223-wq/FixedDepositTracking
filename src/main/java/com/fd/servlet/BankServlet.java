@@ -186,11 +186,9 @@ public class BankServlet extends HttpServlet {
         
         if (success) {
             System.out.println("✅ Bank created successfully");
-            System.out.println("========================================");
             response.sendRedirect("BankList.jsp?msg=created");
         } else {
             System.err.println("❌ Failed to create bank");
-            System.out.println("========================================");
             request.setAttribute("error", "Failed to create bank. Please try again.");
             request.getRequestDispatcher("CreateBank.jsp").forward(request, response);
         }
@@ -256,11 +254,9 @@ public class BankServlet extends HttpServlet {
             
             if (success) {
                 System.out.println("✅ Bank updated successfully");
-                System.out.println("========================================");
                 response.sendRedirect("BankList.jsp?msg=updated");
             } else {
                 System.err.println("❌ Failed to update bank");
-                System.out.println("========================================");
                 request.setAttribute("error", "Failed to update bank. Please try again.");
                 request.setAttribute("bank", bank);
                 request.getRequestDispatcher("EditBank.jsp").forward(request, response);
