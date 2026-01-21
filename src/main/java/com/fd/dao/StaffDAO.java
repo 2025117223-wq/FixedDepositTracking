@@ -160,9 +160,9 @@ public class StaffDAO {
     }
 
     // Get staff ID by email and status
-    public int getStaffIdByEmailAndStatus(String email, String status) {
+    public long getStaffIdByEmailAndStatus(String email, String status) {
         String query = "SELECT STAFFID FROM STAFF WHERE STAFFEMAIL = ? AND STAFFSTATUS = ?";
-        int staffId = -1;
+        long staffId = -1;
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
@@ -171,7 +171,7 @@ public class StaffDAO {
             pstmt.setString(2, status);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    staffId = rs.getInt("STAFFID");
+                    staffId = rs.getLong("STAFFID");
                 }
             }
         } catch (SQLException e) {
@@ -243,12 +243,12 @@ public class StaffDAO {
     }
 
     // Get password by staff ID
-    public String getPasswordByStaffId(int staffId) {
+    public String getPasswordByStaffId(long staffId) {
         String query = "SELECT PASSWORD FROM STAFF WHERE STAFFID = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
-            pstmt.setInt(1, staffId);
+            pstmt.setLong(1, staffId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getString("PASSWORD");
@@ -261,13 +261,13 @@ public class StaffDAO {
     }
 
     // Update password by staff ID
-    public boolean updatePasswordByStaffId(int staffId, String newPassword) {
+    public boolean updatePasswordByStaffId(long staffId, String newPassword) {
         String query = "UPDATE STAFF SET PASSWORD = ? WHERE STAFFID = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(query)) {
 
             pstmt.setString(1, newPassword);
-            pstmt.setInt(2, staffId);
+            pstmt.setLong(2, staffId);
 
             int rowsUpdated = pstmt.executeUpdate();
             return rowsUpdated > 0;
