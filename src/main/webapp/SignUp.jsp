@@ -496,7 +496,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <div class="input-wrapper select-wrapper">
-                            <img src="images/icons/role.png" alt="Role" class="role-icon">
+                            <img src="images/icons/role.png" alt="Home" class="address-icon">
                             <select id="staffRole" name="role">
                                 <option value="" disabled selected>Select Role</option>
                                 <option value="Senior Finance Manager">Senior Finance Manager</option>
@@ -508,7 +508,7 @@
 
                     <div class="form-group">
                         <div class="input-wrapper select-wrapper">
-                            <img src="images/icons/manager.png" alt="Manager" class="manager-icon">
+                            <img src="images/icons/manager.png" alt="Home" class="address-icon">
                             <!-- REMOVED required attribute -->
                             <select id="managerId" name="managerId">
                                 <option value="" disabled selected>Select Manager</option>

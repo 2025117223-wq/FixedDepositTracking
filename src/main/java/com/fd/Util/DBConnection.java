@@ -11,10 +11,9 @@ import java.sql.SQLException;
 public class DBConnection {
     
     // PostgreSQL Database Connection Parameters
-    // UPDATE THESE VALUES TO MATCH YOUR DATABASE
-    private static final String DB_URL = "jdbc:postgresql://cee3ebbhveeoab.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/dbu39dr34ej0dq";  // <<< Change this to your PostgreSQL DB URL
-    private static final String DB_USER = "u375elp7att1k5";     
-    private static final String DB_PASSWORD = "p7dd455ccb3b6240ac52d8059200db4a112c7942d8084f4753cbff9186626a833";  // <<< CHANGE THIS
+    private static final String DB_URL = "jdbc:postgresql://cee3ebbhveeoab.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/dbu39dr34ej0dq";  // Database URL
+    private static final String DB_USER = "u375elp7att1k5";  // Database Username
+    private static final String DB_PASSWORD = "p7dd455ccb3b6240ac52d8059200db4a112c7942d8084f4753cbff9186626a833";  // Database Password
     
     // JDBC Driver
     private static final String JDBC_DRIVER = "org.postgresql.Driver";  
@@ -37,6 +36,7 @@ public class DBConnection {
      */
     public static Connection getConnection() throws SQLException {
         try {
+            // Establish connection to the database
             Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
             return conn;
         } catch (SQLException e) {
