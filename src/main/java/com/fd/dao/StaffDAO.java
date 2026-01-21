@@ -1,11 +1,10 @@
 package com.fd.dao;
 
-import com.fd.model.STAFF;
+import com.fd.model.Staff;
 import com.fd.util.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import com.fd.model.Staff;
 
 
 public class StaffDAO {
