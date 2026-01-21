@@ -9,8 +9,8 @@ import java.util.List;
 
 public class StaffDAO {
 
-	public List<STAFF> getAllStaff() {
-	    List<STAFF> staffList = new ArrayList<>();
+	public List<Staff> getAllStaff() {
+	    List<Staff> staffList = new ArrayList<>();
 	    
 	    // ADD STAFFID_PREFIX to the query
 	    String query = "SELECT s.STAFFID, s.STAFFID_PREFIX, s.STAFFNAME, s.STAFFPHONE, " +
@@ -24,7 +24,7 @@ public class StaffDAO {
 	         ResultSet rs = pstmt.executeQuery()) {
 	        
 	        while (rs.next()) {
-	            STAFF staff = new STAFF();
+	            Staff staff = new STAFF();
 	            staff.setStaffId(rs.getInt("STAFFID"));
 	            staff.setStaffIdPrefix(rs.getString("STAFFID_PREFIX")); // ← ADD THIS LINE
 	            staff.setName(rs.getString("STAFFNAME"));
