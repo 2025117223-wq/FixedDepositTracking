@@ -72,7 +72,7 @@ public class EmailUtil {
             
             System.out.println("✅ Email sent successfully");
 
-        } catch (MessagingException e) {
+        } catch (Exception e) {  // Catching general Exception instead of MessagingException
             System.err.println("❌ Failed to send email: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Failed to send email: " + e.getMessage());
