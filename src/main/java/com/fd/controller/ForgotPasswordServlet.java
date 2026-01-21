@@ -2,32 +2,31 @@ package com.fd.servlet;
 
 import com.fd.dao.StaffDAO;
 import com.fd.util.EmailUtil;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.mail.MessagingException;
 
 import java.io.IOException;
 import java.security.SecureRandom;
-import javax.mail.MessagingException;
 
 @WebServlet("/ForgotPasswordServlet")
 public class ForgotPasswordServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
-    
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         request.setCharacterEncoding("UTF-8");
-        
+
         System.out.println("========================================");
         System.out.println("🔐 ForgotPasswordServlet - Password Reset Request");
         System.out.println("========================================");
-        
+
         String email = request.getParameter("email");
 
         if (email == null || email.trim().isEmpty()) {
@@ -42,7 +41,7 @@ public class ForgotPasswordServlet extends HttpServlet {
 
         // Check if email exists and staff is Active
         StaffDAO staffDAO = new StaffDAO();
-        Integer staffId = staffDAO.getStaffIdByEmailAndStatus(email, "Active");
+        Long staffId = staffDAO.getStaffIdByEmailAndStatus(email, "Active");
 
         if (staffId == null) {
             System.err.println("❌ Email not found or staff not active");
@@ -77,12 +76,14 @@ public class ForgotPasswordServlet extends HttpServlet {
                     email,
                     "Fixed Deposit Tracking System - Password Reset OTP",
                     "Your verification code is: " + otp + "\n\n" +
-                    "This code will expire in 5 minutes.\n\n" +
-                    "If you did not request this, please ignore this email."
+                            "This code will expire in 5 minutes.\n\n" +
+                            "If you did not request this, please ignore this email."
             );
             System.out.println("✅ Email sent successfully");
         } catch (MessagingException e) {
-            System.err.println("❌ Failed to send email: " + e.getMessage());
+            System.err.println("❌ Failed to send email");
+            e.printStackTrace();
+            System.out.println("========================================");
             request.setAttribute("error", "Unable to send verification email. Please try again.");
             request.getRequestDispatcher("ForgotPassword.jsp").forward(request, response);
             return;
