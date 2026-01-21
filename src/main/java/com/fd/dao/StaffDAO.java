@@ -469,5 +469,9 @@ public class StaffDAO {
             }
             
         } catch (SQLException e) {
-            System.err.println("❌ Error getting next staff ID: " + e.getMessage());
-           
+            System.err.println("❌ Error getting next staff ID: " + e.getMessage());}
+            e.printStackTrace();
+        }
+        
+       
+    }
