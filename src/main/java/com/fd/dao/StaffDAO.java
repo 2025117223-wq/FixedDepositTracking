@@ -6,48 +6,47 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class StaffDAO {
 
-	public List<Staff> getAllStaff() {
-	    List<Staff> staffList = new ArrayList<>();
-	    
-	    // ADD STAFFID_PREFIX to the query
-	    String query = "SELECT s.STAFFID, s.STAFFID_PREFIX, s.STAFFNAME, s.STAFFPHONE, " +
-	                   "s.STAFFADDRESS, s.STAFFEMAIL, s.STAFFROLE, s.STAFFSTATUS, " +
-	                   "s.REASON, s.MANAGERID, m.STAFFNAME AS MANAGER_NAME " +
-	                   "FROM STAFF s " +
-	                   "LEFT JOIN STAFF m ON s.MANAGERID = m.STAFFID";
-	    
-	    try (Connection conn = DBConnection.getConnection();
-	         PreparedStatement pstmt = conn.prepareStatement(query);
-	         ResultSet rs = pstmt.executeQuery()) {
-	        
-	        while (rs.next()) {
-	            Staff staff = new STAFF();
-	            staff.setStaffId(rs.getInt("STAFFID"));
-	            staff.setStaffIdPrefix(rs.getString("STAFFID_PREFIX")); // ← ADD THIS LINE
-	            staff.setName(rs.getString("STAFFNAME"));
-	            staff.setPhone(rs.getString("STAFFPHONE"));
-	            staff.setAddress(rs.getString("STAFFADDRESS"));
-	            staff.setEmail(rs.getString("STAFFEMAIL"));
-	            staff.setRole(rs.getString("STAFFROLE"));
-	            staff.setStatus(rs.getString("STAFFSTATUS"));
-	            staff.setReason(rs.getString("REASON"));
-	            staff.setManagerId(rs.getInt("MANAGERID"));
-	            staff.setManagerName(rs.getString("MANAGER_NAME"));
-	            
-	            staffList.add(staff);
-	        }
-	    } catch (SQLException e) {
-	        System.err.println("❌ Error loading staff: " + e.getMessage());
-	        e.printStackTrace();
-	    }
-	    
-	    return staffList;
-	}
+    public List<Staff> getAllStaff() {
+        List<Staff> staffList = new ArrayList<>();
+        
+        // ADD STAFFID_PREFIX to the query
+        String query = "SELECT s.STAFFID, s.STAFFID_PREFIX, s.STAFFNAME, s.STAFFPHONE, " +
+                       "s.STAFFADDRESS, s.STAFFEMAIL, s.STAFFROLE, s.STAFFSTATUS, " +
+                       "s.REASON, s.MANAGERID, m.STAFFNAME AS MANAGER_NAME " +
+                       "FROM STAFF s " +
+                       "LEFT JOIN STAFF m ON s.MANAGERID = m.STAFFID";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+            
+            while (rs.next()) {
+                Staff staff = new Staff();  // Changed from STAFF to Staff
+                staff.setStaffId(rs.getInt("STAFFID"));
+                staff.setStaffIdPrefix(rs.getString("STAFFID_PREFIX")); // ← ADD THIS LINE
+                staff.setName(rs.getString("STAFFNAME"));
+                staff.setPhone(rs.getString("STAFFPHONE"));
+                staff.setAddress(rs.getString("STAFFADDRESS"));
+                staff.setEmail(rs.getString("STAFFEMAIL"));
+                staff.setRole(rs.getString("STAFFROLE"));
+                staff.setStatus(rs.getString("STAFFSTATUS"));
+                staff.setReason(rs.getString("REASON"));
+                staff.setManagerId(rs.getInt("MANAGERID"));
+                staff.setManagerName(rs.getString("MANAGER_NAME"));
+                
+                staffList.add(staff);
+            }
+        } catch (SQLException e) {
+            System.err.println("❌ Error loading staff: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return staffList;
+    }
 
-    public boolean updateStaff(STAFF staff) {
+    public boolean updateStaff(Staff staff) {  // Changed from STAFF to Staff
         String sql = "UPDATE FD.STAFF SET STAFFROLE = ?, STAFFSTATUS = ?, REASON = ? WHERE STAFFID = ?";
         
         try (Connection conn = DBConnection.getConnection();
@@ -81,8 +80,8 @@ public class StaffDAO {
         }
     }
     
-    public STAFF getStaffById(int staffId) {
-        STAFF staff = null;
+    public Staff getStaffById(int staffId) {  // Changed from STAFF to Staff
+        Staff staff = null;
         String query = "SELECT STAFFID, STAFFID_PREFIX, STAFFNAME, STAFFEMAIL, STAFFPHONE, " +
                        "STAFFADDRESS, PASSWORD, STAFFPICTURE, STAFFROLE, STAFFSTATUS, REASON, MANAGERID " +
                        "FROM STAFF WHERE STAFFID = ?";
@@ -97,7 +96,7 @@ public class StaffDAO {
             
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    staff = new STAFF();
+                    staff = new Staff();  // Changed from STAFF to Staff
                     
                     // Debug: Print what we get from database
                     System.out.println("📋 Database values:");
@@ -123,8 +122,8 @@ public class StaffDAO {
                     staff.setReason(rs.getString("REASON"));
                     staff.setManagerId(rs.getInt("MANAGERID"));
                     
-                    // Debug: Print what we set in STAFF object
-                    System.out.println("✅ STAFF object created:");
+                    // Debug: Print what we set in Staff object
+                    System.out.println("✅ Staff object created:");
                     System.out.println("   Name: " + staff.getName());
                     System.out.println("   Email: " + staff.getEmail());
                     System.out.println("   Phone: " + staff.getPhone());
@@ -148,7 +147,7 @@ public class StaffDAO {
     /**
      * Update staff profile (name, phone, address, password, profile picture) - UPDATED
      */
-    public boolean updateStaffProfile(STAFF staff) {
+    public boolean updateStaffProfile(Staff staff) {  // Changed from STAFF to Staff
         // Include STAFFPICTURE in the update
         String query = "UPDATE STAFF SET STAFFNAME = ?, STAFFPHONE = ?, STAFFADDRESS = ?, PASSWORD = ?, STAFFPICTURE = ? " +
                        "WHERE STAFFID = ?";
@@ -235,7 +234,7 @@ public class StaffDAO {
      * Register new staff member
      * UPDATED VERSION - Includes STAFFID_PREFIX
      */
-    public boolean registerStaff(STAFF staff) {
+    public boolean registerStaff(Staff staff) {  // Changed from STAFF to Staff
         // Use STAFF_SEQ.NEXTVAL for auto-incrementing STAFFID
         String query = "INSERT INTO STAFF " +
                        "(STAFFID, STAFFID_PREFIX, STAFFNAME, STAFFPHONE, STAFFADDRESS, STAFFEMAIL, PASSWORD, " +
@@ -279,7 +278,7 @@ public class StaffDAO {
             int rowsAffected = pstmt.executeUpdate();
             
             if (rowsAffected > 0) {
-                System.out.println("✅ STAFF registered successfully");
+                System.out.println("✅ Staff registered successfully");
                 System.out.println("   Rows affected: " + rowsAffected);
                 System.out.println("   STAFFID auto-generated by sequence");
                 System.out.println("   STAFFID_PREFIX: " + staff.getStaffIdPrefix());
@@ -298,8 +297,8 @@ public class StaffDAO {
             return false;
         }
     }
-    
-    public STAFF login(String email, String password) {
+
+    public Staff login(String email, String password) {  // Changed from STAFF to Staff
         String query = "SELECT STAFFID, STAFFNAME, STAFFEMAIL, STAFFROLE, STAFFSTATUS, MANAGERID " +
                        "FROM STAFF " +
                        "WHERE STAFFEMAIL ILIKE ? AND PASSWORD = ?";
@@ -316,7 +315,7 @@ public class StaffDAO {
             
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    STAFF staff = new STAFF();
+                    Staff staff = new Staff();  // Changed from STAFF to Staff
                     staff.setStaffId(rs.getInt("STAFFID"));
                     staff.setName(rs.getString("STAFFNAME"));
                     staff.setEmail(rs.getString("STAFFEMAIL"));
@@ -352,7 +351,7 @@ public class StaffDAO {
             return null;
         }
     }
-    
+
     public Integer getStaffIdByEmailAndStatus(String email, String status) {
         String query = "SELECT STAFFID FROM STAFF WHERE STAFFEMAIL ILIKE ? AND STAFFSTATUS = ?";
         
@@ -369,7 +368,7 @@ public class StaffDAO {
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     int staffId = rs.getInt("STAFFID");
-                    System.out.println("✅ STAFF found - ID: " + staffId);
+                    System.out.println("✅ Staff found - ID: " + staffId);
                     return staffId;
                 } else {
                     System.out.println("❌ No staff found");
@@ -446,11 +445,11 @@ public class StaffDAO {
             return false;
         }
     }
-    
+
     public String formatStaffId(String prefix, int staffId) {
         return String.format("%s%02d", prefix, staffId); // ← Change %04d to %02d
     }
-    
+
     public int getNextStaffIdNumber(String prefix) {
         int nextNumber = 1;
         String query = "SELECT MAX(STAFFID) AS MAX_ID FROM STAFF WHERE STAFFID_PREFIX = ?";
@@ -471,29 +470,4 @@ public class StaffDAO {
             
         } catch (SQLException e) {
             System.err.println("❌ Error getting next staff ID: " + e.getMessage());
-            e.printStackTrace();
-        }
-        
-        System.out.println("📋 Next STAFF ID for prefix '" + prefix + "': " + nextNumber);
-        return nextNumber;
-    }
-
-    /**
-     * Get staff ID prefix based on role
-     * Updated prefix format without "0" suffix
-     */
-    public String getStaffIdPrefix(String role) {
-        if (role == null) return "STAFF";
-        
-        if (role.equals("Finance Executive")) {
-            return "FinanceE";
-        } else if (role.equals("Senior Finance Manager")) {
-            return "FinanceM";
-        } else if (role.equals("Finance Manager")) {
-            return "FinanceM";
-        }
-        
-        return "STAFF"; // Default prefix
-    }
-
-}
+           
